@@ -12,7 +12,7 @@ import GioHangPage from './pages/public/GioHang';
 import ThanhToanPage from './pages/public/checkout/ThanhToanPage';
 import LichSuDonHangPage from './pages/public/LichSuDonHangPage';
 import ThuongHieuPage from './pages/public/ThuongHieuPage';
-import POSPage from './pages/admin/POSPage';
+
 
 // Auth Pages
 import DangNhapPage from './pages/auth/DangNhapPage';
@@ -60,7 +60,7 @@ function App() {
           
           <Route path="reports" element={<AdminReportPage />} />
           <Route path="returns" element={<AdminReturnsPage />} />
-          <Route path="pos" element={<POSPage />} />
+         
         </Route>
       </Routes>
     </div>

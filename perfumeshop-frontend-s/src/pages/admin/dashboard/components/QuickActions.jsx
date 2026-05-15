@@ -40,7 +40,7 @@ const QuickActions = () => {
         </Link>
 
         <Link
-          to="/admin/employees"
+          to="/admin/users"
           className="flex items-center gap-3 p-4 border border-border-light dark:border-border-dark rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <span className="material-symbols-outlined text-purple-600">people</span>
@@ -51,13 +51,13 @@ const QuickActions = () => {
         </Link>
 
         <Link
-          to="/admin/pos"
+          to="/admin/uers"
           className="flex items-center gap-3 p-4 border border-border-light dark:border-border-dark rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
-          <span className="material-symbols-outlined text-orange-600">point_of_sale</span>
+          <span className="material-symbols-outlined text-pink-600">person</span>
           <div>
-            <p className="font-medium">POS - Bán hàng</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Bán tại quầy</p>
+            <p className="font-medium">Quản lý khách hàng</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Xem và xử lý khách hàng</p>
           </div>
         </Link>
       </div>

@@ -40,14 +40,7 @@ const AdminHeader = () => {
     <header className="flex h-14 items-center gap-4 border-b bg-surface-light dark:bg-surface-dark px-4 lg:h-[60px] lg:px-6">
       {/* Có thể thêm nút mở/đóng sidebar trên mobile ở đây */}
       <div className="w-full flex-1 flex items-center gap-4">
-        <Link
-          to="/admin/pos"
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          title="Truy cập POS - Bán hàng tại quầy"
-        >
-          <span className="material-symbols-outlined text-base">point_of_sale</span>
-          POS System
-        </Link>
+        
       </div>
       <div className="flex items-center gap-4">
         {/* Dashboard Alerts - Only show if there are alerts */}

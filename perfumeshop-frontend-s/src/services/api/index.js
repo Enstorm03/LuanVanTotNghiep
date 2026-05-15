@@ -6,7 +6,7 @@ import customerApi from './customerApi.js';
 import employeeApi from './employeeApi.js';
 import reviewApi from './reviewApi.js';
 import returnApi from './returnApi.js';
-import posApi from './posApi.js';
+
 
 import dashboardApi from './dashboardApi.js';
 
@@ -93,9 +93,7 @@ const api = {
   approveReturn: returnApi.approveReturn.bind(returnApi),
   rejectReturn: returnApi.rejectReturn.bind(returnApi),
 
-  // POS methods
-  createPosBanLe: posApi.createPosBanLe.bind(posApi),
-  createPosOrder: posApi.createPosOrder.bind(posApi),
+  
 };
 
 export default api;
@@ -110,5 +108,5 @@ export {
   employeeApi,
   reviewApi,
   returnApi,
-  posApi,
+
 };
