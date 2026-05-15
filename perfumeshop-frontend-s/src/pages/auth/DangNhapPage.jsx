@@ -1,184 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import useAuthLogin from '../../hooks/useAuthLogin';
 
 const DangNhapPage = () => {
-  const [loginType, setLoginType] = useState('customer'); // 'customer' or 'staff'
-  const [formData, setFormData] = useState({
-    tenDangNhap: '',
-    matKhau: ''
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-
-  const { loginUser, loginStaff } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.state?.message) {
-      setSuccessMessage(location.state.message);
-    }
-  }, [location.state]);
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      let result;
-      if (loginType === 'customer') {
-        result = await loginUser(formData);
-        if (result.success) {
-          navigate('/');
-        } else {
-          setError(result.error || 'Đăng nhập thất bại');
-        }
-      } else {
-        result = await loginStaff(formData);
-        if (result.success) {
-          navigate('/admin');
-        } else {
-          setError(result.error || 'Đăng nhập thất bại');
-        }
-      }
-    } catch (error) {
-      setError('Có lỗi xảy ra, vui lòng thử lại');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { formData, loading, error, handleChange, handleSubmit } = useAuthLogin();
 
   return (
-    <main className="flex flex-1 justify-center items-center py-12 px-4 bg-background-light dark:bg-background-dark min-h-screen">
-      <div className="w-full max-w-md">
-        
-        <div className="bg-surface-light dark:bg-surface-dark p-8 rounded-2xl shadow-lg border border-border-light dark:border-border-dark">
-          
-            <Link className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" to="/"> Quay lại trang chủ</Link>
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-black text-text-light dark:text-text-dark">Đăng Nhập</h1>
-            
-            <p className="text-text-subtle-light dark:text-text-subtle-dark mt-2">Chào mừng bạn trở lại!</p>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Đăng nhập hệ thống
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Dành cho cả thành viên và quản trị viên
+          </p>
+        </div>
 
-          {/* Login Type Toggle */}
-          <div className="flex mb-6 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            <button
-              type="button"
-              onClick={() => setLoginType('customer')}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                loginType === 'customer'
-                  ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900'
-              }`}
-            >
-              Khách hàng
-            </button>
-            <button
-              type="button"
-              onClick={() => setLoginType('staff')}
-              className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                loginType === 'staff'
-                  ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900'
-              }`}
-            >
-              Nhân viên
-            </button>
-          </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            {/* Username Input - Database uses ten_dang_nhap */}
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="ten_dang_nhap" className="block text-sm font-medium mb-2 text-text-subtle-light dark:text-text-subtle-dark">
-                Tên đăng nhập
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
               <input
-                type="text"
-                id="tenDangNhap"
                 name="tenDangNhap"
+                type="text"
+                required
                 value={formData.tenDangNhap}
-                onChange={handleInputChange}
-                className="form-input w-full h-12 rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary/50"
-                placeholder="nhập tên đăng nhập"
-                required
+                onChange={handleChange}
+                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                placeholder="Nhập tài khoản của bạn"
               />
             </div>
-
-            {/* Password Input - Database uses mat_khau_bam (but we'll keep it as mat_khau_bam for consistency) */}
             <div>
-              <div className="flex justify-between items-center mb-2">
-                  <label htmlFor="mat_khau_bam" className="block text-sm font-medium text-text-subtle-light dark:text-text-subtle-dark">Mật khẩu</label>
-                  
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
               <input
-                type="password"
-                id="matKhau"
                 name="matKhau"
-                value={formData.matKhau}
-                onChange={handleInputChange}
-                className="form-input w-full h-12 rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary/50"
-                placeholder="••••••••"
+                type="password"
                 required
+                value={formData.matKhau}
+                onChange={handleChange}
+                className="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                placeholder="Nhập mật khẩu"
               />
             </div>
+          </div>
 
-            {/* Success Message */}
-            {successMessage && (
-              <div className="text-green-600 text-sm text-center bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                {successMessage}
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <div className="text-red-600 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            {/* Submit Button */}
+          <div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-bold hover:bg-opacity-90 transition-colors mt-4 disabled:bg-gray-400"
+              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
             >
               {loading ? (
-                <>
-                  <span className="animate-spin mr-2">⚽</span>
-                  Đang đăng nhập...
-                </>
-              ) : (
-                loginType === 'customer' ? 'Đăng Nhập Khách Hàng' : 'Đăng Nhập Nhân Viên'
-              )}
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Đang xử lý...
+                </span>
+              ) : 'Đăng nhập'}
             </button>
+          </div>
 
-            {loginType === 'customer' && (
-              <div className="text-center mt-4">
-                <Link to="#" className="text-sm text-primary hover:underline">Quên mật khẩu?</Link>
-                <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
-                  
-                  Chưa có tài khoản? <Link to="/register" className="font-medium text-primary hover:underline">Đăng ký ngay</Link>
-                </p>
-              </div>
-            )}
-          </form>
-
-  
-          
-        </div>
+          <div className="flex items-center justify-between text-sm">
+             <Link to="/register" className="font-medium text-primary hover:text-primary/80">
+                Chưa có tài khoản? Đăng ký ngay
+             </Link>
+             <Link to="/" className="font-medium text-gray-500 hover:text-gray-700">
+                Quay lại trang chủ
+             </Link>
+          </div>
+        </form>
       </div>
-    </main>
+    </div>
   );
 };
 

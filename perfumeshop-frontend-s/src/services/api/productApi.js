@@ -72,7 +72,7 @@ class ProductApi extends BaseApi {
   }
 
   // Tìm kiếm sản phẩm NÂNG CAO (BE xử lý filter + sort + paginate)
-  async searchProductsAdvanced({ kw, danhMucId, thuongHieuId, nongDo, dungTich, minGia, maxGia, sortBy, sortDir, page, size } = {}) {
+ async searchProductsAdvanced({ kw, danhMucId, thuongHieuId, nongDo, dungTich, minGia, maxGia, sortBy, sortDir, page, size } = {}) {
     try {
       const params = new URLSearchParams();
       if (kw) params.append('kw', kw);
@@ -84,23 +84,29 @@ class ProductApi extends BaseApi {
       if (maxGia) params.append('maxGia', maxGia);
       if (sortBy) params.append('sortBy', sortBy);
       if (sortDir) params.append('sortDir', sortDir);
-      if (page) params.append('page', page);
+      if (page !== undefined) params.append('page', page); // Cho phép truyền 0
       if (size) params.append('size', size);
 
       const response = await this._fetch(`${API_BASE_URL}/catalog/san-pham/search?${params.toString()}`);
+      
+      // MẸO: Đề phòng BE bọc trong biến 'data' hoặc 'result'
+      const actualData = response?.data || response?.result || response;
+
       // Nếu BE trả về PagedResponse { content, totalPages, totalElements }
-      if (response && response.content) {
+      if (actualData && actualData.content) {
         return {
-          products: this._mapProducts(response.content),
-          totalPages: response.totalPages || 1,
-          totalElements: response.totalElements || response.content.length
+          products: this._mapProducts(actualData.content),
+          totalPages: actualData.totalPages || 1,
+          totalElements: actualData.totalElements || actualData.content.length
         };
       }
+      
       // Fallback: response là array
+      const fallbackArray = Array.isArray(actualData) ? actualData : [];
       return {
-        products: this._mapProducts(response),
+        products: this._mapProducts(fallbackArray),
         totalPages: 1,
-        totalElements: Array.isArray(response) ? response.length : 0
+        totalElements: fallbackArray.length
       };
     } catch (error) {
       console.error('Lỗi tìm kiếm sản phẩm:', error);

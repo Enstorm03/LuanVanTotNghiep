@@ -39,18 +39,15 @@ const AdminSidebar = () => {
               <span className="material-symbols-outlined">assignment_return</span>
               Đổi trả
             </NavLink>
+            
+            {/* Đã gộp chung Nhân viên & Khách hàng thành 1 mục Tài khoản */}
             {isAdmin() && (
-              <>
-                <NavLink to="/admin/employees" className={navLinkClasses}>
-                  <span className="material-symbols-outlined">group</span>
-                  Nhân viên
-                </NavLink>
-                <NavLink to="/admin/customers" className={navLinkClasses}>
-                  <span className="material-symbols-outlined">people</span>
-                  Khách hàng
-                </NavLink>
-              </>
+              <NavLink to="/admin/users" className={navLinkClasses}>
+                <span className="material-symbols-outlined">manage_accounts</span>
+                Tài khoản
+              </NavLink>
             )}
+            
             <NavLink to="/admin/reports" className={navLinkClasses}>
               <span className="material-symbols-outlined">monitoring</span>
               Báo cáo

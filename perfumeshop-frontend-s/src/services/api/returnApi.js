@@ -48,9 +48,17 @@ class ReturnApi extends BaseApi {
   }
 
   // Từ chối hoàn trả
-  async rejectReturn(returnId, employeeId) {
+  // Từ chối hoàn trả
+  async rejectReturn(returnId, employeeId, reason) {
     try {
-      return await this._fetch(`${API_BASE_URL}/doi-tra/${returnId}/tu-choi`, { method: 'POST', body: JSON.stringify({ nhanVienId: employeeId }) });
+      return await this._fetch(`${API_BASE_URL}/doi-tra/${returnId}/tu-choi`, { 
+        method: 'POST', 
+        body: JSON.stringify({ 
+          nhanVienId: employeeId, 
+          lyDo: reason,          // Thêm lý do vào payload
+          lyDoTuChoi: reason     // Đề phòng BE dùng tên biến này
+        }) 
+      });
     } catch (error) {
       console.error('Lỗi từ chối hoàn trả:', error);
       throw error;

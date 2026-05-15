@@ -20,11 +20,11 @@ const useOrders = (isAdmin = false) => {
       setError('');
 
       if (isAdmin) {
-        // Admin mode: Use backend pagination and search
+        // Admin mode: Phân trang qua Backend
         const result = await api.getOrders({
           trangThai: statusFilter === 'All' ? null : statusFilter,
           search: searchTerm || null,
-          page: currentPage,
+          page: currentPage > 0 ? currentPage - 1 : 0, // BE dùng 0-index
           size: itemsPerPage
         });
         
@@ -32,30 +32,38 @@ const useOrders = (isAdmin = false) => {
         setTotalPages(result.totalPages || 1);
         setTotalElements(result.totalElements || 0);
       } else {
-        // User mode: Fetch history (no pagination/search in BE yet)
-        if (user && user.id_nguoi_dung) {
-          const data = await api.getUserOrdersHistoryDto(user.id_nguoi_dung, statusFilter === 'All' ? null : statusFilter);
+        // User mode: Lấy thẳng danh sách lịch sử DTO, không tự phân trang client
+        if (user && (user.id_nguoi_dung || user.id)) {
+          const userId = user.id_nguoi_dung || user.id;
+          const statusParam = statusFilter === 'All' ? null : statusFilter;
+          
+          const data = await api.getUserOrdersHistoryDto(userId, statusParam);
           
           let ordersArray = [];
           if (Array.isArray(data)) {
             ordersArray = data;
+          } else if (data && typeof data === 'object' && data.content) {
+             // Đề phòng BE bọc trong PagedResponse
+             ordersArray = data.content;
           } else if (data && typeof data === 'object') {
             ordersArray = [data];
           }
           
-          // Client-side search & pagination for user orders
-          const term = searchTerm.toLowerCase();
-          const filtered = ordersArray.filter(order => 
-            (order.idDonHang || order.id_don_hang)?.toString().toLowerCase().includes(term) ||
-            (order.tenNguoiNhan || order.ten_nguoi_nhan)?.toLowerCase().includes(term)
-          );
+          // Lọc cơ bản theo tên nếu user gõ search (an toàn hơn, tránh lỗi null)
+          let filtered = ordersArray;
+          if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filtered = ordersArray.filter(order => {
+                const idStr = (order.idDonHang || order.id_don_hang || '').toString().toLowerCase();
+                const nameStr = (order.tenNguoiNhan || order.ten_nguoi_nhan || '').toLowerCase();
+                return idStr.includes(term) || nameStr.includes(term);
+            });
+          }
           
+          // Gán thẳng toàn bộ mảng đã lọc vào state, KHÔNG DÙNG slice()
+          setOrders(filtered);
           setTotalElements(filtered.length);
-          setTotalPages(Math.ceil(filtered.length / itemsPerPage));
-          
-          const indexOfLastItem = currentPage * itemsPerPage;
-          const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-          setOrders(filtered.slice(indexOfFirstItem, indexOfLastItem));
+          setTotalPages(1); // Trang user không cần phân trang
         } else {
           setOrders([]);
           setTotalPages(1);
@@ -75,7 +83,7 @@ const useOrders = (isAdmin = false) => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Reset page to 1 when filters change
+  // Reset page khi filter đổi
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
@@ -83,8 +91,8 @@ const useOrders = (isAdmin = false) => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return {
-    orders: isAdmin ? orders : undefined, // For backwards compatibility or direct access
-    currentOrders: orders, // Provide standardized currentOrders
+    orders: isAdmin ? orders : undefined, 
+    currentOrders: orders, 
     loading,
     error,
     searchTerm,

@@ -36,10 +36,23 @@ class OrderApi extends BaseApi {
   }
 
   // Lấy lịch sử đơn hàng DTO
+  // async getUserOrdersHistoryDto(userId, trangThai = null) {
+  //   try {
+  //     const url = `${API_BASE_URL}/don-hang/lich-su-dto?userId=${userId}${trangThai ? `&trangThai=${encodeURIComponent(trangThai)}` : ''}`;
+  //     return await this._fetch(url);
+  //   } catch (error) {
+  //     console.error('Lỗi lấy lịch sử đơn hàng:', error);
+  //     throw error;
+  //   }
+  // }
   async getUserOrdersHistoryDto(userId, trangThai = null) {
     try {
       const url = `${API_BASE_URL}/don-hang/lich-su-dto?userId=${userId}${trangThai ? `&trangThai=${encodeURIComponent(trangThai)}` : ''}`;
-      return await this._fetch(url);
+      const response = await this._fetch(url);
+      
+      // Bóc tách 'data' hoặc 'result' nếu BE bọc kết quả
+      const actualData = response?.data || response?.result || response;
+      return actualData;
     } catch (error) {
       console.error('Lỗi lấy lịch sử đơn hàng:', error);
       throw error;

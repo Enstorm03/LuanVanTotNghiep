@@ -46,16 +46,18 @@ const useReturns = () => {
     }
   };
 
-  const handleApproveReturn = async (returnId) => {
+ const handleApproveReturn = async (returnId) => {
     if (!window.confirm('Bạn có chắc muốn duyệt phiếu đổi trả này? Hệ thống sẽ hoàn kho tất cả sản phẩm và đơn hàng sẽ được xử lý theo quy định.')) {
       return;
     }
 
     try {
       setProcessing(returnId);
-      const employeeId = staff?.id_nhan_vien || 1; // Use staff ID or fallback to 1
+      // Lấy ID an toàn từ AuthContext
+      const employeeId = staff?.userId || staff?.id_nhan_vien || staff?.idNhanVien || 1; 
+      
       await api.approveReturn(returnId, employeeId);
-      alert('Đã duyệt phiếu đổi trả thành công! Đơn hàng sẽ được xử lý theo quy định.');
+      alert('Đã duyệt phiếu đổi trả thành công!');
       await fetchAllReturns(); // Refresh the list
     } catch (error) {
       alert('Không thể duyệt phiếu đổi trả: ' + error.message);
@@ -73,8 +75,12 @@ const useReturns = () => {
 
     try {
       setProcessing(returnId);
-      const employeeId = staff?.id_nhan_vien || 1; // Use staff ID or fallback to 1
-      await api.rejectReturn(returnId, employeeId);
+      // Lấy ID an toàn từ AuthContext
+      const employeeId = staff?.userId || staff?.id_nhan_vien || staff?.idNhanVien || 1; 
+      
+      // QUAN TRỌNG: Đã truyền thêm biến reason vào API
+      await api.rejectReturn(returnId, employeeId, reason);
+      
       alert('Đã từ chối phiếu đổi trả!');
       await fetchAllReturns(); // Refresh the list
     } catch (error) {
