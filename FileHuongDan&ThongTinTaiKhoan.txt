@@ -1,0 +1,14 @@
+Giải nén NguyenMinhTuyen_LyQuocSon.zip
+Hướng dẫn chạy:
+Bước 1: mở wampserver nhập database perfumeshop.sql vào 
+Bước 2: giải nén file perfumeshop-backend.zip, mở file perfumeshop-backend bằng IntelliJ IDEA, tiến hành chạy 
+Bước 3:  giải nén file perfumeshop-frontend-s.zip
+mở file perfumeshop-frontend bằng Visual Studio Code chạy lệnh "npm install" để cài đặt dependencies rồi chạy "npm start"
+-----------------------------------------------------------------------------------------
+Tài khoản demo:
+Tài khoản: user2 | Mật khẩu: 1 (Khách)
+Tài khoản: admin1 | Mật khẩu: 1 (Admin)
+Tài khoản: nv1 | Mật khẩu: 1 (Nhân Vien)
+
+
+
