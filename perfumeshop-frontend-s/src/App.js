@@ -23,8 +23,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from './pages/admin/AdminOrderDetailPage';
-import AdminEmployeesPage from './pages/admin/AdminEmployeesPage';
-import AdminCustomersPage from './pages/admin/AdminCustomersPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage'; // Đã gộp Nhân viên & Khách hàng
 import AdminReportPage from './pages/admin/AdminReportPage';
 import AdminReturnsPage from './pages/admin/AdminReturnsPage';
 
@@ -55,8 +54,10 @@ function App() {
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
-          <Route path="employees" element={<AdminEmployeesPage />} />
-          <Route path="customers" element={<AdminCustomersPage />} />
+          
+          {/* Route mới dùng chung cho việc Quản lý Tài khoản */}
+          <Route path="users" element={<AdminUsersPage />} /> 
+          
           <Route path="reports" element={<AdminReportPage />} />
           <Route path="returns" element={<AdminReturnsPage />} />
           <Route path="pos" element={<POSPage />} />

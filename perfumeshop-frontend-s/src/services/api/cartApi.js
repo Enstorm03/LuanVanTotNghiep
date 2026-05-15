@@ -3,29 +3,46 @@ import productApi from './productApi.js';
 
 class CartApi extends BaseApi {
   // Lấy giỏ hàng
+  // async getCart(userId) {
+  //   // Ưu tiên dùng endpoint /don-hang/gio-hang-dto trước vì BE đã enrich sẵn
+  //   try {
+  //     const params = new URLSearchParams({ userId });
+  //     const data = await fetch(`${API_BASE_URL}/don-hang/gio-hang-dto?${params}`).then(r => r.json());
+  //     const cartData = Array.isArray(data) && data.length > 0 ? data[0] : { idDonHang: null, chiTiet: [] };
+
+  //     return cartData;
+  //   } catch (error) {
+  //     // Fallback to /cart/dto
+  //     try {
+  //       const params = new URLSearchParams({ userId });
+  //       const res = await fetch(`${API_BASE_URL}/cart/dto?${params}`);
+  //       if (res.ok) {
+  //         const data = await res.json();
+  //         return { idDonHang: data.idDonHang || null, chiTiet: data.chiTiet || [] };
+  //       }
+  //     } catch (error) {
+  //       // Return empty cart if all endpoints fail
+  //     }
+  //   }
+
+  //   return { idDonHang: null, chiTiet: [] };
+  // }
+  // Lấy giỏ hàng
   async getCart(userId) {
-    // Ưu tiên dùng endpoint /don-hang/gio-hang-dto trước vì BE đã enrich sẵn
     try {
-      const params = new URLSearchParams({ userId });
-      const data = await fetch(`${API_BASE_URL}/don-hang/gio-hang-dto?${params}`).then(r => r.json());
-      const cartData = Array.isArray(data) && data.length > 0 ? data[0] : { idDonHang: null, chiTiet: [] };
-
-      return cartData;
+      // 1. Dùng this._fetch để đảm bảo gửi kèm Token Header bảo mật
+      // 2. Gọi đúng endpoint mà Backend đã enrich data
+      const response = await this._fetch(`${API_BASE_URL}/cart/dto?userId=${userId}`);
+      
+      // 3. Backend trả về Object DTO, ta chỉ cần format lại cho chắc chắn
+      return { 
+        idDonHang: response?.idDonHang || null, 
+        chiTiet: response?.chiTiet || [] 
+      };
     } catch (error) {
-      // Fallback to /cart/dto
-      try {
-        const params = new URLSearchParams({ userId });
-        const res = await fetch(`${API_BASE_URL}/cart/dto?${params}`);
-        if (res.ok) {
-          const data = await res.json();
-          return { idDonHang: data.idDonHang || null, chiTiet: data.chiTiet || [] };
-        }
-      } catch (error) {
-        // Return empty cart if all endpoints fail
-      }
+      console.error('Lỗi lấy dữ liệu giỏ hàng:', error);
+      return { idDonHang: null, chiTiet: [] }; // Fallback an toàn
     }
-
-    return { idDonHang: null, chiTiet: [] };
   }
 
   // Thêm sản phẩm vào giỏ hàng

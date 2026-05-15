@@ -81,7 +81,7 @@ const useCategoryProducts = (categoryId, brandId, searchQuery) => {
           maxGia: filters.maxPrice < 10000000 ? filters.maxPrice : undefined, // only send if customized
           sortBy: apiSortBy,
           sortDir: apiSortDir,
-          page: page,
+        page: page > 0 ? page - 1 : 0,
           size: pageSize
         });
 

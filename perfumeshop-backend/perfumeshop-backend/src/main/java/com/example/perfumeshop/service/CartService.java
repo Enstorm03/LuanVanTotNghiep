@@ -131,10 +131,6 @@ public class CartService {
                 sanPhamRepository.save(sp);
             }
             cart.setTienDatCoc(BigDecimal.ZERO);
-        } else {
-            cart.setTrangThaiVanHanh(DonHangService.TT_CHO_HANG);
-            cart.setTrangThaiThanhToan("Đã cọc");
-            cart.setTienDatCoc(cart.getTongTien().multiply(new BigDecimal("0.5")));
         }
         return donHangRepository.save(cart);
     }
