@@ -34,38 +34,42 @@ public class AuthController {
     @Autowired
     private AdminUserService adminUserService;
 
+    // File: AuthController.java
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
-        String type = req.getLoai().toLowerCase();
         Map<String, Object> body = new HashMap<>();
+        String username = req.getTenDangNhap();
         String hashedPassword = hash(req.getMatKhau());
-        switch (type) {
-            case "customer":
-            case "khach":
-                NguoiDung kh = nguoiDungRepository.findByTenDangNhap(req.getTenDangNhap())
-                        .orElseThrow(() -> new BusinessException("Sai tài khoản hoặc mật khẩu"));
-                if (!kh.getMatKhauBam().equals(hashedPassword)) {
-                    throw new BusinessException("Sai tài khoản hoặc mật khẩu");
-                }
+
+        // Bước 1: Thử tìm trong bảng Nhân viên (Admin/Staff)
+        var nvOpt = nhanVienRepository.findByTenDangNhap(username);
+        if (nvOpt.isPresent()) {
+            NhanVien nv = nvOpt.get();
+            if (nv.getMatKhauBam().equals(hashedPassword)) {
+                body.put("success", true);
+                body.put("type", "employee");
+                body.put("userId", nv.getIdNhanVien());
+                body.put("displayName", nv.getHoTen());
+                body.put("role", nv.getVaiTro()); // Chứa ADMIN hoặc STAFF
+                return ResponseEntity.ok(body);
+            }
+        }
+
+        // Bước 2: Nếu không thấy trong Nhân viên, thử tìm trong bảng Người dùng (Khách hàng)
+        var khOpt = nguoiDungRepository.findByTenDangNhap(username);
+        if (khOpt.isPresent()) {
+            NguoiDung kh = khOpt.get();
+            if (kh.getMatKhauBam().equals(hashedPassword)) {
+                body.put("success", true);
                 body.put("type", "customer");
                 body.put("userId", kh.getIdNguoiDung());
                 body.put("displayName", kh.getHoTen());
                 return ResponseEntity.ok(body);
-            case "employee":
-            case "nhanvien":
-                NhanVien nv = nhanVienRepository.findByTenDangNhap(req.getTenDangNhap())
-                        .orElseThrow(() -> new BusinessException("Sai tài khoản hoặc mật khẩu"));
-                if (!nv.getMatKhauBam().equals(hashedPassword)) {
-                    throw new BusinessException("Sai tài khoản hoặc mật khẩu");
-                }
-                body.put("type", "employee");
-                body.put("userId", nv.getIdNhanVien());
-                body.put("displayName", nv.getHoTen());
-                body.put("role", nv.getVaiTro());
-                return ResponseEntity.ok(body);
-            default:
-                throw new BusinessException("loai phải là 'customer|khach' hoặc 'employee|nhanvien'");
+            }
         }
+
+        // Bước 3: Nếu cả hai đều không khớp
+        throw new BusinessException("Sai tài khoản hoặc mật khẩu");
     }
 
     private String hash(String raw) {

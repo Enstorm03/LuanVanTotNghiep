@@ -12,7 +12,6 @@ public class DonHangHistoryDto {
     private BigDecimal tienDatCoc;
     private String tenNguoiNhan;
     private String diaChiGiaoHang;
-    private String tenKhachVangLai;
     private LocalDateTime ngayDatHang;
     private LocalDateTime ngayHoanThanh;
     private String maVanDon;
@@ -38,9 +37,6 @@ public class DonHangHistoryDto {
 
     public String getDiaChiGiaoHang() { return diaChiGiaoHang; }
     public void setDiaChiGiaoHang(String diaChiGiaoHang) { this.diaChiGiaoHang = diaChiGiaoHang; }
-
-    public String getTenKhachVangLai() { return tenKhachVangLai; }
-    public void setTenKhachVangLai(String tenKhachVangLai) { this.tenKhachVangLai = tenKhachVangLai; }
 
     public LocalDateTime getNgayDatHang() { return ngayDatHang; }
     public void setNgayDatHang(LocalDateTime ngayDatHang) { this.ngayDatHang = ngayDatHang; }

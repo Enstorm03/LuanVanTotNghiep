@@ -89,7 +89,6 @@ public class CheckoutService {
             dh.setTienDatCoc(BigDecimal.ZERO);
         } else {
             // Hàng order/backorder: Chờ hàng, Chờ cọc, cọc = 50%, không trừ kho
-            dh.setTrangThaiVanHanh(DonHangService.TT_CHO_HANG);
             dh.setTrangThaiThanhToan("Chờ cọc");
             dh.setTienDatCoc(tong.multiply(new BigDecimal("0.5")));
             

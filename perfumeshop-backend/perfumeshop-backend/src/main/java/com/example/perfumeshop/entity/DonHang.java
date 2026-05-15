@@ -41,9 +41,6 @@ public class DonHang {
     @Column(name = "dia_chi_giao_hang")
     private String diaChiGiaoHang;
 
-    @Column(name = "ten_khach_vang_lai")
-    private String tenKhachVangLai;
-
     @Column(name = "ngay_dat_hang")
     private LocalDateTime ngayDatHang;
 

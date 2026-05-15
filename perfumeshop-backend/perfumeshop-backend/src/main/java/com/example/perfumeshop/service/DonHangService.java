@@ -29,7 +29,6 @@ public class DonHangService {
     public static final String TT_DA_XAC_NHAN = "Đã xác nhận";
     public static final String TT_DANG_GIAO = "Đang giao hàng";
     public static final String TT_HOAN_THANH = "Hoàn thành";
-    public static final String TT_CHO_HANG = "Chờ hàng";
     public static final String TT_DA_HUY = "Đã hủy";
 
     @Autowired
@@ -66,7 +65,6 @@ public class DonHangService {
         dto.setTienDatCoc(dh.getTienDatCoc());
         dto.setTenNguoiNhan(dh.getTenNguoiNhan());
         dto.setDiaChiGiaoHang(dh.getDiaChiGiaoHang());
-        dto.setTenKhachVangLai(dh.getTenKhachVangLai());
         dto.setNgayDatHang(dh.getNgayDatHang());
         dto.setNgayHoanThanh(dh.getNgayHoanThanh());
         dto.setMaVanDon(dh.getMaVanDon());
@@ -115,7 +113,7 @@ public class DonHangService {
     @Transactional
     public DonHang confirm(Integer id, Integer nhanVienId) {
         DonHang dh = getById(id);
-        if (!(TT_CHO_XAC_NHAN.equals(dh.getTrangThaiVanHanh()) || TT_CHO_HANG.equals(dh.getTrangThaiVanHanh()))) {
+        if (!(TT_CHO_XAC_NHAN.equals(dh.getTrangThaiVanHanh()) )) {
             throw new BusinessException("Chỉ xác nhận đơn ở trạng thái 'Đang chờ' hoặc 'Chờ hàng'");
         }
         dh.setIdNhanVien(nhanVienId);
@@ -150,15 +148,13 @@ public class DonHangService {
     public DonHang cancel(Integer id, String lyDo) {
         DonHang dh = getById(id);
         String tt = dh.getTrangThaiVanHanh();
-        if (!(TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt) || TT_CHO_HANG.equals(tt))) {
+        if (!(TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt) )) {
             throw new BusinessException("Không thể hủy đơn ở trạng thái hiện tại");
         }
         // Hoàn kho theo quy tắc
         if (TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt)) {
             // Hàng có sẵn: hoàn kho
             restoreInventory(dh);
-        } else if (TT_CHO_HANG.equals(tt)) {
-            // Hàng order chưa về: không hoàn kho
         }
         dh.setTrangThaiVanHanh(TT_DA_HUY);
         dh.setLyDoHuy(lyDo);
