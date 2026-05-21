@@ -19,7 +19,6 @@ const OrdersFilter = ({ searchTerm, onSearchChange, statusFilter, onStatusFilter
         <option value="Đang chờ">Đang chờ</option>
         <option value="Đã xác nhận">Đã xác nhận</option>
         <option value="Đang giao hàng">Đang giao hàng</option>
-        <option value="Chờ hàng">Chờ hàng</option>
         <option value="Hoàn thành">Hoàn thành</option>
         <option value="Đã hủy">Đã hủy</option>
       </select>

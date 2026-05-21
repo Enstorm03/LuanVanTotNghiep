@@ -28,7 +28,6 @@ public class ReportService {
 
     @Autowired
     private NhanVienRepository nhanVienRepository;
-
     public Map<String, Object> getSummary(LocalDate startDate, LocalDate endDate) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
         LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
@@ -41,7 +40,14 @@ public class ReportService {
                 .collect(Collectors.toList());
 
         long totalOrders = orders.size();
+
+        // Bổ sung đếm số lượng cho từng trạng thái
+        long pendingOrders = orders.stream().filter(o -> "Đang chờ".equals(o.getTrangThaiVanHanh()) || "Chờ xác nhận".equals(o.getTrangThaiVanHanh())).count();
+        long confirmedOrders = orders.stream().filter(o -> "Đã xác nhận".equals(o.getTrangThaiVanHanh())).count();
+        long shippingOrders = orders.stream().filter(o -> "Đang giao hàng".equals(o.getTrangThaiVanHanh()) || "Đang giao".equals(o.getTrangThaiVanHanh())).count();
         long completedOrders = orders.stream().filter(o -> "Hoàn thành".equals(o.getTrangThaiVanHanh())).count();
+        long cancelledOrders = orders.stream().filter(o -> "Đã hủy".equals(o.getTrangThaiVanHanh())).count();
+        long depositOrders = orders.stream().filter(o -> "Chờ hàng".equals(o.getTrangThaiVanHanh()) || "Đặt cọc".equals(o.getTrangThaiVanHanh())).count();
 
         BigDecimal totalRevenue = orders.stream()
                 .filter(o -> "Hoàn thành".equals(o.getTrangThaiVanHanh()))
@@ -55,9 +61,16 @@ public class ReportService {
         Map<String, Object> summary = new HashMap<>();
         summary.put("totalRevenue", totalRevenue);
         summary.put("totalOrders", totalOrders);
-        summary.put("completedOrders", completedOrders);
         summary.put("avgOrderValue", avgOrderValue);
         summary.put("newCustomers", nguoiDungRepository.count());
+
+        // Trả về đầy đủ các trạng thái cho Frontend
+        summary.put("pendingOrders", pendingOrders);
+        summary.put("confirmedOrders", confirmedOrders);
+        summary.put("shippingOrders", shippingOrders);
+        summary.put("completedOrders", completedOrders);
+        summary.put("cancelledOrders", cancelledOrders);
+        summary.put("depositOrders", depositOrders);
 
         return summary;
     }

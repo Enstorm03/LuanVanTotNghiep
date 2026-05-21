@@ -1,13 +1,21 @@
 import React from 'react';
 
-const OrderStatusChart = ({ orderStats }) => {
+const OrderStatusChart = ({ orderStats = {} }) => {
+  
+  const stats = {
+    pending: orderStats.pending || 0,
+    confirmed: orderStats.confirmed || 0,
+    shipping: orderStats.shipping || 0,
+    completed: orderStats.completed || 0,
+    cancelled: orderStats.cancelled || 0,
+  };
+
   const statusNames = {
     pending: 'Đang chờ',
     confirmed: 'Đã xác nhận',
     shipping: 'Đang giao hàng',
     completed: 'Hoàn thành',
     cancelled: 'Đã hủy',
-    deposit: 'Chờ hàng'
   };
 
   const statusColors = {
@@ -16,16 +24,16 @@ const OrderStatusChart = ({ orderStats }) => {
     shipping: 'bg-blue-500',
     completed: 'bg-green-500',
     cancelled: 'bg-red-500',
-    deposit: 'bg-orange-500'
   };
 
-  const totalOrders = Object.values(orderStats).reduce((sum, count) => sum + count, 0);
+  // Tính tổng để chia phần trăm, đảm bảo không bị NaN
+  const totalOrders = Object.values(stats).reduce((sum, count) => sum + Number(count), 0);
 
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">
       <h3 className="text-lg font-bold mb-4">Trạng thái đơn hàng</h3>
       <div className="space-y-3">
-        {Object.entries(orderStats).map(([status, count]) => {
+        {Object.entries(stats).map(([status, count]) => {
           const percentage = totalOrders > 0 ? (count / totalOrders) * 100 : 0;
 
           return (

@@ -1,15 +1,33 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Lấy thông tin URL hiện tại
   const { user, isUser, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // LỆNH CẬP NHẬT TÌM KIẾM LIÊN TỤC
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim()) {
+       
+        navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      } else if (searchQuery === '' && location.pathname === '/products') {
+       
+        navigate(`/products`);
+      }
+    }, 400); // 400ms sau khi ngừng gõ lệnh navigate mới chạy
+
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery, navigate, location.pathname]);
+
   const timKiem = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
     }
@@ -34,7 +52,6 @@ const Header = () => {
           <Link className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" to="/">Trang Chu</Link>
           <Link className="text-sm font-medium leading-normal text-primary dark:text-primary" to="/products">San Pham</Link>
           <Link className="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" to="/brands">Thuong Hieu</Link>
-          
         </div>
       </div>
       <div className="flex flex-1 justify-end items-center gap-2 sm:gap-4">
