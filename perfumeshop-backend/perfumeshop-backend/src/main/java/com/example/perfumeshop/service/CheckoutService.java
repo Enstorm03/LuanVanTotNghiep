@@ -86,16 +86,8 @@ public class CheckoutService {
                 sp.setSoLuongTonKho((sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho()) - ct.getSoLuong());
                 sanPhamRepository.save(sp);
             }
-            dh.setTienDatCoc(BigDecimal.ZERO);
-        } else {
-            // Hàng order/backorder: Chờ hàng, Chờ cọc, cọc = 50%, không trừ kho
-            dh.setTrangThaiThanhToan("Chờ cọc");
-            dh.setTienDatCoc(tong.multiply(new BigDecimal("0.5")));
-            
-            // Nếu là đơn backorder, lưu thông tin vào lý do
-            if (Boolean.TRUE.equals(req.getAllowBackorder())) {
-                dh.setLyDoHuy("Đơn hàng đặt trước (backorder)");
-            }
+
+        }
         }
 
         return donHangRepository.save(dh);

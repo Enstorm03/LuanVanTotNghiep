@@ -62,7 +62,7 @@ public class DonHangService {
         dto.setTrangThaiVanHanh(dh.getTrangThaiVanHanh());
         dto.setTrangThaiThanhToan(dh.getTrangThaiThanhToan());
         dto.setTongTien(dh.getTongTien());
-        dto.setTienDatCoc(dh.getTienDatCoc());
+
         dto.setTenNguoiNhan(dh.getTenNguoiNhan());
         dto.setDiaChiGiaoHang(dh.getDiaChiGiaoHang());
         dto.setNgayDatHang(dh.getNgayDatHang());

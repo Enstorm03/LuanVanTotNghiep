@@ -32,8 +32,7 @@ public class DonHang {
     @Column(name = "tong_tien", precision = 15, scale = 2)
     private BigDecimal tongTien;
 
-    @Column(name = "tien_dat_coc", precision = 15, scale = 2)
-    private BigDecimal tienDatCoc;
+
 
     @Column(name = "ten_nguoi_nhan")
     private String tenNguoiNhan;

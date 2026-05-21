@@ -55,8 +55,5 @@ public class CartController {
         return ResponseEntity.ok(cartService.clearCart(userId));
     }
 
-    @PostMapping("/checkout")
-    public ResponseEntity<DonHang> checkout(@Valid @RequestBody CheckoutCartRequest req) {
-        return ResponseEntity.ok(cartService.checkout(req));
-    }
+
 }

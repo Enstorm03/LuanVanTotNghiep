@@ -1,6 +1,14 @@
 import React from 'react';
 
 const SummaryCards = ({ reportData, conversionRate }) => {
+  // Safely access nested values with defaults
+  const totalRevenue = reportData?.totalRevenue ?? 0;
+  const totalOrders = reportData?.totalOrders ?? 0;
+  const averageOrderValue = reportData?.averageOrderValue ?? 0;
+  const customerTotal = reportData?.customerStats?.totalCustomers ?? 0;
+  const completed = reportData?.orderStats?.completed ?? 0;
+  const rate = conversionRate ?? 0;
+
   return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       {/* Total Revenue */}
@@ -11,10 +19,10 @@ const SummaryCards = ({ reportData, conversionRate }) => {
         </div>
         <div className="pt-0">
           <div className="text-2xl font-bold text-text-light dark:text-text-dark">
-            {reportData.totalRevenue.toLocaleString('vi-VN')}₫
+            {Number(totalRevenue).toLocaleString('vi-VN')}₫
           </div>
           <p className="text-xs text-green-600 pt-1">
-            Từ {reportData.orderStats.completed} đơn hoàn thành
+            Từ {completed} đơn hoàn thành
           </p>
         </div>
       </div>
@@ -26,9 +34,9 @@ const SummaryCards = ({ reportData, conversionRate }) => {
           <span className="material-symbols-outlined text-blue-600">shopping_cart</span>
         </div>
         <div className="pt-0">
-          <div className="text-2xl font-bold text-text-light dark:text-text-dark">{reportData.totalOrders}</div>
+          <div className="text-2xl font-bold text-text-light dark:text-text-dark">{totalOrders}</div>
           <p className="text-xs text-blue-600 pt-1">
-            Trung bình: {reportData.averageOrderValue.toLocaleString('vi-VN')}₫/đơn
+            Trung bình: {Number(averageOrderValue).toLocaleString('vi-VN')}₫/đơn
           </p>
         </div>
       </div>
@@ -40,7 +48,7 @@ const SummaryCards = ({ reportData, conversionRate }) => {
           <span className="material-symbols-outlined text-orange-600">people</span>
         </div>
         <div className="pt-0">
-          <div className="text-2xl font-bold text-text-light dark:text-text-dark">{reportData.customerStats.totalCustomers}</div>
+          <div className="text-2xl font-bold text-text-light dark:text-text-dark">{customerTotal}</div>
           <p className="text-xs text-orange-600 pt-1">
             Trong khoảng thời gian
           </p>
@@ -55,10 +63,10 @@ const SummaryCards = ({ reportData, conversionRate }) => {
         </div>
         <div className="pt-0">
           <div className="text-2xl font-bold text-text-light dark:text-text-dark">
-            {conversionRate}%
+            {rate}%
           </div>
           <p className="text-xs text-purple-600 pt-1">
-            {reportData.orderStats.completed}/{reportData.totalOrders} đơn
+            {completed}/{totalOrders} đơn
           </p>
         </div>
       </div>

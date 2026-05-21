@@ -31,6 +31,7 @@ public class CartService {
     private static final String TT_GIO_HANG = "Giỏ hàng";
 
     @Transactional
+    // Hàm lấy giỏ hàng hiện tại hoặc tạo mới nếu chưa có
     public DonHang getOrCreateCart(Integer userId) {
         if (userId == null) throw new BusinessException("userId là bắt buộc");
         List<DonHang> carts = donHangRepository.findByIdNguoiDungAndTrangThaiVanHanh(userId, TT_GIO_HANG);
@@ -41,12 +42,13 @@ public class CartService {
         dh.setTrangThaiThanhToan("Chưa thanh toán");
         dh.setNgayDatHang(null);
         dh.setTongTien(BigDecimal.ZERO);
-        dh.setTienDatCoc(BigDecimal.ZERO);
+
         dh.setChiTietDonHangs(new ArrayList<>());
         return donHangRepository.save(dh);
     }
 
     @Transactional
+    // Hàm thêm một sản phẩm vào giỏ hàng
     public DonHang addItem(AddCartItemRequest req) {
         DonHang cart = getOrCreateCart(req.getUserId());
         SanPham sp = sanPhamRepository.findById(req.getSanPhamId())
@@ -69,6 +71,7 @@ public class CartService {
     }
 
     @Transactional
+    // Hàm cập nhật số lượng của một mặt hàng trong giỏ
     public DonHang updateItem(UpdateCartItemRequest req) {
         DonHang cart = getOrCreateCart(req.getUserId());
         ChiTietDonHang existed = findItem(cart, req.getSanPhamId());
@@ -86,6 +89,7 @@ public class CartService {
     }
 
     @Transactional
+    // Hàm xóa hẳn một sản phẩm khỏi giỏ
     public DonHang removeItem(Integer userId, Integer sanPhamId) {
         DonHang cart = getOrCreateCart(userId);
         ChiTietDonHang existed = findItem(cart, sanPhamId);
@@ -97,6 +101,7 @@ public class CartService {
     }
 
     @Transactional
+    // Hàm làm trống giỏ hàng
     public DonHang clearCart(Integer userId) {
         DonHang cart = getOrCreateCart(userId);
         cart.getChiTietDonHangs().clear();
@@ -104,37 +109,8 @@ public class CartService {
         return donHangRepository.save(cart);
     }
 
-    @Transactional
-    public DonHang checkout(CheckoutCartRequest req) {
-        DonHang cart = getOrCreateCart(req.getUserId());
-        if (cart.getChiTietDonHangs() == null || cart.getChiTietDonHangs().isEmpty()) {
-            throw new BusinessException("Giỏ hàng trống");
-        }
-        cart.setTenNguoiNhan(req.getTenNguoiNhan());
-        cart.setDiaChiGiaoHang(req.getDiaChiGiaoHang());
-        cart.setNgayDatHang(LocalDateTime.now());
-        boolean allInStock = true;
-        for (ChiTietDonHang it : cart.getChiTietDonHangs()) {
-            SanPham sp = sanPhamRepository.findById(it.getSanPham().getIdSanPham())
-                    .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại"));
-            it.setGiaTaiThoiDiemMua(sp.getGiaBan());
-            int ton = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
-            if (ton < it.getSoLuong()) allInStock = false;
-        }
-        recalc(cart);
-        if (allInStock) {
-            cart.setTrangThaiVanHanh(DonHangService.TT_CHO_XAC_NHAN);
-            cart.setTrangThaiThanhToan("Chưa thanh toán");
-            for (ChiTietDonHang it : cart.getChiTietDonHangs()) {
-                SanPham sp = it.getSanPham();
-                sp.setSoLuongTonKho((sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho()) - it.getSoLuong());
-                sanPhamRepository.save(sp);
-            }
-            cart.setTienDatCoc(BigDecimal.ZERO);
-        }
-        return donHangRepository.save(cart);
-    }
 
+    // Hàm phụ trợ ẩn (private): Dùng để dò tìm một sản phẩm xem nó nằm ở đâu trong danh sách của giỏ
     private ChiTietDonHang findItem(DonHang cart, Integer sanPhamId) {
         if (cart.getChiTietDonHangs() == null) return null;
         for (ChiTietDonHang it : cart.getChiTietDonHangs()) {
@@ -142,7 +118,7 @@ public class CartService {
         }
         return null;
     }
-
+    // Hàm phụ trợ ẩn (private): Dùng để tính toán lại tổng tiền của giỏ hàng và dọn dẹp các món rác
     private void recalc(DonHang cart) {
         BigDecimal tong = BigDecimal.ZERO;
         if (cart.getChiTietDonHangs() != null) {
