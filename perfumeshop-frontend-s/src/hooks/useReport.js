@@ -6,7 +6,12 @@ import api from '../services/api';
  * Map fields from BE response to FE structure.
  * Supports both English camelCase and Vietnamese camelCase field naming.
  */
-const mapReportData = (summaryData, topProductsData, revenueByStatusData) => {
+const mapReportData = (summaryDataRaw, topProductsDataRaw, revenueByStatusDataRaw) => {
+  // Unwrap 'data' if backend uses a wrapper like { data: { ... } } or { result: { ... } }
+  const summaryData = summaryDataRaw?.data || summaryDataRaw?.result || summaryDataRaw || {};
+  const topProductsData = topProductsDataRaw?.data || topProductsDataRaw?.result || topProductsDataRaw || [];
+  const revenueByStatusData = revenueByStatusDataRaw?.data || revenueByStatusDataRaw?.result || revenueByStatusDataRaw || [];
+
   // Helper to safely get value from multiple possible field names
   const getField = (obj, ...keys) => {
     if (!obj) return undefined;
@@ -17,8 +22,8 @@ const mapReportData = (summaryData, topProductsData, revenueByStatusData) => {
     return undefined;
   };
 
-  // Map order stats - BE might return Vietnamese keys or English keys
-  const orderStats = summaryData?.orderStats || {};
+  // Map order stats - Lấy từ object root (summaryData) nếu orderStats không tồn tại (đối với JSON phẳng từ BE)
+  const orderStats = summaryData?.orderStats || summaryData || {};
   const mappedOrderStats = {
     pending: getField(orderStats, 'pending', 'dangCho', 'pendingOrders', 'soLuongDangCho') ?? 0,
     confirmed: getField(orderStats, 'confirmed', 'daXacNhan', 'confirmedOrders', 'soLuongDaXacNhan') ?? 0,
@@ -28,10 +33,10 @@ const mapReportData = (summaryData, topProductsData, revenueByStatusData) => {
     deposit: getField(orderStats, 'deposit', 'datCoc', 'depositOrders', 'soLuongDatCoc') ?? 0
   };
 
-  // Map customer stats
-  const customerStats = summaryData?.customerStats || {};
+  // Map customer stats - Lấy từ object root (summaryData) nếu customerStats không tồn tại
+  const customerStats = summaryData?.customerStats || summaryData || {};
   const mappedCustomerStats = {
-    totalCustomers: getField(customerStats, 'totalCustomers', 'tongKhachHang', 'totalCustomersCount') ?? 0,
+    totalCustomers: getField(customerStats, 'totalCustomers', 'tongKhachHang', 'totalCustomersCount', 'newCustomers') ?? 0,
     newCustomers: getField(customerStats, 'newCustomers', 'khachHangMoi', 'newCustomersCount') ?? 0,
     repeatCustomers: getField(customerStats, 'repeatCustomers', 'khachHangQuayLai', 'repeatCustomersCount') ?? 0
   };
@@ -42,23 +47,31 @@ const mapReportData = (summaryData, topProductsData, revenueByStatusData) => {
         id: getField(p, 'id', 'idSanPham', 'id_san_pham', 'productId'),
         name: getField(p, 'name', 'tenSanPham', 'ten_san_pham', 'productName') || 'Không có tên',
         revenue: getField(p, 'revenue', 'doanhThu', 'doanh_thu', 'totalRevenue') ?? 0,
-        quantity: getField(p, 'quantity', 'soLuongDaBan', 'so_luong_da_ban', 'soLuong', 'so_luong', 'soldQuantity') ?? 0
+        quantity: getField(p, 'quantity', 'soLuongDaBan', 'so_luong_da_ban', 'soLuong', 'so_luong', 'soldQuantity', 'totalQuantity') ?? 0
       }))
     : [];
 
   // Map revenue by status
-  const mappedRevenueByStatus = Array.isArray(revenueByStatusData)
-    ? revenueByStatusData.map(item => ({
+  let mappedRevenueByStatus = [];
+  if (Array.isArray(revenueByStatusData)) {
+    mappedRevenueByStatus = revenueByStatusData.map(item => ({
         status: getField(item, 'status', 'trangThai', 'trang_thai', 'orderStatus') || 'unknown',
         revenue: getField(item, 'revenue', 'doanhThu', 'doanh_thu', 'totalRevenue') ?? 0,
         count: getField(item, 'count', 'soLuong', 'so_luong', 'orderCount') ?? 0
-      }))
-    : [];
+      }));
+  } else if (revenueByStatusData && typeof revenueByStatusData === 'object') {
+    const revMap = revenueByStatusData.revenueByStatus || revenueByStatusData;
+    mappedRevenueByStatus = Object.keys(revMap).map(key => ({
+      status: key,
+      revenue: revMap[key],
+      count: 0
+    }));
+  }
 
   return {
     totalRevenue: getField(summaryData, 'totalRevenue', 'tongDoanhThu', 'total_revenue', 'totalRevenueAmount') ?? 0,
     totalOrders: getField(summaryData, 'totalOrders', 'tongDonHang', 'total_orders', 'totalOrderCount') ?? 0,
-    averageOrderValue: getField(summaryData, 'averageOrderValue', 'trungBinhDonHang', 'average_order_value', 'avgOrderValue') ?? 0,
+    averageOrderValue: getField(summaryData, 'averageOrderValue', 'avgOrderValue', 'trungBinhDonHang', 'average_order_value') ?? 0,
     topProducts: mappedTopProducts,
     revenueByStatus: mappedRevenueByStatus,
     customerStats: mappedCustomerStats,
@@ -102,18 +115,23 @@ const useReport = () => {
       setError('');
 
       const { startDate, endDate } = dateRange;
+      
+      console.log(`Fetching reports for date range: ${startDate} to ${endDate}`);
 
       const [summaryData, topProductsData, revenueByStatusData] = await Promise.all([
-        api.getReportSummary(startDate, endDate).catch(() => null),
-        api.getTopProducts(startDate, endDate, 10).catch(() => []),
-        api.getRevenueByStatus(startDate, endDate).catch(() => [])
+        api.getReportSummary(startDate, endDate).catch((e) => { console.error('Summary API Error:', e); return null; }),
+        api.getTopProducts(startDate, endDate, 10).catch((e) => { console.error('Top Products API Error:', e); return []; }),
+        api.getRevenueByStatus(startDate, endDate).catch((e) => { console.error('Revenue API Error:', e); return []; })
       ]);
+      
+      console.log('Summary Data:', summaryData);
 
       if (summaryData) {
         const mapped = mapReportData(summaryData, topProductsData, revenueByStatusData);
+        console.log('Mapped Report Data:', mapped);
         setReportData(mapped);
       } else {
-        setError('Dữ liệu báo cáo chưa sẵn sàng');
+        setError('Dữ liệu báo cáo chưa sẵn sàng. Vui lòng kiểm tra Console (F12) để xem chi tiết lỗi.');
       }
     } catch (err) {
       console.error('Error fetching report data:', err);
