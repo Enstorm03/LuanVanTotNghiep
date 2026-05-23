@@ -42,7 +42,6 @@ public class CartService {
         dh.setTrangThaiThanhToan("Chưa thanh toán");
         dh.setNgayDatHang(null);
         dh.setTongTien(BigDecimal.ZERO);
-
         dh.setChiTietDonHangs(new ArrayList<>());
         return donHangRepository.save(dh);
     }

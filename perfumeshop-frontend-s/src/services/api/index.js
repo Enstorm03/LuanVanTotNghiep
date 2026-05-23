@@ -6,7 +6,7 @@ import customerApi from './customerApi.js';
 import employeeApi from './employeeApi.js';
 import reviewApi from './reviewApi.js';
 import returnApi from './returnApi.js';
-
+import brandApi from './brandApi.js';
 
 import dashboardApi from './dashboardApi.js';
 
@@ -63,6 +63,13 @@ const api = {
   getOrders: orderApi.getOrders.bind(orderApi),
   checkOrderReturnStatus: orderApi.checkOrderReturnStatus.bind(orderApi),
 
+  // Brand methods
+  getAllBrands: brandApi.getAllBrands.bind(brandApi),
+  getBrandById: brandApi.getBrandById.bind(brandApi),
+  createBrand: brandApi.createBrand.bind(brandApi),
+  updateBrand: brandApi.updateBrand.bind(brandApi),
+  deleteBrand: brandApi.deleteBrand.bind(brandApi),
+
   // Auth methods
   login: authApi.login.bind(authApi),
   registerCustomer: authApi.registerCustomer.bind(authApi),
@@ -108,5 +115,7 @@ export {
   employeeApi,
   reviewApi,
   returnApi,
-
+  brandApi,
+  dashboardApi,
+  reportApi
 };

@@ -12,7 +12,8 @@ public class ThuongHieu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_thuong_hieu")
     private Integer idThuongHieu;
-
+    @Column(name = "url_hinh_anh")
+    private String urlHinhAnh;
     @Column(name = "ten_thuong_hieu", nullable = false, unique = true)
     private String tenThuongHieu;
 }

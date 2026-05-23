@@ -26,6 +26,7 @@ import AdminOrderDetailPage from './pages/admin/AdminOrderDetailPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage'; // Đã gộp Nhân viên & Khách hàng
 import AdminReportPage from './pages/admin/AdminReportPage';
 import AdminReturnsPage from './pages/admin/AdminReturnsPage';
+import AdminBrandsPage from './pages/admin/AdminBrandPage';
 
 import './assets/styles/App.css';
 
@@ -60,7 +61,7 @@ function App() {
           
           <Route path="reports" element={<AdminReportPage />} />
           <Route path="returns" element={<AdminReturnsPage />} />
-         
+          <Route path="brands" element={<AdminBrandsPage />} />
         </Route>
       </Routes>
     </div>

@@ -26,19 +26,11 @@ const ActionButtons = ({ onAddToCart, onBuyNow, onPreOrder, cartLoading, isOutOf
       <div className="mt-4">
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3 mb-4">
           <p className="text-sm text-orange-800 dark:text-orange-200 font-medium">
-            🚚 Hàng sẽ về sau 7-10 ngày
+           Sản phẩm hiện đang hết hàng. 
           </p>
-          <p className="text-xs text-orange-700 dark:text-orange-300 mt-1">
-            Cần thanh toán 50% tiền cọc để xác nhận đặt hàng
-          </p>
+         
         </div>
-        <ActionButton
-          onClick={onPreOrder}
-          loading={cartLoading}
-          variant="warning"
-        >
-          Đặt hàng trước
-        </ActionButton>
+        
       </div>
     );
   }

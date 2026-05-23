@@ -4,7 +4,7 @@ import productApi from './productApi.js';
 class CartApi extends BaseApi {
   // Lấy giỏ hàng
   // async getCart(userId) {
-  //   // Ưu tiên dùng endpoint /don-hang/gio-hang-dto trước vì BE đã enrich sẵn
+  //  
   //   try {
   //     const params = new URLSearchParams({ userId });
   //     const data = await fetch(`${API_BASE_URL}/don-hang/gio-hang-dto?${params}`).then(r => r.json());
@@ -30,8 +30,7 @@ class CartApi extends BaseApi {
   // Lấy giỏ hàng
   async getCart(userId) {
     try {
-      // 1. Dùng this._fetch để đảm bảo gửi kèm Token Header bảo mật
-      // 2. Gọi đúng endpoint mà Backend đã enrich data
+      
       const response = await this._fetch(`${API_BASE_URL}/cart/dto?userId=${userId}`);
       
       // 3. Backend trả về Object DTO, ta chỉ cần format lại cho chắc chắn

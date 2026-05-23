@@ -16,6 +16,7 @@ const QuickActions = () => {
             <p className="text-sm text-gray-600 dark:text-gray-400">Thêm sản phẩm mới</p>
           </div>
         </Link>
+        
 
         <Link
           to="/admin/orders"
@@ -51,13 +52,13 @@ const QuickActions = () => {
         </Link>
 
         <Link
-          to="/admin/uers"
+          to="/admin/brands"
           className="flex items-center gap-3 p-4 border border-border-light dark:border-border-dark rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <span className="material-symbols-outlined text-pink-600">person</span>
           <div>
-            <p className="font-medium">Quản lý khách hàng</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Xem và xử lý khách hàng</p>
+            <p className="font-medium">Quản lý thương hiệu</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Xem và xử lý thương hiệu</p>
           </div>
         </Link>
       </div>

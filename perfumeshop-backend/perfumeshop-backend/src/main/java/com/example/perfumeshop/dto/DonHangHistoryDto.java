@@ -9,7 +9,7 @@ public class DonHangHistoryDto {
     private String trangThaiVanHanh;
     private String trangThaiThanhToan;
     private BigDecimal tongTien;
-    private BigDecimal tienDatCoc;
+
     private String tenNguoiNhan;
     private String diaChiGiaoHang;
     private LocalDateTime ngayDatHang;
@@ -29,8 +29,7 @@ public class DonHangHistoryDto {
     public BigDecimal getTongTien() { return tongTien; }
     public void setTongTien(BigDecimal tongTien) { this.tongTien = tongTien; }
 
-    public BigDecimal getTienDatCoc() { return tienDatCoc; }
-    public void setTienDatCoc(BigDecimal tienDatCoc) { this.tienDatCoc = tienDatCoc; }
+
 
     public String getTenNguoiNhan() { return tenNguoiNhan; }
     public void setTenNguoiNhan(String tenNguoiNhan) { this.tenNguoiNhan = tenNguoiNhan; }

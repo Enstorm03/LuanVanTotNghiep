@@ -23,10 +23,10 @@ public class CartController {
     @Autowired
     private DonHangService donHangService;
 
-    @GetMapping
-    public ResponseEntity<DonHang> getCart(@RequestParam("userId") Integer userId) {
-        return ResponseEntity.ok(cartService.getOrCreateCart(userId));
-    }
+//    @GetMapping
+//    public ResponseEntity<DonHang> getCart(@RequestParam("userId") Integer userId) {
+//        return ResponseEntity.ok(cartService.getOrCreateCart(userId));
+//    }
 
     @GetMapping("/dto")
     public ResponseEntity<DonHangHistoryDto> getCartDto(@RequestParam("userId") Integer userId) {

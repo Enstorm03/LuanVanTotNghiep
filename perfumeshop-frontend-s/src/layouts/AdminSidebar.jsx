@@ -31,6 +31,10 @@ const AdminSidebar = () => {
               <span className="material-symbols-outlined">inventory_2</span>
               Sản phẩm
             </NavLink>
+            <NavLink to="/admin/brands" className={navLinkClasses}>
+              <span className="material-symbols-outlined">inventory_2</span>
+              Thương hiệu
+            </NavLink>
             <NavLink to="/admin/orders" className={navLinkClasses}>
               <span className="material-symbols-outlined">receipt_long</span>
               Đơn hàng

@@ -84,7 +84,7 @@ public class AuthController {
 
     @PostMapping("/register-customer")
     public ResponseEntity<NguoiDung> registerCustomer(@Valid @RequestBody CreateKhachHangRequest req) {
-        // Tái sử dụng logic tạo khách hàng từ AdminUserService (đã kiểm tra trùng username)
+        // Tái sử dụng logic tạo khách hàng từ AdminUserService
         NguoiDung created = adminUserService.createKhachHang(req);
         return ResponseEntity.ok(created);
     }

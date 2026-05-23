@@ -153,7 +153,7 @@ public class DonHangService {
         }
         // Hoàn kho theo quy tắc
         if (TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt)) {
-            // Hàng có sẵn: hoàn kho
+
             restoreInventory(dh);
         }
         dh.setTrangThaiVanHanh(TT_DA_HUY);

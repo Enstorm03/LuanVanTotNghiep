@@ -6,7 +6,7 @@ const OrderStatusChart = ({ orderStats = {} }) => {
     pending: orderStats.pending || 0,
     confirmed: orderStats.confirmed || 0,
     shipping: orderStats.shipping || 0,
-    completed: orderStats.completed || 0,
+    completed: orderStats.completed || 0, 
     cancelled: orderStats.cancelled || 0,
   };
 

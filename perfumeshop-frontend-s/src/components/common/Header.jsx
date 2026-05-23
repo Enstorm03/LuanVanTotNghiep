@@ -11,20 +11,20 @@ const Header = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   // LỆNH CẬP NHẬT TÌM KIẾM LIÊN TỤC
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery.trim()) {
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     if (searchQuery.trim()) {
        
-        navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      } else if (searchQuery === '' && location.pathname === '/products') {
+  //       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+  //     } else if (searchQuery === '' && location.pathname === '/products') {
        
-        navigate(`/products`);
-      }
-    }, 400); // 400ms sau khi ngừng gõ lệnh navigate mới chạy
+  //       navigate(`/products`);
+  //     }
+  //   }, 400); // 400ms sau khi ngừng gõ lệnh navigate mới chạy
 
     
-    return () => clearTimeout(timer);
-  }, [searchQuery, navigate, location.pathname]);
+  //   return () => clearTimeout(timer);
+  // }, [searchQuery, navigate, location.pathname]);
 
   const timKiem = (e) => {
     if (e) e.preventDefault();
