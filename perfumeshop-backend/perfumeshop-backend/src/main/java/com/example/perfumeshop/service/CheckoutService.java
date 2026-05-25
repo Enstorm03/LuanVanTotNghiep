@@ -33,62 +33,52 @@ public class CheckoutService {
             throw new BusinessException("Giỏ hàng trống");
         }
 
-        boolean allInStock = true;
-        // Nếu cho phép đặt hàng backorder thì bỏ qua kiểm tra tồn kho
-        if (Boolean.TRUE.equals(req.getAllowBackorder())) {
-            allInStock = false; // Mặc định xử lý như hết hàng để vào luồng chờ hàng
-        } else {
-            // Chỉ kiểm tra tồn kho nếu không phải là đơn backorder
-            for (PlaceOrderItemRequest it : req.getItems()) {
-                SanPham sp = sanPhamRepository.findById(it.getSanPhamId())
-                        .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại: " + it.getSanPhamId()));
-                int ton = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
-                if (ton < it.getSoLuong()) {
-                    allInStock = false;
-                    break;
-                }
-            }
-        }
-
         DonHang dh = new DonHang();
         dh.setIdNguoiDung(req.getIdNguoiDung());
         dh.setTenNguoiNhan(req.getTenNguoiNhan());
         dh.setDiaChiGiaoHang(req.getDiaChiGiaoHang());
         dh.setNgayDatHang(LocalDateTime.now());
+        dh.setTrangThaiThanhToan("Chưa thanh toán");
 
+        boolean allInStock = !Boolean.TRUE.equals(req.getAllowBackorder());
         BigDecimal tong = BigDecimal.ZERO;
         List<ChiTietDonHang> ctList = new ArrayList<>();
 
+        // Chuẩn bị dữ liệu và kiểm tra tồn kho
         for (PlaceOrderItemRequest it : req.getItems()) {
-            SanPham sp = sanPhamRepository.findById(it.getSanPhamId()).orElseThrow();
+            SanPham sp = sanPhamRepository.findById(it.getSanPhamId())
+                    .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại: " + it.getSanPhamId()));
+
+            if (allInStock && (sp.getSoLuongTonKho() == null || sp.getSoLuongTonKho() < it.getSoLuong())) {
+                allInStock = false;
+            }
+
             ChiTietDonHang ct = new ChiTietDonHang();
             ct.setDonHang(dh);
             ct.setSanPham(sp);
             ct.setSoLuong(it.getSoLuong());
-            // Giá tại thời điểm đặt lấy từ sp.giaBan
-            if (sp.getGiaBan() == null) {
-                throw new BusinessException("Sản phẩm chưa có giá: " + sp.getTenSanPham());
-            }
-            ct.setGiaTaiThoiDiemMua(sp.getGiaBan());
+            ct.setGiaTaiThoiDiemMua(sp.getGiaBan() != null ? sp.getGiaBan() : BigDecimal.ZERO);
             ctList.add(ct);
-            tong = tong.add(sp.getGiaBan().multiply(BigDecimal.valueOf(it.getSoLuong())));
+
+            tong = tong.add(ct.getGiaTaiThoiDiemMua().multiply(BigDecimal.valueOf(it.getSoLuong())));
         }
 
         dh.setTongTien(tong);
         dh.setChiTietDonHangs(ctList);
 
         if (allInStock) {
-            // Trừ kho ngay và đặt trạng thái Đang chờ, thanh toán: Chưa thanh toán
-            dh.setTrangThaiVanHanh(DonHangService.TT_CHO_XAC_NHAN);
-            dh.setTrangThaiThanhToan("Chưa thanh toán");
-            for (ChiTietDonHang ct : ctList) {
-                SanPham sp = ct.getSanPham();
-                sp.setSoLuongTonKho((sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho()) - ct.getSoLuong());
+            // Trường hợp đủ hàng: Trừ kho ngay lập tức
+            // JPA sẽ tự kiểm tra @Version khi save sản phẩm
+            for (PlaceOrderItemRequest it : req.getItems()) {
+                SanPham sp = sanPhamRepository.findById(it.getSanPhamId()).get();
+                sp.setSoLuongTonKho(sp.getSoLuongTonKho() - it.getSoLuong());
                 sanPhamRepository.save(sp);
             }
-
+            dh.setTrangThaiVanHanh(DonHangService.TT_CHO_XAC_NHAN);
+        } else {
+            // Trường hợp thiếu hàng: Đặt trạng thái Chờ hàng
+            dh.setTrangThaiVanHanh("Chờ hàng");
         }
-
 
         return donHangRepository.save(dh);
     }

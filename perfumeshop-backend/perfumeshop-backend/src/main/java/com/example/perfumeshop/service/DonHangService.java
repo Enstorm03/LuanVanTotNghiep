@@ -67,7 +67,7 @@ public class DonHangService {
         dto.setDiaChiGiaoHang(dh.getDiaChiGiaoHang());
         dto.setNgayDatHang(dh.getNgayDatHang());
         dto.setNgayHoanThanh(dh.getNgayHoanThanh());
-        dto.setMaVanDon(dh.getMaVanDon());
+
 
         List<ChiTietDonHang> items = dh.getChiTietDonHangs();
         List<ChiTietDonHangDto> itemDtos = new ArrayList<>();
@@ -87,10 +87,6 @@ public class DonHangService {
         return dto;
     }
 
-    public List<DonHang> searchByMaVanDon(String keyword) {
-        if (keyword == null || keyword.isBlank()) return List.of();
-        return donHangRepository.findByMaVanDonContainingIgnoreCase(keyword);
-    }
 
     public PagedResponse<DonHang> listWithPage(String trangThai, String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -129,7 +125,7 @@ public class DonHangService {
         }
         // chỉ cập nhật trạng thái
         dh.setTrangThaiVanHanh(TT_DANG_GIAO);
-        dh.setMaVanDon(maVanDon);
+
         return donHangRepository.save(dh);
     }
 

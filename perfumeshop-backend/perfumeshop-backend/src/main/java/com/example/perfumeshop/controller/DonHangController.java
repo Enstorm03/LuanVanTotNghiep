@@ -49,10 +49,7 @@ public class DonHangController {
         return ResponseEntity.ok(donHangService.historyDtoByUser(userId, "Giỏ hàng"));
     }
 
-    @GetMapping("/search-by-tracking")
-    public ResponseEntity<List<DonHang>> searchByTracking(@RequestParam("q") String q) {
-        return ResponseEntity.ok(donHangService.searchByMaVanDon(q));
-    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<DonHang> detail(@PathVariable Integer id) {

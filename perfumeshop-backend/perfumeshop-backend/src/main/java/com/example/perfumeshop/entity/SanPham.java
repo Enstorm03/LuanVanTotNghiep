@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @Data
 public class SanPham {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_san_pham")
@@ -40,6 +41,7 @@ public class SanPham {
     @JoinColumn(name = "id_danh_muc") // Khóa ngoại trong SQL
     @JsonBackReference
     private DanhMuc danhMuc;
+
 
     // Thương hiệu
     @ManyToOne

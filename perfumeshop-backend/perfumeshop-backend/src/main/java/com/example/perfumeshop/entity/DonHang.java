@@ -43,8 +43,7 @@ public class DonHang {
     @Column(name = "ngay_dat_hang")
     private LocalDateTime ngayDatHang;
 
-    @Column(name = "ma_van_don")
-    private String maVanDon;
+
 
     @Column(name = "ly_do_huy")
     private String lyDoHuy;
