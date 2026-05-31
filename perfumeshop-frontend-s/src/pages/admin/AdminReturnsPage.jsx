@@ -15,6 +15,7 @@ const AdminReturnsPage = () => {
     handleConfirmRefund,
     handleRejectReturn,
     getPendingCount,
+    getWaitingRefundCount,
     getApprovedCount,
     getRejectedCount
   } = useReturns();
@@ -50,6 +51,7 @@ const AdminReturnsPage = () => {
 
       <ReturnsSummary
         pendingCount={getPendingCount()}
+        waitingRefundCount={getWaitingRefundCount()}
         approvedCount={getApprovedCount()}
         rejectedCount={getRejectedCount()}
       />
