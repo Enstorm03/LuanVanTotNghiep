@@ -8,8 +8,26 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
       <td className="p-4 align-middle hidden md:table-cell">
         <ProductStockBadge stockQuantity={product.so_luong_ton_kho || 0} />
       </td>
-      <td className="p-4 align-middle hidden md:table-cell text-text-subtle-light dark:text-text-subtle-dark">
-        {product.gia_ban ? product.gia_ban.toLocaleString('vi-VN') + '₫' : 'Liên hệ'}
+      <td className="p-4 align-middle hidden md:table-cell">
+        {product.ang_giam_gia ? (
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-primary text-sm">
+                {Number(product.gia_hien_tai).toLocaleString('vi-VN')}₫
+              </span>
+              <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                -{product.phan_tram_giam}%
+              </span>
+            </div>
+            <span className="text-xs text-gray-400 line-through">
+              {Number(product.gia_ban).toLocaleString('vi-VN')}₫
+            </span>
+          </div>
+        ) : (
+          <span className="text-text-subtle-light dark:text-text-subtle-dark text-sm">
+            {product.gia_ban ? Number(product.gia_ban).toLocaleString('vi-VN') + '₫' : 'Liên hệ'}
+          </span>
+        )}
       </td>
       <td className="p-4 align-middle hidden sm:table-cell text-text-subtle-light dark:text-text-subtle-dark">{product.so_luong_ton_kho || 0}</td>
       <td className="p-4 align-middle text-right">

@@ -23,17 +23,29 @@ class BaseApi {
 
   // Ánh xạ dữ liệu sản phẩm từ backend
   mapProductFields(product) {
+    const phanTramGiam = product.phanTramGiam || null;
+    const angGiamGia = product.angGiamGia || false;
+    // Ưu tiên giaHienTai từ BE (đã tính sẵn), fallback về giaBan
+    const giaHienTai = angGiamGia && product.giaHienTai
+      ? Number(product.giaHienTai)
+      : Number(product.giaBan);
+
     return {
       id_san_pham: product.idSanPham,
       ten_san_pham: product.tenSanPham,
-      gia_ban: product.giaBan,
+      gia_ban: Number(product.giaBan),          // Giá gốc (để hiển thị gạch ngang)
+      gia_hien_tai: giaHienTai,                 // Giá thực tế khách trả
       url_hinh_anh: product.urlHinhAnh,
       id_thuong_hieu: product.thuongHieu?.idThuongHieu || product.idThuongHieu || 1,
       id_danh_muc: product.danhMuc?.idDanhMuc || product.idDanhMuc || 1,
       so_luong_ton_kho: product.soLuongTonKho,
       mo_ta: product.moTa,
       dung_tich_ml: product.dungTichMl,
-      nong_do: product.nongDo
+      nong_do: product.nongDo,
+      phan_tram_giam: phanTramGiam,             // % giảm (null nếu không giảm)
+      ang_giam_gia: angGiamGia,                 // true nếu đang trong thời gian sale
+      ngay_bat_dau_giam: product.ngayBatDauGiam || null,
+      ngay_ket_thuc_giam: product.ngayKetThucGiam || null,
     };
   }
 

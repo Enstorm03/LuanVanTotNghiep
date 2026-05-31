@@ -30,6 +30,7 @@ public class DonHangService {
     public static final String TT_DANG_GIAO = "Đang giao hàng";
     public static final String TT_HOAN_THANH = "Hoàn thành";
     public static final String TT_DA_HUY = "Đã hủy";
+    public static final String TT_DA_HOAN_TRA = "Đã hoàn trả";
 
     @Autowired
     private DonHangRepository donHangRepository;
@@ -64,10 +65,12 @@ public class DonHangService {
         dto.setTongTien(dh.getTongTien());
 
         dto.setTenNguoiNhan(dh.getTenNguoiNhan());
+        dto.setSoDienThoai(dh.getSoDienThoai());
         dto.setDiaChiGiaoHang(dh.getDiaChiGiaoHang());
+        dto.setPhuongThucThanhToan(dh.getPhuongThucThanhToan());
         dto.setNgayDatHang(dh.getNgayDatHang());
         dto.setNgayHoanThanh(dh.getNgayHoanThanh());
-
+        dto.setMaVanDon(dh.getMaVanDon());
 
         List<ChiTietDonHang> items = dh.getChiTietDonHangs();
         List<ChiTietDonHangDto> itemDtos = new ArrayList<>();
@@ -118,14 +121,22 @@ public class DonHangService {
     }
 
     @Transactional
-    public DonHang updateTrackingAndShip(Integer id, String maVanDon) {
+    public DonHang shipOrder(Integer id) {
         DonHang dh = getById(id);
         if (!TT_DA_XAC_NHAN.equals(dh.getTrangThaiVanHanh())) {
-            throw new BusinessException("Chỉ chuyển 'Đang giao hàng' từ 'Đã xác nhận'");
+            throw new BusinessException("Chỉ chuyển 'Đang giao hàng' từ trạng thái 'Đã xác nhận'");
         }
-        // chỉ cập nhật trạng thái
         dh.setTrangThaiVanHanh(TT_DANG_GIAO);
+        return donHangRepository.save(dh);
+    }
 
+    @Transactional
+    public DonHang updateTracking(Integer id, String maVanDon) {
+        DonHang dh = getById(id);
+        if (!TT_DANG_GIAO.equals(dh.getTrangThaiVanHanh())) {
+            throw new BusinessException("Chỉ cập nhật mã vận đơn khi đơn đang ở trạng thái 'Đang giao hàng'");
+        }
+        dh.setMaVanDon(maVanDon);
         return donHangRepository.save(dh);
     }
 
@@ -144,7 +155,7 @@ public class DonHangService {
     public DonHang cancel(Integer id, String lyDo) {
         DonHang dh = getById(id);
         String tt = dh.getTrangThaiVanHanh();
-        if (!(TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt) )) {
+        if (!(TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt))) {
             throw new BusinessException("Không thể hủy đơn ở trạng thái hiện tại");
         }
         // Hoàn kho theo quy tắc

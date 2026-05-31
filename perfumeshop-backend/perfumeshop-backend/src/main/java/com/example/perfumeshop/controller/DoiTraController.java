@@ -21,13 +21,11 @@ public class DoiTraController {
     @Autowired
     private ReturnService returnService;
 
-    // Đổi thành /cho-duyet để khớp với Frontend
     @GetMapping("/cho-duyet")
     public ResponseEntity<List<PhieuDoiTra>> listPending() {
         return ResponseEntity.ok(returnService.listPending());
     }
 
-    // Đổi thành /all để khớp với Frontend
     @GetMapping("/all")
     public ResponseEntity<List<PhieuDoiTra>> listAll() {
         return ResponseEntity.ok(returnService.listAll());
@@ -46,6 +44,7 @@ public class DoiTraController {
         Map<String, Object> result = new HashMap<>();
         result.put("hasReturnRequest", p != null);
         result.put("returnStatus", p != null ? p.getTrangThai() : null);
+        result.put("lyDoTuChoi", p != null ? p.getLyDoTuChoi() : null);
         return ResponseEntity.ok(result);
     }
 
@@ -54,27 +53,26 @@ public class DoiTraController {
         return ResponseEntity.ok(returnService.create(req.getIdDonHang(), req.getIdNguoiDung(), req.getLyDo()));
     }
 
-    // Đổi thành /duyet để khớp với Frontend
     @PostMapping("/{id}/duyet")
-    public ResponseEntity<PhieuDoiTra> approve(@PathVariable Integer id, @Valid @RequestBody ApproveReturnRequest req) {
+    public ResponseEntity<PhieuDoiTra> approve(@PathVariable Integer id,
+                                                @Valid @RequestBody ApproveReturnRequest req) {
         return ResponseEntity.ok(returnService.approve(id, req.getNhanVienId()));
     }
 
-    // Đổi thành /tu-choi để khớp với Frontend, và hứng tham số lyDo
+    @PostMapping("/{id}/xac-nhan-hoan-tien")
+    public ResponseEntity<PhieuDoiTra> confirmRefund(@PathVariable Integer id,
+                                                      @RequestBody Map<String, Object> req) {
+        Integer nhanVienId = req.get("nhanVienId") != null
+                ? Integer.parseInt(req.get("nhanVienId").toString()) : null;
+        return ResponseEntity.ok(returnService.confirmRefund(id, nhanVienId));
+    }
+
     @PostMapping("/{id}/tu-choi")
-    public ResponseEntity<PhieuDoiTra> reject(@PathVariable Integer id, @RequestBody Map<String, Object> req) {
-        Integer nhanVienId = null;
-        if (req.containsKey("nhanVienId") && req.get("nhanVienId") != null) {
-            nhanVienId = Integer.parseInt(req.get("nhanVienId").toString());
-        }
-
+    public ResponseEntity<PhieuDoiTra> reject(@PathVariable Integer id,
+                                               @RequestBody Map<String, Object> req) {
+        Integer nhanVienId = req.get("nhanVienId") != null
+                ? Integer.parseInt(req.get("nhanVienId").toString()) : null;
         String lyDo = (String) req.get("lyDo");
-
-        // GỌI SERVICE: Nếu hàm reject của bạn có nhận lyDo thì dùng dòng 1, nếu không có thì dùng dòng 2
-        // Dòng 1 (Khuyên dùng - nếu ReturnService.java của bạn có lưu lý do):
-        // return ResponseEntity.ok(returnService.reject(id, nhanVienId, lyDo));
-
-        // Dòng 2 (Hiện tại ReturnService của bạn đang chỉ nhận 2 tham số):
-        return ResponseEntity.ok(returnService.reject(id, nhanVienId));
+        return ResponseEntity.ok(returnService.reject(id, nhanVienId, lyDo));
     }
 }

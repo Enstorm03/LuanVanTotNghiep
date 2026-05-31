@@ -59,11 +59,12 @@ public class CartService {
             ct.setDonHang(cart);
             ct.setSanPham(sp);
             ct.setSoLuong(req.getSoLuong());
-            ct.setGiaTaiThoiDiemMua(sp.getGiaBan());
+            // Dùng giá hiện tại (đã áp dụng giảm giá nếu đang sale)
+            ct.setGiaTaiThoiDiemMua(sp.getGiaHienTai());
             cart.getChiTietDonHangs().add(ct);
         } else {
             existed.setSoLuong(existed.getSoLuong() + req.getSoLuong());
-            existed.setGiaTaiThoiDiemMua(sp.getGiaBan());
+            existed.setGiaTaiThoiDiemMua(sp.getGiaHienTai());
         }
         recalc(cart);
         return donHangRepository.save(cart);
@@ -81,7 +82,7 @@ public class CartService {
             SanPham sp = sanPhamRepository.findById(req.getSanPhamId())
                     .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại"));
             existed.setSoLuong(req.getSoLuong());
-            existed.setGiaTaiThoiDiemMua(sp.getGiaBan());
+            existed.setGiaTaiThoiDiemMua(sp.getGiaHienTai());
         }
         recalc(cart);
         return donHangRepository.save(cart);

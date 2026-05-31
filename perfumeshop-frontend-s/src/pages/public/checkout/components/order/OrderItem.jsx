@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { getOrderItemImageUrl, getOrderItemName, getOrderItemQuantity, getOrderItemPrice } from '../../../../../utils/checkoutUtils';
 import api from '../../../../../services/api';
 
-const OrderItem = ({ item, isPreOrder }) => {
+const OrderItem = ({ item }) => {
   const [productDetails, setProductDetails] = useState(null);
   const [loading, setLoading] = useState(false);
-  
-  // Lấy thông tin chi tiết sản phẩm nếu có sanPhamId hoặc id_san_pham
+
+  // Lấy thông tin chi tiết sản phẩm nếu item thiếu ảnh hoặc tên
   useEffect(() => {
     const fetchProductDetails = async () => {
-      // Nếu đã có đủ thông tin thì không cần gọi API
       const hasName = item.tenSanPham || item.ten_san_pham;
       const hasImage = item.urlHinhAnh || item.url_hinh_anh;
 
-      if (hasName && hasImage) {
-        return;
-      }
+      if (hasName && hasImage) return;
 
       const productId = item.sanPhamId || item.id_san_pham;
       if (productId) {
@@ -34,17 +31,16 @@ const OrderItem = ({ item, isPreOrder }) => {
     fetchProductDetails();
   }, [item.sanPhamId, item.id_san_pham]);
 
-  // Kết hợp thông tin từ item và productDetails
   const mergedItem = {
     ...item,
-    tenSanPham: item.tenSanPham || item.ten_san_pham || (productDetails?.tenSanPham || productDetails?.ten_san_pham || 'Sản phẩm không tên'),
+    tenSanPham: item.tenSanPham || item.ten_san_pham || productDetails?.tenSanPham || productDetails?.ten_san_pham || 'Sản phẩm không tên',
     urlHinhAnh: item.urlHinhAnh || item.url_hinh_anh || productDetails?.urlHinhAnh || productDetails?.hinh_anh || productDetails?.anh_dai_dien || 'https://placehold.co/80x80?text=No+Image'
   };
 
-  const imageUrl = getOrderItemImageUrl(mergedItem, isPreOrder);
-  const name = getOrderItemName(mergedItem, isPreOrder);
-  const quantity = getOrderItemQuantity(mergedItem, isPreOrder);
-  const price = getOrderItemPrice(mergedItem, isPreOrder);
+  const imageUrl = getOrderItemImageUrl(mergedItem);
+  const name = getOrderItemName(mergedItem);
+  const quantity = getOrderItemQuantity(mergedItem);
+  const price = getOrderItemPrice(mergedItem);
 
   if (loading) {
     return (

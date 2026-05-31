@@ -121,11 +121,7 @@ const HomePage = () => {
               products.map((product) => (
                 <ProductCard
                   key={product.id_san_pham}
-                  id_san_pham={product.id_san_pham}
-                  ten_san_pham={product.ten_san_pham}
-                  gia_ban={product.gia_ban}
-                  url_hinh_anh={product.url_hinh_anh}
-                  id_thuong_hieu={product.id_thuong_hieu}
+                  {...product}
                 />
               ))
             )}

@@ -47,7 +47,19 @@ const OrderCard = ({
                 Viết đánh giá
               </button>
             )}
-            {canRequestReturn(order, order.ngayDatHang, returnStatuses[order.idDonHang]) && (
+            {/* Hiển thị trạng thái đổi trả nếu đã có phiếu */}
+            {returnStatuses[order.idDonHang]?.hasReturnRequest && (
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                returnStatuses[order.idDonHang]?.returnStatus === 'Đã duyệt'
+                  ? 'bg-teal-100 text-teal-800'
+                  : returnStatuses[order.idDonHang]?.returnStatus === 'Từ chối'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                Đổi trả: {returnStatuses[order.idDonHang]?.returnStatus}
+              </span>
+            )}
+            {canRequestReturn(order, order.ngayHoanThanh, returnStatuses[order.idDonHang]) && (
               <button
                 onClick={() => onRequestReturn(order)}
                 className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
@@ -104,7 +116,19 @@ const OrderCard = ({
               Viết đánh giá
             </button>
           )}
-          {canRequestReturn(order, order.ngayDatHang, returnStatuses[order.idDonHang]) && (
+          {/* Hiển thị trạng thái đổi trả nếu đã có phiếu */}
+          {returnStatuses[order.idDonHang]?.hasReturnRequest && (
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+              returnStatuses[order.idDonHang]?.returnStatus === 'Đã duyệt'
+                ? 'bg-teal-100 text-teal-800'
+                : returnStatuses[order.idDonHang]?.returnStatus === 'Từ chối'
+                ? 'bg-red-100 text-red-800'
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              Đổi trả: {returnStatuses[order.idDonHang]?.returnStatus}
+            </span>
+          )}
+          {canRequestReturn(order, order.ngayHoanThanh, returnStatuses[order.idDonHang]) && (
             <button
               onClick={() => onRequestReturn(order)}
               className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"

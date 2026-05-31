@@ -38,11 +38,9 @@ const api = {
   // Cart methods
   getCart: cartApi.getCart.bind(cartApi),
   addCartItem: cartApi.addCartItem.bind(cartApi),
-  addPreOrderToCart: cartApi.addPreOrderToCart.bind(cartApi),
   removeCartItem: cartApi.removeCartItem.bind(cartApi),
   clearCart: cartApi.clearCart.bind(cartApi),
   updateCartItem: cartApi.updateCartItem.bind(cartApi),
-  checkStockBeforeCheckout: cartApi.checkStockBeforeCheckout.bind(cartApi),
   checkoutCart: cartApi.checkoutCart.bind(cartApi),
 
   // Order methods
@@ -98,6 +96,7 @@ const api = {
   getPendingReturns: returnApi.getPendingReturns.bind(returnApi),
   createReturn: returnApi.createReturn.bind(returnApi),
   approveReturn: returnApi.approveReturn.bind(returnApi),
+  confirmRefund: returnApi.confirmRefund.bind(returnApi),
   rejectReturn: returnApi.rejectReturn.bind(returnApi),
 
   

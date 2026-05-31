@@ -11,7 +11,9 @@ public class DonHangHistoryDto {
     private BigDecimal tongTien;
 
     private String tenNguoiNhan;
+    private String soDienThoai;
     private String diaChiGiaoHang;
+    private String phuongThucThanhToan;
     private LocalDateTime ngayDatHang;
     private LocalDateTime ngayHoanThanh;
     private String maVanDon;
@@ -34,8 +36,14 @@ public class DonHangHistoryDto {
     public String getTenNguoiNhan() { return tenNguoiNhan; }
     public void setTenNguoiNhan(String tenNguoiNhan) { this.tenNguoiNhan = tenNguoiNhan; }
 
+    public String getSoDienThoai() { return soDienThoai; }
+    public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
+
     public String getDiaChiGiaoHang() { return diaChiGiaoHang; }
     public void setDiaChiGiaoHang(String diaChiGiaoHang) { this.diaChiGiaoHang = diaChiGiaoHang; }
+
+    public String getPhuongThucThanhToan() { return phuongThucThanhToan; }
+    public void setPhuongThucThanhToan(String phuongThucThanhToan) { this.phuongThucThanhToan = phuongThucThanhToan; }
 
     public LocalDateTime getNgayDatHang() { return ngayDatHang; }
     public void setNgayDatHang(LocalDateTime ngayDatHang) { this.ngayDatHang = ngayDatHang; }

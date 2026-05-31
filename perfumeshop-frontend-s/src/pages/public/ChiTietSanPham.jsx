@@ -70,9 +70,31 @@ const ChiTietSanPham = () => {
           <div className="flex flex-col gap-6 py-4">
             <ProductInfo product={product} brandName={brandName} />
 
-            <p className="text-3xl font-bold text-primary">
-              {formatPrice(product.gia_ban)}
-            </p>
+            {/* Hiển thị giá — có hoặc không có sale */}
+            {product.ang_giam_gia ? (
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <p className="text-3xl font-bold text-primary">
+                    {Number(product.gia_hien_tai).toLocaleString('vi-VN')}₫
+                  </p>
+                  <span className="bg-red-500 text-white text-sm font-bold px-2 py-1 rounded-full">
+                    -{product.phan_tram_giam}%
+                  </span>
+                </div>
+                <p className="text-gray-400 text-base line-through">
+                  {Number(product.gia_ban).toLocaleString('vi-VN')}₫
+                </p>
+                {product.ngay_ket_thuc_giam && (
+                  <p className="text-orange-500 text-sm">
+                    Ưu đãi đến: {new Date(product.ngay_ket_thuc_giam).toLocaleDateString('vi-VN')}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-3xl font-bold text-primary">
+                {formatPrice(product.gia_ban)}
+              </p>
+            )}
 
             {/* Quantity Selector */}
             {!isOutOfStock && (

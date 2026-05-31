@@ -74,7 +74,7 @@ const OrderActions = ({
           </button>
         )}
 
-        {/* {order.trangThaiVanHanh === 'Đã xác nhận' && (
+        {order.trangThaiVanHanh === 'Đã xác nhận' && (
           <button
             onClick={() => setShowShipDialog(true)}
             disabled={processing}
@@ -82,17 +82,17 @@ const OrderActions = ({
           >
             Gửi hàng
           </button>
-        )} */}
+        )}
 
-        {(order.trangThaiVanHanh === 'Đã xác nhận' || order.trangThaiVanHanh === 'Đang giao hàng') && (
+        {/* {order.trangThaiVanHanh === 'Đang giao hàng' && (
           <button
             onClick={() => setShowTrackingDialog(true)}
             disabled={processing}
             className="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
           >
-            Cập nhật vận đơn
+            Cập nhật mã vận đơn
           </button>
-        )}
+        )} */}
 
         {order.trangThaiVanHanh === 'Đang giao hàng' && (
           <button

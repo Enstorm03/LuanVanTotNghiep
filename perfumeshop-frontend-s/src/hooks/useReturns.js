@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 const useReturns = () => {
-  const { staff } = useAuth();
+  const { user } = useAuth();
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,84 +16,75 @@ const useReturns = () => {
   const fetchAllReturns = async () => {
     try {
       setLoading(true);
-      console.log('useReturns - Fetching all returns...');
-
-      // Now backend has getAllReturns endpoint
-      const returnsData = await api.getAllReturns();
-      console.log('useReturns - All returns data received:', returnsData);
-
-      setReturns(returnsData || []);
-      console.log('useReturns - Returns state set to:', returnsData || []);
-
-      // Debug: Log statistics
-      const pending = returnsData?.filter(r => r.trangThai === 'Chờ duyệt').length || 0;
-      const approved = returnsData?.filter(r => r.trangThai === 'Đã duyệt').length || 0;
-      const rejected = returnsData?.filter(r => r.trangThai === 'Từ chối').length || 0;
-      console.log('useReturns - Statistics:', { pending, approved, rejected });
+      setError('');
+      const data = await api.getAllReturns();
+      setReturns(data || []);
     } catch (err) {
       console.error('Error fetching returns:', err);
-      console.log('useReturns - Falling back to pending returns...');
-      // Fallback to pending returns if getAllReturns fails
-      try {
-        const pendingData = await api.getPendingReturns();
-        setReturns(pendingData || []);
-      } catch (fallbackErr) {
-        console.error('useReturns - Fallback also failed:', fallbackErr);
-        setError('Không thể tải danh sách đổi trả');
-      }
+      setError('Không thể tải danh sách đổi trả');
     } finally {
       setLoading(false);
     }
   };
 
- const handleApproveReturn = async (returnId) => {
-    if (!window.confirm('Bạn có chắc muốn duyệt phiếu đổi trả này? Hệ thống sẽ hoàn kho tất cả sản phẩm và đơn hàng sẽ được xử lý theo quy định.')) {
-      return;
-    }
+  const handleApproveReturn = async (returnId) => {
+    if (!window.confirm('Duyệt phiếu đổi trả? Hệ thống sẽ hoàn kho ngay. Bước tiếp theo: xác nhận đã hoàn tiền cho khách.')) return;
 
     try {
       setProcessing(returnId);
-      // Lấy ID an toàn từ AuthContext
-      const employeeId = staff?.userId || staff?.id_nhan_vien || staff?.idNhanVien || 1; 
-      
+      const employeeId = user?.id_nhan_vien || user?.id || 1;
       await api.approveReturn(returnId, employeeId);
-      alert('Đã duyệt phiếu đổi trả thành công!');
-      await fetchAllReturns(); // Refresh the list
+      alert('Đã duyệt! Vui lòng hoàn tiền cho khách và bấm "Xác nhận đã hoàn tiền".');
+      await fetchAllReturns();
     } catch (error) {
-      alert('Không thể duyệt phiếu đổi trả: ' + error.message);
+      alert('Không thể duyệt: ' + error.message);
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleConfirmRefund = async (returnId, soTienHoan) => {
+    if (!window.confirm(
+      `Xác nhận đã hoàn tiền ${Number(soTienHoan).toLocaleString('vi-VN')}₫ cho khách?\n\nThao tác này không thể hoàn tác.`
+    )) return;
+
+    try {
+      setProcessing(returnId);
+      const employeeId = user?.id_nhan_vien || user?.id || 1;
+      await api.confirmRefund(returnId, employeeId);
+      alert('Đã xác nhận hoàn tiền thành công! Quy trình đổi trả hoàn tất.');
+      await fetchAllReturns();
+    } catch (error) {
+      alert('Không thể xác nhận: ' + error.message);
     } finally {
       setProcessing(null);
     }
   };
 
   const handleRejectReturn = async (returnId) => {
-    const reason = prompt('Lý do từ chối:');
-    if (!reason || reason.trim() === '') {
+    const reason = prompt('Nhập lý do từ chối:');
+    if (!reason || !reason.trim()) {
       alert('Vui lòng nhập lý do từ chối');
       return;
     }
 
     try {
       setProcessing(returnId);
-      // Lấy ID an toàn từ AuthContext
-      const employeeId = staff?.userId || staff?.id_nhan_vien || staff?.idNhanVien || 1; 
-      
-      // QUAN TRỌNG: Đã truyền thêm biến reason vào API
-      await api.rejectReturn(returnId, employeeId, reason);
-      
+      const employeeId = user?.id_nhan_vien || user?.id || 1;
+      await api.rejectReturn(returnId, employeeId, reason.trim());
       alert('Đã từ chối phiếu đổi trả!');
-      await fetchAllReturns(); // Refresh the list
+      await fetchAllReturns();
     } catch (error) {
-      alert('Không thể từ chối phiếu đổi trả: ' + error.message);
+      alert('Không thể từ chối: ' + error.message);
     } finally {
       setProcessing(null);
     }
   };
 
-  // Calculate summary statistics
-  const getPendingCount = () => returns.filter(r => r.trangThai === 'Chờ duyệt').length;
-  const getApprovedCount = () => returns.filter(r => r.trangThai === 'Đã duyệt').length;
-  const getRejectedCount = () => returns.filter(r => r.trangThai === 'Từ chối').length;
+  const getPendingCount       = () => returns.filter(r => r.trangThai === 'Chờ duyệt').length;
+  const getWaitingRefundCount = () => returns.filter(r => r.trangThai === 'Chờ hoàn tiền').length;
+  const getApprovedCount      = () => returns.filter(r => r.trangThai === 'Hoàn tiền thành công').length;
+  const getRejectedCount      = () => returns.filter(r => r.trangThai === 'Từ chối').length;
 
   return {
     returns,
@@ -102,10 +93,12 @@ const useReturns = () => {
     processing,
     fetchAllReturns,
     handleApproveReturn,
+    handleConfirmRefund,
     handleRejectReturn,
     getPendingCount,
+    getWaitingRefundCount,
     getApprovedCount,
-    getRejectedCount
+    getRejectedCount,
   };
 };
 

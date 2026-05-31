@@ -37,12 +37,28 @@ class ReturnApi extends BaseApi {
     }
   }
 
-  // Duyệt hoàn trả
+  // Duyệt hoàn trả (bước 1 — hoàn kho, chờ hoàn tiền)
   async approveReturn(returnId, employeeId) {
     try {
-      return await this._fetch(`${API_BASE_URL}/doi-tra/${returnId}/duyet`, { method: 'POST', body: JSON.stringify({ nhanVienId: employeeId }) });
+      return await this._fetch(`${API_BASE_URL}/doi-tra/${returnId}/duyet`, {
+        method: 'POST',
+        body: JSON.stringify({ nhanVienId: employeeId })
+      });
     } catch (error) {
       console.error('Lỗi duyệt hoàn trả:', error);
+      throw error;
+    }
+  }
+
+  // Xác nhận đã hoàn tiền (bước 2 — hoàn tất quy trình)
+  async confirmRefund(returnId, employeeId) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/doi-tra/${returnId}/xac-nhan-hoan-tien`, {
+        method: 'POST',
+        body: JSON.stringify({ nhanVienId: employeeId })
+      });
+    } catch (error) {
+      console.error('Lỗi xác nhận hoàn tiền:', error);
       throw error;
     }
   }

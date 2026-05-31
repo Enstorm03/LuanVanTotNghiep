@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CheckoutService {
@@ -36,9 +37,17 @@ public class CheckoutService {
         DonHang dh = new DonHang();
         dh.setIdNguoiDung(req.getIdNguoiDung());
         dh.setTenNguoiNhan(req.getTenNguoiNhan());
+        dh.setSoDienThoai(req.getSoDienThoai());
         dh.setDiaChiGiaoHang(req.getDiaChiGiaoHang());
+        dh.setPhuongThucThanhToan(req.getPhuongThucThanhToan());
         dh.setNgayDatHang(LocalDateTime.now());
-        dh.setTrangThaiThanhToan("Chưa thanh toán");
+
+        // Xác định trạng thái thanh toán dựa trên phương thức
+        if ("COD".equalsIgnoreCase(req.getPhuongThucThanhToan())) {
+            dh.setTrangThaiThanhToan("Chưa thanh toán"); // COD: nhận hàng mới thanh toán
+        } else {
+            dh.setTrangThaiThanhToan("Chờ thanh toán"); // Chuyển khoản/Ví: chờ người dùng chuyển tiền
+        }
 
         boolean allInStock = !Boolean.TRUE.equals(req.getAllowBackorder());
         BigDecimal tong = BigDecimal.ZERO;
@@ -57,7 +66,8 @@ public class CheckoutService {
             ct.setDonHang(dh);
             ct.setSanPham(sp);
             ct.setSoLuong(it.getSoLuong());
-            ct.setGiaTaiThoiDiemMua(sp.getGiaBan() != null ? sp.getGiaBan() : BigDecimal.ZERO);
+            // Dùng giá hiện tại (đã áp dụng giảm giá nếu đang sale)
+            ct.setGiaTaiThoiDiemMua(sp.getGiaHienTai());
             ctList.add(ct);
 
             tong = tong.add(ct.getGiaTaiThoiDiemMua().multiply(BigDecimal.valueOf(it.getSoLuong())));
@@ -65,6 +75,9 @@ public class CheckoutService {
 
         dh.setTongTien(tong);
         dh.setChiTietDonHangs(ctList);
+
+        // Tự động tạo mã vận đơn
+        dh.setMaVanDon(generateMaVanDon());
 
         if (allInStock) {
             // Trường hợp đủ hàng: Trừ kho ngay lập tức
@@ -80,7 +93,30 @@ public class CheckoutService {
             dh.setTrangThaiVanHanh("Chờ hàng");
         }
 
-        return donHangRepository.save(dh);
+        DonHang saved = donHangRepository.save(dh);
+
+        // Xóa giỏ hàng sau khi đặt hàng thành công
+        // Dùng CartService để xóa giỏ hàng hiện tại
+        CartService cartService = applicationContext.getBean(CartService.class);
+        try {
+            cartService.clearCart(req.getIdNguoiDung());
+        } catch (Exception ignored) {
+            // Không throw lỗi nếu xóa giỏ thất bại
+        }
+
+        return saved;
+    }
+
+    // Inject ApplicationContext để lấy CartService bean (tránh circular dependency)
+    @Autowired
+    private org.springframework.context.ApplicationContext applicationContext;
+
+    private String generateMaVanDon() {
+        // Format: ORD + timestamp (yyMMddHHmmss) + 4 ký tự ngẫu nhiên
+        String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyMMddHHmmss"));
+        String random = UUID.randomUUID().toString().replace("-", "").substring(0, 4).toUpperCase();
+        return "ORD" + timestamp + random;
     }
 
     // Khách hủy đơn: uỷ quyền sang DonHangService.cancel để áp dụng đúng quy tắc hoàn kho

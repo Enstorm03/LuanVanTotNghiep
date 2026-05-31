@@ -4,6 +4,9 @@ import { Routes, Route } from 'react-router-dom';
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 
+// Guards
+import ProtectedRoute from './components/common/ProtectedRoute';
+
 // Public Pages
 import HomePage from './pages/public/TrangChu';
 import ProductDetail from './pages/public/ChiTietSanPham';
@@ -12,7 +15,6 @@ import GioHangPage from './pages/public/GioHang';
 import ThanhToanPage from './pages/public/checkout/ThanhToanPage';
 import LichSuDonHangPage from './pages/public/LichSuDonHangPage';
 import ThuongHieuPage from './pages/public/ThuongHieuPage';
-
 
 // Auth Pages
 import DangNhapPage from './pages/auth/DangNhapPage';
@@ -23,7 +25,7 @@ import DashboardPage from './pages/admin/DashboardPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminOrderDetailPage from './pages/admin/AdminOrderDetailPage';
-import AdminUsersPage from './pages/admin/AdminUsersPage'; // Đã gộp Nhân viên & Khách hàng
+import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminReportPage from './pages/admin/AdminReportPage';
 import AdminReturnsPage from './pages/admin/AdminReturnsPage';
 import AdminBrandsPage from './pages/admin/AdminBrandPage';
@@ -39,26 +41,53 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<CategoryPage />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<GioHangPage />} />
-          <Route path="/thanh-toan" element={<ThanhToanPage />} />
-          <Route path="/lich-su-don-hang" element={<LichSuDonHangPage />} />
           <Route path="/brands" element={<ThuongHieuPage />} />
+
+          {/* Routes yêu cầu đăng nhập (khách hàng) */}
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute requireUser>
+                <GioHangPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/thanh-toan"
+            element={
+              <ProtectedRoute requireUser>
+                <ThanhToanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lich-su-don-hang"
+            element={
+              <ProtectedRoute requireUser>
+                <LichSuDonHangPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Auth Routes without Layout */}
         <Route path="/login" element={<DangNhapPage />} />
         <Route path="/register" element={<DangKyPage />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
+        {/* Admin Routes — chỉ nhân viên (ADMIN / STAFF) mới được vào */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireEmployee>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<DashboardPage />} />
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
-          
-          {/* Route mới dùng chung cho việc Quản lý Tài khoản */}
-          <Route path="users" element={<AdminUsersPage />} /> 
-          
+          <Route path="users" element={<AdminUsersPage />} />
           <Route path="reports" element={<AdminReportPage />} />
           <Route path="returns" element={<AdminReturnsPage />} />
           <Route path="brands" element={<AdminBrandsPage />} />

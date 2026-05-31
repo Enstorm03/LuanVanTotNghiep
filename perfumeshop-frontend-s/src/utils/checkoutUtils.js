@@ -49,14 +49,11 @@ export const validateShippingForm = (shippingInfo) => {
   return true;
 };
 
-export const getOrderItemId = (item, isPreOrder) => {
-  if (isPreOrder) {
-    return `preorder-${item.id}`;
-  }
+export const getOrderItemId = (item) => {
   return `cart-${item.sanPhamId || item.id || Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const getOrderItemImageUrl = (item, isPreOrder) => {
+export const getOrderItemImageUrl = (item) => {
   // Kiểm tra các trường có thể chứa URL hình ảnh
   const possibleImageFields = [
     'urlHinhAnh', 
@@ -79,39 +76,29 @@ export const getOrderItemImageUrl = (item, isPreOrder) => {
   return 'https://placehold.co/80x80?text=No+Image';
 };
 
-export const getOrderItemName = (item, isPreOrder) => {
-  // Kiểm tra các trường có thể chứa tên sản phẩm
+export const getOrderItemName = (item) => {
   const possibleNameFields = [
     'tenSanPham',
     'ten_san_pham',
-    'tenSanPham',
     'name',
     'productName',
     'title'
   ];
-  
-  // Tìm trường tên sản phẩm đầu tiên có giá trị
+
   for (const field of possibleNameFields) {
     if (item[field]) {
       return item[field];
     }
   }
-  
-  // Nếu là đơn đặt trước
-  if (isPreOrder) {
-    return 'Sản phẩm đặt trước';
-  }
-  
-  // Nếu không tìm thấy, trả về tên mặc định với ID sản phẩm nếu có
+
   return `Sản phẩm ${item.sanPhamId || item.id || ''}`.trim();
 };
 
-export const getOrderItemQuantity = (item, isPreOrder) => {
-  return isPreOrder ? (item.quantity || 1) : (item.soLuong || item.quantity || 1);
+export const getOrderItemQuantity = (item) => {
+  return item.soLuong || item.quantity || 1;
 };
 
-export const getOrderItemPrice = (item, isPreOrder) => {
-  // Các trường có thể chứa giá tiền
+export const getOrderItemPrice = (item) => {
   const priceFields = [
     'giaTaiThoiDiemMua',
     'price',
@@ -120,22 +107,21 @@ export const getOrderItemPrice = (item, isPreOrder) => {
     'giaTien',
     'gia_tien'
   ];
-  
-  // Tìm trường giá tiền đầu tiên có giá trị
+
   for (const field of priceFields) {
     if (item[field] !== undefined && item[field] !== null) {
       return Number(item[field]) || 0;
     }
   }
-  
+
   return 0;
 };
 
 // Tính tổng tiền đơn hàng
 export const calculateOrderTotal = (items = []) => {
   return items.reduce((total, item) => {
-    const quantity = getOrderItemQuantity(item, false);
-    const price = getOrderItemPrice(item, false);
+    const quantity = getOrderItemQuantity(item);
+    const price = getOrderItemPrice(item);
     return total + (price * quantity);
   }, 0);
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { getOrderItemId } from '../../../../../utils/checkoutUtils';
 import OrderItem from './OrderItem';
 
-const OrderItems = ({ items, isPreOrder }) => {
+const OrderItems = ({ items }) => {
   if (!items || items.length === 0) {
     return (
       <div className="bg-white dark:bg-content-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -16,13 +16,9 @@ const OrderItems = ({ items, isPreOrder }) => {
     <div className="bg-white dark:bg-content-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <h3 className="text-lg font-semibold mb-4">Sản phẩm trong đơn hàng ({items.length} sản phẩm)</h3>
       <div className="space-y-4 max-h-96 overflow-y-auto">
-        {items.map((item, index) => (
-          <div key={getOrderItemId(item, isPreOrder)} className="border-b border-gray-200 pb-2">
-            <OrderItem
-              item={item}
-              isPreOrder={isPreOrder}
-            />
-           
+        {items.map((item) => (
+          <div key={getOrderItemId(item, false)} className="border-b border-gray-200 pb-2">
+            <OrderItem item={item} />
           </div>
         ))}
       </div>

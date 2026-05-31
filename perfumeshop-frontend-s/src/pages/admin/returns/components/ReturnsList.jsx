@@ -1,7 +1,7 @@
 import React from 'react';
 import ReturnItem from './ReturnItem';
 
-const ReturnsList = ({ returns, onApprove, onReject, processing }) => {
+const ReturnsList = ({ returns, onApprove, onConfirmRefund, onReject, processing }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark">
       <div className="p-6">
@@ -19,6 +19,7 @@ const ReturnsList = ({ returns, onApprove, onReject, processing }) => {
                 key={returnItem.idDoiTra}
                 returnItem={returnItem}
                 onApprove={onApprove}
+                onConfirmRefund={onConfirmRefund}
                 onReject={onReject}
                 processing={processing}
               />

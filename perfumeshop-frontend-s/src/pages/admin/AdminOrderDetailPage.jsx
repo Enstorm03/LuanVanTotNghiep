@@ -143,6 +143,7 @@ const AdminOrderDetailPage = () => {
         onConfirm={handleShipOrder}
         onClose={() => setShowShipDialog(false)}
         orderId={order.idDonHang}
+        maVanDon={order.maVanDon}
         processing={processing}
       />
 

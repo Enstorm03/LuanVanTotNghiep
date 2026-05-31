@@ -27,8 +27,18 @@ public class PhieuDoiTra {
     @Column(name = "ly_do")
     private String lyDo;
 
+    @Column(name = "ly_do_tu_choi")
+    private String lyDoTuChoi;
+
+    @Column(name = "so_tien_hoan")
+    private java.math.BigDecimal soTienHoan;
+
+    @Column(name = "ngay_hoan_tien")
+    private LocalDateTime ngayHoanTien;
+
     @Column(name = "trang_thai")
-    private String trangThai; // Chờ duyệt, Đã duyệt, Từ chối
+    // Chờ duyệt → Chờ hoàn tiền → Hoàn tiền thành công | Từ chối
+    private String trangThai;
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;

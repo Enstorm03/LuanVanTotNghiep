@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import useCheckoutData from '../../../hooks/useCheckoutData';
 import useShippingForm from '../../../hooks/useShippingForm';
 import usePaymentMethod from '../../../hooks/usePaymentMethod';
 import useSubmitOrder from '../../../hooks/useSubmitOrder';
-import api from '../../../services/api';
 import CheckoutHeader from './components/CheckoutHeader';
-import PreOrderNotice from './components/preorder/PreOrderNotice';
 import ShippingForm from './components/shipping/ShippingForm';
 import PaymentMethodSelector from './components/payment/PaymentMethodSelector';
 import OrderItems from './components/order/OrderItems';
@@ -14,55 +12,20 @@ import OrderSummary from './components/order/OrderSummary';
 const ThanhToanPage = () => {
   const {
     cart,
-    preOrderData,
     loading,
     error,
     user,
     fetchCart,
     hasItems,
-    isPreOrder,
     items
   } = useCheckoutData();
 
   const { shippingInfo, updateShippingInfo } = useShippingForm();
-  const { paymentMethod, setPaymentMethod } = usePaymentMethod(preOrderData?.paymentMethod || 'cod');
+  const { paymentMethod, setPaymentMethod } = usePaymentMethod('cod');
   const { submitOrder, processing } = useSubmitOrder();
 
-  const [stockCheck, setStockCheck] = useState(null);
-
-  // Check stock when component mounts or items change
-  useEffect(() => {
-    const checkStock = async () => {
-      if (!user || isPreOrder || !items.length) return;
-
-      try {
-        // Get cart data to check stock locally
-        const cartData = await api.getCart(user.id_nguoi_dung);
-        const cartItems = cartData.chiTiet || [];
-
-        // Dùng API BE để kiểm tra tồn kho (1 request duy nhất)
-        const stockResult = await api.checkStockBeforeCheckout(cartItems);
-
-        setStockCheck({
-          isAllInStock: stockResult.allInStock !== undefined ? stockResult.allInStock : (stockResult.isAllInStock !== undefined ? stockResult.isAllInStock : true),
-          outOfStockItems: stockResult.outOfStockItems || []
-        });
-      } catch (error) {
-        console.error('Lỗi kiểm tra tồn kho:', error);
-        // Set default state if stock check fails
-        setStockCheck({ isAllInStock: true, outOfStockItems: [] });
-      }
-    };
-
-    checkStock();
-  }, [user, isPreOrder, items]);
-
   const handleSubmitOrder = () => {
-    submitOrder({ cart, preOrderData, isPreOrder, stockCheck }, shippingInfo, paymentMethod);
-  };
-
-  const handleSubmitBackorder = () => {
-    submitOrder({ cart, preOrderData, isPreOrder, isBackorder: true, stockCheck }, shippingInfo, paymentMethod);
+    submitOrder({ cart }, shippingInfo, paymentMethod);
   };
 
   if (!user) {
@@ -121,9 +84,7 @@ const ThanhToanPage = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <div className="container mx-auto px-4 py-8">
-        <CheckoutHeader isPreOrder={isPreOrder} preOrderData={preOrderData} />
-
-        {isPreOrder && <PreOrderNotice />}
+        <CheckoutHeader />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column - Forms */}
@@ -141,17 +102,13 @@ const ThanhToanPage = () => {
 
           {/* Right Column - Order Summary */}
           <div className="space-y-6">
-            <OrderItems items={items} isPreOrder={isPreOrder} />
+            <OrderItems items={items} />
 
             <OrderSummary
               items={items}
-              isPreOrder={isPreOrder}
-              preOrderData={preOrderData}
               paymentMethod={paymentMethod}
               processing={processing}
               onSubmitOrder={handleSubmitOrder}
-              stockCheck={stockCheck}
-              onSubmitBackorder={handleSubmitBackorder}
             />
           </div>
         </div>

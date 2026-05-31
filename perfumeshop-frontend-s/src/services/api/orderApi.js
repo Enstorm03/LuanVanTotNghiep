@@ -4,10 +4,9 @@ class OrderApi extends BaseApi {
   // Đặt hàng
   async placeOrder(orderData) {
     try {
-      const payload = { ...orderData, allowBackorder: orderData.allowBackorder || false };
       return await this._fetch(`${API_BASE_URL}/dat-hang`, {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify(orderData)
       });
     } catch (error) {
       console.error('Lỗi đặt hàng:', error);
@@ -79,22 +78,28 @@ class OrderApi extends BaseApi {
     }
   }
 
-  // Cập nhật vận đơn (Admin)
-  async shipOrder(orderId, trackingNumber) {
+  // Gửi hàng — chuyển sang "Đang giao hàng", dùng mã vận đơn đã tạo sẵn
+  async shipOrder(orderId) {
     try {
-      return await this._fetch(`${API_BASE_URL}/don-hang/${orderId}/cap-nhat-van-don`, { method: 'POST', body: JSON.stringify({ maVanDon: trackingNumber || "" }) });
+      return await this._fetch(`${API_BASE_URL}/don-hang/${orderId}/giao-hang`, {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
     } catch (error) {
-      console.error('Lỗi cập nhật vận đơn:', error);
+      console.error('Lỗi gửi hàng:', error);
       throw error;
     }
   }
 
-  // Cập nhật số vận đơn theo dõi (Admin)
+  // Cập nhật mã vận đơn (chỉ khi đang giao hàng)
   async updateTracking(orderId, trackingNumber) {
     try {
-      return await this._fetch(`${API_BASE_URL}/don-hang/${orderId}/cap-nhat-van-don`, { method: 'POST', body: JSON.stringify({ maVanDon: trackingNumber }) });
+      return await this._fetch(`${API_BASE_URL}/don-hang/${orderId}/cap-nhat-van-don`, {
+        method: 'POST',
+        body: JSON.stringify({ maVanDon: trackingNumber })
+      });
     } catch (error) {
-      console.error('Lỗi cập nhật theo dõi:', error);
+      console.error('Lỗi cập nhật mã vận đơn:', error);
       throw error;
     }
   }

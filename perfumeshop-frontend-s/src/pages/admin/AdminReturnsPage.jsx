@@ -12,6 +12,7 @@ const AdminReturnsPage = () => {
     processing,
     fetchAllReturns,
     handleApproveReturn,
+    handleConfirmRefund,
     handleRejectReturn,
     getPendingCount,
     getApprovedCount,
@@ -56,6 +57,7 @@ const AdminReturnsPage = () => {
       <ReturnsList
         returns={returns}
         onApprove={handleApproveReturn}
+        onConfirmRefund={handleConfirmRefund}
         onReject={handleRejectReturn}
         processing={processing}
       />

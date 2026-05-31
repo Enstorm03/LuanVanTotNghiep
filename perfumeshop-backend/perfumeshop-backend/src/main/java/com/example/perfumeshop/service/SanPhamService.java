@@ -48,6 +48,9 @@ public class SanPhamService {
         existing.setSoLuongTonKho(input.getSoLuongTonKho());
         existing.setDanhMuc(input.getDanhMuc());
         existing.setThuongHieu(input.getThuongHieu());
+        existing.setPhanTramGiam(input.getPhanTramGiam());
+        existing.setNgayBatDauGiam(input.getNgayBatDauGiam());
+        existing.setNgayKetThucGiam(input.getNgayKetThucGiam());
 
         return sanPhamRepository.save(existing);
     }

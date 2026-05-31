@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const useAuthLogin = () => {
@@ -8,6 +8,10 @@ const useAuthLogin = () => {
   const [error, setError] = useState('');
   const { loginUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // URL mà user muốn vào trước khi bị redirect về /login
+  const returnTo = location.state?.from?.pathname || null;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,18 +24,17 @@ const useAuthLogin = () => {
 
     try {
       const response = await loginUser(formData);
-      
+
       if (response.success) {
-        // Lấy role hoặc type từ response trả về
         const role = (response.role || '').toUpperCase();
         const type = response.type;
 
         if (type === 'employee' || role === 'ADMIN' || role === 'STAFF') {
-          console.log("Xác nhận quyền Admin -> Vào CMS");
-          navigate('/admin');
+          // Nhân viên → vào trang admin (hoặc trang admin họ muốn vào)
+          navigate(returnTo?.startsWith('/admin') ? returnTo : '/admin', { replace: true });
         } else {
-          console.log("Xác nhận quyền Khách hàng -> Về Trang chủ");
-          navigate('/');
+          // Khách hàng → về trang họ muốn vào, hoặc trang chủ
+          navigate(returnTo && !returnTo.startsWith('/admin') ? returnTo : '/', { replace: true });
         }
       } else {
         setError(response.error || 'Sai tài khoản hoặc mật khẩu');

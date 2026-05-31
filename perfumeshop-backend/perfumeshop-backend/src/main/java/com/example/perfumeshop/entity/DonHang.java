@@ -34,6 +34,15 @@ public class DonHang {
 
 
 
+    @Column(name = "ma_van_don")
+    private String maVanDon;
+
+    @Column(name = "so_dien_thoai")
+    private String soDienThoai;
+
+    @Column(name = "phuong_thuc_thanh_toan")
+    private String phuongThucThanhToan; // COD, Chuyển khoản, Ví điện tử
+
     @Column(name = "ten_nguoi_nhan")
     private String tenNguoiNhan;
 

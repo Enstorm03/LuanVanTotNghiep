@@ -15,23 +15,6 @@ export const validateQuantity = (quantity, maxStock) => {
   return Math.max(1, Math.min(num, maxStock || 999));
 };
 
-export const createPreOrderData = (product, quantity = 1) => {
-  return {
-    isPreOrder: true,
-    items: [{
-      id_san_pham: product.id_san_pham,
-      ten_san_pham: product.ten_san_pham,
-      url_hinh_anh: product.url_hinh_anh,
-      gia_ban: product.gia_ban,
-      quantity: quantity
-    }],
-    paymentMethod: 'deposit',
-    depositAmount: product.gia_ban * 0.5,
-    total: product.gia_ban,
-    ghiChu: `Đặt hàng trước - ${product.ten_san_pham}`
-  };
-};
-
 export const formatCartItem = (product, quantity) => {
   return {
     userId: null, // Will be set by caller

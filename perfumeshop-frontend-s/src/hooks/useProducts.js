@@ -1,4 +1,4 @@
-import { useState, useEffect, version } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
 
 const useProducts = () => {
@@ -91,43 +91,40 @@ const useProducts = () => {
   //   }
   // };
   const handleSaveProduct = async (productData) => {
-  try {
-    setSaving(true);
+    try {
+      setSaving(true);
 
-    // 1. Chuẩn bị dữ liệu gửi lên
-    // Thay vì xóa ID, hãy cấu trúc lại để Backend nhận được object đúng chuẩn Entity
-    const payload = {
-      ...productData,
-      // Gửi đúng cấu trúc mà Backend Entity chờ đợi
-      danhMuc: productData.idDanhMuc ? { idDanhMuc: productData.idDanhMuc } : null,
-      thuongHieu: productData.idThuongHieu ? { idThuongHieu: productData.idThuongHieu } : null,
-      // ĐẢM BẢO GỬI VERSION NẾU ĐANG CẬP NHẬT
-      version: editingProduct ? editingProduct.version : null 
-    };
+      const payload = {
+        ...productData,
+        danhMuc:     productData.idDanhMuc    ? { idDanhMuc: productData.idDanhMuc }       : (productData.danhMuc || null),
+        thuongHieu:  productData.idThuongHieu ? { idThuongHieu: productData.idThuongHieu } : (productData.thuongHieu || null),
+        version:     editingProduct ? editingProduct.version : null,
+        // Giảm giá
+        phanTramGiam:    productData.phanTramGiam    ?? null,
+        ngayBatDauGiam:  productData.ngayBatDauGiam  ?? null,
+        ngayKetThucGiam: productData.ngayKetThucGiam ?? null,
+      };
 
-    // Xóa các key thừa không nằm trong Entity (nếu Backend không nhận)
-    delete payload.idDanhMuc;
-    delete payload.idThuongHieu;
+      delete payload.idDanhMuc;
+      delete payload.idThuongHieu;
 
-    if (editingProduct) {
-      await api.updateProduct(editingProduct.id_san_pham, payload);
-      alert('Cập nhật sản phẩm thành công!');
-    } else {
-      await api.createProduct(payload);
-      alert('Thêm sản phẩm thành công!');
+      if (editingProduct) {
+        await api.updateProduct(editingProduct.id_san_pham, payload);
+        alert('Cập nhật sản phẩm thành công!');
+      } else {
+        await api.createProduct(payload);
+        alert('Thêm sản phẩm thành công!');
+      }
+
+      handleCloseModal();
+      fetchData();
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Lỗi: ' + (error.message || 'Vui lòng kiểm tra lại dữ liệu'));
+    } finally {
+      setSaving(false);
     }
-
-    handleCloseModal();
-    fetchData(); 
-  } catch (error) {
-    // Để biết chi tiết lỗi, hãy nhìn vào Terminal của Backend (IntelliJ)
-    // Lỗi thường nằm trong các dòng bắt đầu bằng 'Caused by:...'
-    console.error('Error saving product:', error);
-    alert('Lỗi: ' + (error.message || 'Vui lòng kiểm tra lại dữ liệu'));
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
@@ -145,14 +142,13 @@ const useProducts = () => {
   };
 
   // Lọc và tìm kiếm
-  const filteredProducts = products
-    .filter(product => {
-      if (categoryFilter === 'All') return true;
-      return product.ten_san_pham?.toLowerCase().includes(searchTerm.toLowerCase());
-    })
-    .filter(product =>
-      product.ten_san_pham?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const filteredProducts = products.filter(product => {
+    const matchSearch = !searchTerm ||
+      product.ten_san_pham?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchCategory = categoryFilter === 'All' ||
+      String(product.id_danh_muc) === String(categoryFilter);
+    return matchSearch && matchCategory;
+  });
 
   // Phân trang
   const indexOfLastItem = currentPage * itemsPerPage;

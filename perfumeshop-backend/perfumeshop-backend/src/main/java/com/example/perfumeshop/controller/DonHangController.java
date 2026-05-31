@@ -61,9 +61,14 @@ public class DonHangController {
         return ResponseEntity.ok(donHangService.confirm(id, req.getNhanVienId()));
     }
 
+    @PostMapping("/{id}/giao-hang")
+    public ResponseEntity<DonHang> shipOrder(@PathVariable Integer id) {
+        return ResponseEntity.ok(donHangService.shipOrder(id));
+    }
+
     @PostMapping("/{id}/cap-nhat-van-don")
     public ResponseEntity<DonHang> updateTracking(@PathVariable Integer id, @Valid @RequestBody UpdateTrackingRequest req) {
-        return ResponseEntity.ok(donHangService.updateTrackingAndShip(id, req.getMaVanDon()));
+        return ResponseEntity.ok(donHangService.updateTracking(id, req.getMaVanDon()));
     }
 
     @PostMapping("/{id}/hoan-thanh")

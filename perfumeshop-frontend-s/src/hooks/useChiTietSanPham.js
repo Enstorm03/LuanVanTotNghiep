@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
   formatCartItem,
-  createPreOrderData,
   createBrandMap
 } from '../utils/productUtils';
 
@@ -68,8 +67,7 @@ const useChiTietSanPham = (productId) => {
       return;
     }
 
-    // Only check stock for regular cart actions, not for pre-orders
-    if (actionType !== 'pre_order' && quantity > product.so_luong_ton_kho) {
+    if (quantity > product.so_luong_ton_kho) {
       alert('Số lượng vượt quá tồn kho');
       return;
     }
@@ -88,10 +86,6 @@ const useChiTietSanPham = (productId) => {
         cartItem.userId = user.id_nguoi_dung;
 
         await api.addCartItem(cartItem);
-        navigate('/thanh-toan');
-      } else if (actionType === 'pre_order') {
-        const preOrderData = createPreOrderData(product, quantity);
-        localStorage.setItem('pre-order-data', JSON.stringify(preOrderData));
         navigate('/thanh-toan');
       }
     } catch (error) {

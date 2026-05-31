@@ -1,5 +1,6 @@
 package com.example.perfumeshop.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
@@ -10,16 +11,20 @@ public class PlaceOrderRequest {
 
     private Integer idNguoiDung;
 
-    @NotEmpty
+    @NotBlank
     private String tenNguoiNhan;
 
-    @NotEmpty
+    @NotBlank
+    private String soDienThoai;
+
+    @NotBlank
     private String diaChiGiaoHang;
+
+    @NotBlank
+    private String phuongThucThanhToan; // COD, Chuyển khoản, Ví điện tử
 
     @NotEmpty
     private List<PlaceOrderItemRequest> items;
     private Boolean allowBackorder;
-
-
 
 }

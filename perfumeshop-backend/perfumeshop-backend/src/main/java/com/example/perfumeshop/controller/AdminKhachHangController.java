@@ -1,9 +1,9 @@
 package com.example.perfumeshop.controller;
 
 import com.example.perfumeshop.dto.CreateKhachHangRequest;
+import com.example.perfumeshop.dto.NguoiDungResponse;
 import com.example.perfumeshop.dto.ResetPasswordRequest;
 import com.example.perfumeshop.dto.UpdateKhachHangRequest;
-import com.example.perfumeshop.entity.NguoiDung;
 import com.example.perfumeshop.service.AdminUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,25 +21,36 @@ public class AdminKhachHangController {
     private AdminUserService adminUserService;
 
     @GetMapping
-    public ResponseEntity<List<NguoiDung>> list() { return ResponseEntity.ok(adminUserService.listKhachHang()); }
+    public ResponseEntity<List<NguoiDungResponse>> list() {
+        return ResponseEntity.ok(adminUserService.listKhachHang());
+    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NguoiDung> get(@PathVariable Integer id) { return ResponseEntity.ok(adminUserService.getKhachHang(id)); }
+    public ResponseEntity<NguoiDungResponse> get(@PathVariable Integer id) {
+        return ResponseEntity.ok(adminUserService.getKhachHang(id));
+    }
 
     @PostMapping
-    public ResponseEntity<NguoiDung> create(@Valid @RequestBody CreateKhachHangRequest req) { return ResponseEntity.ok(adminUserService.createKhachHang(req)); }
+    public ResponseEntity<NguoiDungResponse> create(@Valid @RequestBody CreateKhachHangRequest req) {
+        return ResponseEntity.ok(adminUserService.createKhachHang(req));
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<NguoiDung> update(@PathVariable Integer id, @Valid @RequestBody UpdateKhachHangRequest req) {
+    public ResponseEntity<NguoiDungResponse> update(@PathVariable Integer id,
+                                                     @Valid @RequestBody UpdateKhachHangRequest req) {
         return ResponseEntity.ok(adminUserService.updateKhachHang(id, req));
     }
 
     @PostMapping("/{id}/reset-password")
-    public ResponseEntity<Void> resetPassword(@PathVariable Integer id, @Valid @RequestBody ResetPasswordRequest req) {
+    public ResponseEntity<Void> resetPassword(@PathVariable Integer id,
+                                               @Valid @RequestBody ResetPasswordRequest req) {
         adminUserService.resetKhachHangPassword(id, req);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) { adminUserService.deleteKhachHang(id); return ResponseEntity.noContent().build(); }
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        adminUserService.deleteKhachHang(id);
+        return ResponseEntity.noContent().build();
+    }
 }
