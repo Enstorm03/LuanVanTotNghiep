@@ -60,6 +60,8 @@ const api = {
   searchOrdersByTracking: orderApi.searchOrdersByTracking.bind(orderApi),
   getOrders: orderApi.getOrders.bind(orderApi),
   checkOrderReturnStatus: orderApi.checkOrderReturnStatus.bind(orderApi),
+  createPaymentLink: orderApi.createPaymentLink.bind(orderApi),
+  checkPaymentStatus: orderApi.checkPaymentStatus.bind(orderApi),
 
   // Brand methods
   getAllBrands: brandApi.getAllBrands.bind(brandApi),

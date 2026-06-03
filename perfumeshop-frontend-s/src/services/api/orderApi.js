@@ -206,6 +206,31 @@ class OrderApi extends BaseApi {
       return { hasReturnRequest: false, returnStatus: null };
     }
   }
+
+  //  PayOS Payment 
+
+  // Tạo link thanh toán PayOS cho đơn hàng
+  async createPaymentLink(idDonHang) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/payment/create-link`, {
+        method: 'POST',
+        body: JSON.stringify({ idDonHang })
+      });
+    } catch (error) {
+      console.error('Lỗi tạo link thanh toán:', error);
+      throw error;
+    }
+  }
+
+  // Kiểm tra trạng thái thanh toán PayOS
+  async checkPaymentStatus(orderId) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/payment/status/${orderId}`);
+    } catch (error) {
+      console.error('Lỗi kiểm tra trạng thái thanh toán:', error);
+      throw error;
+    }
+  }
 }
 
 const orderApi = new OrderApi();

@@ -24,11 +24,26 @@ const useSubmitOrder = () => {
         phuongThucThanhToan: paymentMethod,
       };
 
+      // Bước 1: Tạo đơn hàng
       const result = await api.checkoutCart(orderData);
+      const idDonHang = result.idDonHang;
 
-      alert('Đặt hàng thành công! Mã đơn hàng: ' + result.idDonHang);
+      // Bước 2: Xử lý theo phương thức thanh toán
+      if (paymentMethod === 'online') {
+        // Tạo link PayOS và redirect
+        const paymentRes = await api.createPaymentLink(idDonHang);
+        if (paymentRes?.checkoutUrl) {
+          // Redirect sang trang thanh toán PayOS (VietQR / các ví điện tử)
+          window.location.href = paymentRes.checkoutUrl;
+          return; // Dừng tại đây, không navigate
+        } else {
+          throw new Error('Không tạo được link thanh toán');
+        }
+      }
 
-      // Xóa giỏ hàng sau khi đặt hàng thành công
+      // COD hoặc phương thức khác: xử lý bình thường
+      alert('Đặt hàng thành công! Mã đơn hàng: ' + idDonHang);
+
       try {
         await api.clearCart(user.id_nguoi_dung);
       } catch (clearError) {
@@ -44,10 +59,7 @@ const useSubmitOrder = () => {
     }
   };
 
-  return {
-    submitOrder,
-    processing
-  };
+  return { submitOrder, processing };
 };
 
 export default useSubmitOrder;

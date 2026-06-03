@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useOrders from '../../hooks/useOrders';
 import OrdersFilter from './orders/components/OrdersFilter';
 import OrdersTable from './orders/components/OrdersTable';
@@ -18,6 +18,14 @@ const AdminOrdersPage = () => {
     paginate,
     fetchOrders
   } = useOrders(true); // isAdmin = true
+
+  // Auto-refresh mỗi 30 giây để admin thấy đơn mới / đơn hủy
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
 
   if (loading) {
     return (
@@ -43,10 +51,18 @@ const AdminOrdersPage = () => {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
         <h1 className="font-semibold text-lg md:text-2xl text-text-light dark:text-text-dark">
           Quản Lý Đơn Hàng
         </h1>
+        <button
+          onClick={fetchOrders}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+        >
+          <span className="material-symbols-outlined text-base">refresh</span>
+          Làm mới
+        </button>
       </div>
 
       {/* Filter and Search Controls */}

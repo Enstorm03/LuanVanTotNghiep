@@ -104,7 +104,8 @@ const OrderActions = ({
           </button>
         )}
 
-        {!['Hoàn thành', 'Đã hủy'].includes(order.trangThaiVanHanh) && (
+        {/* Chỉ hiện nút hủy khi đơn chưa ở trạng thái cuối */}
+        {!['Hoàn thành', 'Đã hủy', 'Đã hoàn trả', 'Chờ hoàn tiền'].includes(order.trangThaiVanHanh) && (
           <button
             onClick={() => setShowCancelDialog(true)}
             disabled={processing}

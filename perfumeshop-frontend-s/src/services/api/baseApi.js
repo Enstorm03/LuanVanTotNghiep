@@ -1,10 +1,16 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+// Khi dùng CRA proxy: dùng đường dẫn tương đối /api/...
+// → request tự động forward đến localhost:8080/api/... mà không bị Mixed Content
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 class BaseApi {
   // Hàm helper để thực hiện fetch request với xử lý lỗi
   async _fetch(url, options = {}) {
     const response = await fetch(url, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',   // Bỏ qua trang cảnh báo của ngrok free
+        ...options.headers
+      },
       ...options
     });
     if (!response.ok) throw new Error(await this._getErrorMessage(response));

@@ -50,25 +50,31 @@ public class ReturnService {
                 .orElseThrow(() -> new BusinessException("Phiếu đổi trả không tồn tại"));
     }
 
-    // ── Bước 0: Khách tạo yêu cầu ──────────────────────────────────────────
+    // Bước 0: Khách tạo yêu cầu 
     @Transactional
     public PhieuDoiTra create(Integer idDonHang, Integer idNguoiDung, String lyDo) {
         DonHang dh = donHangRepository.findById(idDonHang)
                 .orElseThrow(() -> new BusinessException("Đơn hàng không tồn tại"));
 
-        if (!DonHangService.TT_HOAN_THANH.equals(dh.getTrangThaiVanHanh())) {
-            throw new BusinessException("Chỉ nhận đổi trả cho đơn hàng đã hoàn thành");
+        // Cho phép đổi trả khi đang giao hoặc đã hoàn thành
+        boolean dangGiao    = DonHangService.TT_DANG_GIAO.equals(dh.getTrangThaiVanHanh());
+        boolean daHoanThanh = DonHangService.TT_HOAN_THANH.equals(dh.getTrangThaiVanHanh());
+        if (!dangGiao && !daHoanThanh) {
+            throw new BusinessException("Chỉ nhận đổi trả cho đơn hàng đang giao hoặc đã hoàn thành");
         }
 
-        LocalDateTime ngayHoanThanh = dh.getNgayHoanThanh();
-        if (ngayHoanThanh == null) {
-            throw new BusinessException("Đơn hàng chưa có ngày hoàn thành");
-        }
-        long days = Duration.between(ngayHoanThanh, LocalDateTime.now()).toDays();
-        if (days > RETURN_WINDOW_DAYS) {
-            throw new BusinessException(
-                "Đã quá " + RETURN_WINDOW_DAYS + " ngày kể từ ngày hoàn thành. Không thể đổi trả."
-            );
+        // Nếu đã hoàn thành: kiểm tra trong 7 ngày kể từ ngày hoàn thành
+        if (daHoanThanh) {
+            LocalDateTime ngayHoanThanh = dh.getNgayHoanThanh();
+            if (ngayHoanThanh == null) {
+                throw new BusinessException("Đơn hàng chưa có ngày hoàn thành");
+            }
+            long days = Duration.between(ngayHoanThanh, LocalDateTime.now()).toDays();
+            if (days > RETURN_WINDOW_DAYS) {
+                throw new BusinessException(
+                    "Đã quá " + RETURN_WINDOW_DAYS + " ngày kể từ ngày hoàn thành. Không thể đổi trả."
+                );
+            }
         }
 
         List<PhieuDoiTra> existing = phieuDoiTraRepository.findByIdDonHangAndIdNguoiDung(idDonHang, idNguoiDung);
@@ -119,7 +125,7 @@ public class ReturnService {
         return phieuDoiTraRepository.save(p);
     }
 
-    // ── Bước 2: Admin xác nhận đã hoàn tiền → hoàn tất ────────────────────
+    //  Bước 2: Admin xác nhận đã hoàn tiền → hoàn tất
     @Transactional
     public PhieuDoiTra confirmRefund(Integer idDoiTra, Integer nhanVienId) {
         PhieuDoiTra p = getById(idDoiTra);
@@ -139,7 +145,7 @@ public class ReturnService {
         return phieuDoiTraRepository.save(p);
     }
 
-    // ── Từ chối (chỉ khi đang "Chờ duyệt") ────────────────────────────────
+    // Từ chối (chỉ khi đang "Chờ duyệt") 
     @Transactional
     public PhieuDoiTra reject(Integer idDoiTra, Integer nhanVienId, String lyDoTuChoi) {
         PhieuDoiTra p = getById(idDoiTra);

@@ -148,6 +148,10 @@ public class DonHangService {
         }
         dh.setTrangThaiVanHanh(TT_HOAN_THANH);
         dh.setNgayHoanThanh(LocalDateTime.now());
+        // Tự động đánh dấu đã thanh toán khi hoàn thành (khách đã nhận hàng = đã trả tiền COD)
+        if (!"Đã thanh toán".equals(dh.getTrangThaiThanhToan())) {
+            dh.setTrangThaiThanhToan("Đã thanh toán");
+        }
         return donHangRepository.save(dh);
     }
 

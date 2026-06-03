@@ -31,10 +31,11 @@ const OrderInfoCard = ({ order }) => {
         <div className="flex justify-between items-center pt-2">
           <span>Thanh toán:</span>
           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-            order.trangThaiThanhToan === 'Đã thanh toán' ? 'bg-green-100 text-green-800' :
-            order.trangThaiThanhToan === 'Chờ cọc' ? 'bg-orange-100 text-orange-800' :
-            order.trangThaiThanhToan === 'Đã cọc' ? 'bg-blue-100 text-blue-800' :
-            'bg-gray-100 text-gray-800'
+            order.trangThaiThanhToan === 'Đã thanh toán'   ? 'bg-green-100 text-green-800'  :
+            order.trangThaiThanhToan === 'Chờ cọc'         ? 'bg-orange-100 text-orange-800' :
+            order.trangThaiThanhToan === 'Đã cọc'          ? 'bg-blue-100 text-blue-800'    :
+            order.trangThaiThanhToan === 'Chờ thanh toán'  ? 'bg-yellow-100 text-yellow-800' :
+                                                             'bg-gray-100 text-gray-800'
           }`}>
             {order.trangThaiThanhToan || 'N/A'}
           </span>
@@ -48,6 +49,13 @@ const OrderInfoCard = ({ order }) => {
             <span>Đặt cọc:</span>
             <span>{order.tienDatCoc.toLocaleString('vi-VN')}₫</span>
           </p>
+        )}
+        {/* Lý do hủy */}
+        {order.trangThaiVanHanh === 'Đã hủy' && order.lyDoHuy && (
+          <div className="mt-3 pt-3 border-t border-border-light dark:border-border-dark">
+            <p className="text-xs text-gray-500 mb-1">Lý do hủy:</p>
+            <p className="text-sm text-red-600 dark:text-red-400 font-medium">{order.lyDoHuy}</p>
+          </div>
         )}
       </div>
     </div>

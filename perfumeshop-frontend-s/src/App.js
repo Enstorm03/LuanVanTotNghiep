@@ -13,8 +13,10 @@ import ProductDetail from './pages/public/ChiTietSanPham';
 import CategoryPage from './pages/public/DanhMucSanPham';
 import GioHangPage from './pages/public/GioHang';
 import ThanhToanPage from './pages/public/checkout/ThanhToanPage';
+import ThanhToanKetQuaPage from './pages/public/checkout/ThanhToanKetQuaPage';
 import LichSuDonHangPage from './pages/public/LichSuDonHangPage';
 import ThuongHieuPage from './pages/public/ThuongHieuPage';
+import XacNhanDonHangPage from './pages/public/XacNhanDonHangPage';
 
 // Auth Pages
 import DangNhapPage from './pages/auth/DangNhapPage';
@@ -60,6 +62,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Trang kết quả thanh toán PayOS — không cần login vì PayOS redirect trực tiếp */}
+          <Route path="/thanh-toan/ket-qua" element={<ThanhToanKetQuaPage />} />
           <Route
             path="/lich-su-don-hang"
             element={
@@ -73,6 +77,9 @@ function App() {
         {/* Auth Routes without Layout */}
         <Route path="/login" element={<DangNhapPage />} />
         <Route path="/register" element={<DangKyPage />} />
+
+        {/* Route công khai — khách quét QR xác nhận nhận hàng / đổi trả (không cần login) */}
+        <Route path="/don-hang/:orderId/xac-nhan" element={<XacNhanDonHangPage />} />
 
         {/* Admin Routes — chỉ nhân viên (ADMIN / STAFF) mới được vào */}
         <Route

@@ -33,50 +33,43 @@ const useOrderDetail = () => {
     fetchOrderDetails();
   }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-refresh khi đơn đang chờ thanh toán PayOS (mỗi 10 giây)
+  // Dừng khi đơn chuyển sang trạng thái cuối
+  useEffect(() => {
+    const finalStatuses = ['Hoàn thành', 'Đã hủy', 'Đã hoàn trả'];
+    if (!order || finalStatuses.includes(order.trangThaiVanHanh)) return;
+    if (order.trangThaiThanhToan === 'Đã thanh toán') return;
+
+    const interval = setInterval(() => {
+      // Refresh nhẹ — không set loading để tránh flicker
+      api.getOrderDetails(parseInt(orderId)).then(data => {
+        setOrder(data);
+      }).catch(() => {});
+    }, 10000); // 10 giây
+
+    return () => clearInterval(interval);
+  }, [order, orderId]);
+
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
       setError('');
       const orderData = await api.getOrderDetails(parseInt(orderId));
-      console.log('Raw order details:', orderData);
-      console.log('Order chiTiet:', orderData.chiTiet);
-      console.log('Order chiTietDonHangs:', orderData.chiTietDonHangs);
-      console.log('First chiTietDonHang item:', orderData.chiTietDonHangs?.[0]);
-      console.log('First chiTietDonHang item structure:', orderData.chiTietDonHangs?.[0] ? Object.keys(orderData.chiTietDonHangs[0]) : 'No items');
 
-      // Fetch product details for each item to get brand, volume, concentration
       if (orderData.chiTietDonHangs && orderData.chiTietDonHangs.length > 0) {
-        const productIds = orderData.chiTietDonHangs.map(item => item.sanPhamId);
-        console.log('Fetching product details for IDs:', productIds);
-
         try {
           const [allProducts, allBrands] = await Promise.all([
             api.getAllProducts(),
             api.getBrands()
           ]);
-
           const productMap = {};
           const brandMap = {};
-
-          // Create a map of product details by ID
-          allProducts.forEach(product => {
-            productMap[product.id_san_pham] = product;
-          });
-
-          // Create a map of brand details by ID
-          allBrands.forEach(brand => {
-            brandMap[brand.idThuongHieu] = brand.tenThuongHieu;
-          });
-
-          console.log('Product map created:', productMap);
-          console.log('Brand map created:', brandMap);
-
-          // Store product and brand details
+          allProducts.forEach(p => { productMap[p.id_san_pham] = p; });
+          allBrands.forEach(b => { brandMap[b.idThuongHieu] = b.tenThuongHieu; });
           setProductDetails(productMap);
           setBrandDetails(brandMap);
         } catch (productError) {
           console.error('Error fetching product/brand details:', productError);
-          // Continue without product details
         }
       }
 
@@ -140,17 +133,9 @@ const useOrderDetail = () => {
   const handleCompleteOrder = async () => {
     try {
       setProcessing(true);
-
-      // Nếu đơn hàng chưa được thanh toán, tự động đánh dấu đã thanh toán
-      if (order?.trangThaiThanhToan !== 'Đã thanh toán') {
-        console.log('Order not paid, marking as paid before completing...');
-        await api.updatePaymentStatus(parseInt(orderId), true);
-      }
-
-      // Hoàn thành đơn hàng
       const updatedOrder = await api.completeOrder(parseInt(orderId));
       setOrder(updatedOrder);
-      alert('Đơn hàng đã được hoàn thành và đánh dấu đã thanh toán!');
+      alert('Đơn hàng đã hoàn thành! Trạng thái thanh toán đã được cập nhật.');
     } catch (error) {
       alert('Không thể hoàn thành đơn hàng: ' + error.message);
     } finally {

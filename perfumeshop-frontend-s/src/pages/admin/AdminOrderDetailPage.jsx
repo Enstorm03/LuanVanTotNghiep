@@ -12,8 +12,10 @@ import CancelOrderDialog from './orders/dialogs/CancelOrderDialog';
 import UpdateRecipientDialog from './orders/dialogs/UpdateRecipientDialog';
 import MoveToPendingDialog from './orders/dialogs/MoveToPendingDialog';
 import PaymentCollectedDialog from './orders/dialogs/PaymentCollectedDialog';
+import QRDialog from './orders/dialogs/QRDialog';
 
 const AdminOrderDetailPage = () => {
+  const [showQRDialog, setShowQRDialog] = React.useState(false);
   const {
     order,
     loading,
@@ -90,6 +92,16 @@ const AdminOrderDetailPage = () => {
         <h1 className="font-semibold text-lg md:text-2xl text-text-light dark:text-text-dark">
           Chi tiết Đơn hàng #{order.idDonHang}
         </h1>
+        {/* Nút tạo QR — hiện từ khi đặt hàng cho đến khi hoàn thành */}
+        {!['Đã hủy', 'Hoàn thành', 'Đã hoàn trả'].includes(order.trangThaiVanHanh) && (
+          <button
+            onClick={() => setShowQRDialog(true)}
+            className="ml-auto flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors text-sm font-semibold"
+          >
+            <span className="material-symbols-outlined text-base">qr_code</span>
+            Mã QR
+          </button>
+        )}
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
@@ -190,6 +202,12 @@ const AdminOrderDetailPage = () => {
         onClose={() => setShowPaymentCollectedDialog(false)}
         order={order}
         processing={processing}
+      />
+
+      <QRDialog
+        show={showQRDialog}
+        onClose={() => setShowQRDialog(false)}
+        order={order}
       />
     </div>
   );
