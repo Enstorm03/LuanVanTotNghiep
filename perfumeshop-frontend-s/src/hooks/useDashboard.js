@@ -13,7 +13,9 @@ const useDashboard = () => {
     shippingOrders: 0,
     completedOrders: 0,
     pendingReturns: 0,
-    approvedReturns: 0,
+    waitingRefundReturns: 0,
+    completedReturns: 0,
+    rejectedReturns: 0,
     totalReturns: 0
   });
 
@@ -46,7 +48,9 @@ const useDashboard = () => {
           shippingOrders: statsData.shippingOrders || 0,
           completedOrders: statsData.completedOrders || 0,
           pendingReturns: statsData.pendingReturns || 0,
-          approvedReturns: statsData.approvedReturns || 0,
+          waitingRefundReturns: statsData.waitingRefundReturns || 0,
+          completedReturns: statsData.completedReturns || 0,
+          rejectedReturns: statsData.rejectedReturns || 0,
           totalReturns: statsData.totalReturns || 0
         });
       }

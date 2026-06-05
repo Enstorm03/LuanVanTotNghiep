@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 
 const PUBLIC_BASE_URL = process.env.REACT_APP_PUBLIC_URL || window.location.origin;
-
+//const PUBLIC_BASE_URL = 'https://pendant-moustache-flask.ngrok-free.dev';
 const QRDialog = ({ show, onClose, order }) => {
   const canvasRef = useRef(null);
   const printRef  = useRef(null);

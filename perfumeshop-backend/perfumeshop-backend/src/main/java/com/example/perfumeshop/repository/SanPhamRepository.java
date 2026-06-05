@@ -4,6 +4,7 @@ import com.example.perfumeshop.entity.SanPham;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,14 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     List<SanPham> findRelatedProducts(@Param("thuongHieuId") Integer thuongHieuId,
                                       @Param("excludeId") Integer excludeId,
                                       Pageable pageable);
+
+    /**
+     * Trừ kho atomic: chỉ update nếu còn đủ hàng (soLuongTonKho >= qty).
+     * Trả về số rows bị ảnh hưởng: 1 = thành công, 0 = không đủ hàng.
+     * Dùng thay cho đọc-rồi-ghi để tránh race condition khi nhiều đơn đặt cùng lúc.
+     */
+    @Modifying
+    @Query("UPDATE SanPham s SET s.soLuongTonKho = s.soLuongTonKho - :qty " +
+           "WHERE s.idSanPham = :id AND s.soLuongTonKho >= :qty")
+    int decrementStock(@Param("id") Integer id, @Param("qty") int qty);
 }

@@ -57,6 +57,9 @@ public class DonHang {
     @Column(name = "ly_do_huy")
     private String lyDoHuy;
 
+    @Column(name = "ghi_chu")
+    private String ghiChu; // Ghi chú của khách khi đặt hàng
+
     @Column(name = "ngay_hoan_thanh")
     private LocalDateTime ngayHoanThanh;
 

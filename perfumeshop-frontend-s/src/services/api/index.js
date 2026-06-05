@@ -7,9 +7,9 @@ import employeeApi from './employeeApi.js';
 import reviewApi from './reviewApi.js';
 import returnApi from './returnApi.js';
 import brandApi from './brandApi.js';
-
+import categoryApi from './categoryApi.js';
+import reviewAdminApi from './reviewAdminApi.js';
 import dashboardApi from './dashboardApi.js';
-
 import reportApi from './reportApi.js';
 
 // Combined API object for backward compatibility
@@ -100,6 +100,18 @@ const api = {
   approveReturn: returnApi.approveReturn.bind(returnApi),
   confirmRefund: returnApi.confirmRefund.bind(returnApi),
   rejectReturn: returnApi.rejectReturn.bind(returnApi),
+
+  // Category methods
+  getAllCategories: categoryApi.getAllCategories.bind(categoryApi),
+  getCategoryById: categoryApi.getCategoryById.bind(categoryApi),
+  createCategory: categoryApi.createCategory.bind(categoryApi),
+  updateCategory: categoryApi.updateCategory.bind(categoryApi),
+  deleteCategory: categoryApi.deleteCategory.bind(categoryApi),
+
+  // Review admin methods
+  getAllReviews: reviewAdminApi.getAllReviews.bind(reviewAdminApi),
+  getReviewsByProduct: reviewAdminApi.getReviewsByProduct.bind(reviewAdminApi),
+  deleteReview: reviewAdminApi.deleteReview.bind(reviewAdminApi),
 
   
 };

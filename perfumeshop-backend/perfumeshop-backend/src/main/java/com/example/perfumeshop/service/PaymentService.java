@@ -129,9 +129,43 @@ public class PaymentService {
     /**
      * Kiểm tra trạng thái thanh toán của đơn hàng qua PayOS API.
      */
+    @Transactional
     public String checkPaymentStatus(Integer idDonHang) throws Exception {
         PaymentLink paymentInfo = payOS.paymentRequests().get(idDonHang.longValue());
-        return paymentInfo.getStatus().name(); // PAID, PENDING, CANCELLED, EXPIRED
+        String status = paymentInfo.getStatus().name(); // PAID, PENDING, CANCELLED, EXPIRED
+
+        DonHang dh = donHangRepository.findById(idDonHang).orElse(null);
+        if (dh == null) return status;
+
+        if ("PAID".equals(status)) {
+            // Webhook có thể không bắn được, nên check & update dự phòng
+            if (!"Đã thanh toán".equals(dh.getTrangThaiThanhToan())) {
+                dh.setTrangThaiThanhToan("Đã thanh toán");
+                donHangRepository.save(dh);
+            }
+        } else if ("CANCELLED".equals(status)) {
+            // Vì Webhook không bắn khi Hủy, ta phải tự bắt trạng thái CANCELLED ở đây
+            String tt = dh.getTrangThaiVanHanh();
+            boolean coTheHuy = DonHangService.TT_CHO_XAC_NHAN.equals(tt)
+                    || DonHangService.TT_DA_XAC_NHAN.equals(tt);
+
+            if (coTheHuy) {
+                // Hoàn kho
+                if (dh.getChiTietDonHangs() != null) {
+                    for (var item : dh.getChiTietDonHangs()) {
+                        var sp = item.getSanPham();
+                        if (sp == null) continue;
+                        int ton = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
+                        sp.setSoLuongTonKho(ton + item.getSoLuong());
+                    }
+                }
+                dh.setTrangThaiVanHanh(DonHangService.TT_DA_HUY);
+                dh.setLyDoHuy("Khách hàng chủ động hủy thanh toán PayOS");
+                donHangRepository.save(dh);
+            }
+        }
+
+        return status;
     }
 
     private String truncate(String s, int max) {

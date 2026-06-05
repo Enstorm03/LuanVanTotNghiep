@@ -40,6 +40,7 @@ public class CheckoutService {
         dh.setSoDienThoai(req.getSoDienThoai());
         dh.setDiaChiGiaoHang(req.getDiaChiGiaoHang());
         dh.setPhuongThucThanhToan(req.getPhuongThucThanhToan());
+        dh.setGhiChu(req.getGhiChu());
         dh.setNgayDatHang(LocalDateTime.now());
 
         // Xác định trạng thái thanh toán dựa trên phương thức
@@ -80,12 +81,16 @@ public class CheckoutService {
         dh.setMaVanDon(generateMaVanDon());
 
         if (allInStock) {
-            // Trường hợp đủ hàng: Trừ kho ngay lập tức
-            // JPA sẽ tự kiểm tra @Version khi save sản phẩm
-            for (PlaceOrderItemRequest it : req.getItems()) {
-                SanPham sp = sanPhamRepository.findById(it.getSanPhamId()).get();
-                sp.setSoLuongTonKho(sp.getSoLuongTonKho() - it.getSoLuong());
-                sanPhamRepository.save(sp);
+            // Trường hợp đủ hàng: Trừ kho atomic — tránh race condition khi nhiều đơn đặt cùng lúc
+            for (ChiTietDonHang ct : ctList) {
+                SanPham sp = ct.getSanPham();
+                int updated = sanPhamRepository.decrementStock(sp.getIdSanPham(), ct.getSoLuong());
+                if (updated == 0) {
+                    // Sản phẩm vừa bị người khác mua hết trong khoảng thời gian kiểm tra
+                    throw new BusinessException(
+                        "Sản phẩm '" + sp.getTenSanPham() + "' vừa hết hàng. Vui lòng thử lại."
+                    );
+                }
             }
             dh.setTrangThaiVanHanh(DonHangService.TT_CHO_XAC_NHAN);
         } else {

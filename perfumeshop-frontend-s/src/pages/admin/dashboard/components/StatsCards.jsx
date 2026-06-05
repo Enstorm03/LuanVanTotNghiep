@@ -70,7 +70,7 @@ const StatsCards = ({ stats }) => {
         <div className="p-6 pt-0">
           <div className="text-2xl font-bold text-text-light dark:text-text-dark">{stats.pendingReturns}</div>
           <p className="text-xs text-text-subtle-light dark:text-text-subtle-dark pt-1">
-            {stats.approvedReturns} đã duyệt, {stats.totalReturns} tổng số
+            {stats.waitingRefundReturns} chờ hoàn tiền, {stats.totalReturns} tổng số
           </p>
         </div>
       </div>

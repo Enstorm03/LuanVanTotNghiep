@@ -32,8 +32,12 @@ const AdminSidebar = () => {
               Sản phẩm
             </NavLink>
             <NavLink to="/admin/brands" className={navLinkClasses}>
-              <span className="material-symbols-outlined">inventory_2</span>
+              <span className="material-symbols-outlined">local_offer</span>
               Thương hiệu
+            </NavLink>
+            <NavLink to="/admin/categories" className={navLinkClasses}>
+              <span className="material-symbols-outlined">category</span>
+              Danh mục
             </NavLink>
             <NavLink to="/admin/orders" className={navLinkClasses}>
               <span className="material-symbols-outlined">receipt_long</span>
@@ -42,6 +46,10 @@ const AdminSidebar = () => {
             <NavLink to="/admin/returns" className={navLinkClasses}>
               <span className="material-symbols-outlined">assignment_return</span>
               Đổi trả
+            </NavLink>
+            <NavLink to="/admin/reviews" className={navLinkClasses}>
+              <span className="material-symbols-outlined">star</span>
+              Đánh giá
             </NavLink>
             
             {/* Đã gộp chung Nhân viên & Khách hàng thành 1 mục Tài khoản */}

@@ -20,7 +20,7 @@ const ReturnModal = ({
 
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Chính sách đổi trả:</strong> Chỉ nhận đổi trả trong vòng 7 ngày kể từ ngày đặt hàng cho đơn hàng đã hoàn thành.
+              <strong>Chính sách đổi trả:</strong> Chỉ nhận đổi trả trong vòng 7 ngày kể từ ngày hoàn thành đơn hàng.
             </p>
           </div>
 

@@ -54,11 +54,15 @@ public class DashboardService {
         stats.put("completedOrders", countByStatus(allOrders, "Hoàn thành"));
         stats.put("cancelledOrders", countByStatus(allOrders, "Đã hủy"));
 
-        // Đổi trả
-        long pendingReturns = allReturns.stream().filter(r -> "Chờ duyệt".equals(r.getTrangThai())).count();
-        long approvedReturns = allReturns.stream().filter(r -> "Đã duyệt".equals(r.getTrangThai())).count();
+        // Đổi trả — dùng đúng trạng thái thực tế của hệ thống
+        long pendingReturns      = allReturns.stream().filter(r -> "Chờ duyệt".equals(r.getTrangThai())).count();
+        long waitingRefund       = allReturns.stream().filter(r -> "Chờ hoàn tiền".equals(r.getTrangThai())).count();
+        long completedReturns    = allReturns.stream().filter(r -> "Hoàn tiền thành công".equals(r.getTrangThai())).count();
+        long rejectedReturns     = allReturns.stream().filter(r -> "Từ chối".equals(r.getTrangThai())).count();
         stats.put("pendingReturns", pendingReturns);
-        stats.put("approvedReturns", approvedReturns);
+        stats.put("waitingRefundReturns", waitingRefund);
+        stats.put("completedReturns", completedReturns);
+        stats.put("rejectedReturns", rejectedReturns);
         stats.put("totalReturns", (long) allReturns.size());
 
         return stats;

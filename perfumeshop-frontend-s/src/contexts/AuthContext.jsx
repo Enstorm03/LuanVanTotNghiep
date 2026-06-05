@@ -16,12 +16,12 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = sessionStorage.getItem('user');
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
       }
     }
     setLoading(false);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       };
 
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('user', JSON.stringify(userData));
 
       return { success: true, ...userData };
     } catch (error) {
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     window.location.href = '/';
   };
 

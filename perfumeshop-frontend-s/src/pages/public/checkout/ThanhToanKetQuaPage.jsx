@@ -15,8 +15,6 @@ const ThanhToanKetQuaPage = () => {
   const { user } = useAuth();
 
   const orderId = searchParams.get('orderId');
-  const code    = searchParams.get('code');    // "00" = thành công
-  const status  = searchParams.get('status');  // "PAID" | "CANCELLED" | "PENDING"
 
   const [checking, setChecking] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState(null); // 'success'|'cancelled'|'pending'
@@ -26,44 +24,20 @@ const ThanhToanKetQuaPage = () => {
       try {
         const id = parseInt(orderId);
 
-        if (code === '00' || status === 'PAID') {
-          // ── Thanh toán thành công 
+        // Luôn hỏi BE làm nguồn sự thật — BE tự xử lý hủy đơn + hoàn kho
+        const res = await api.checkPaymentStatus(id);
+
+        if (res?.status === 'PAID') {
           setPaymentStatus('success');
+          // Xóa giỏ hàng sau khi thanh toán thành công
           if (user?.id_nguoi_dung) {
             try { await api.clearCart(user.id_nguoi_dung); } catch {}
           }
-
-        } else if (status === 'CANCELLED') {
-          //  PayOS báo hủy → hủy đơn trong DB luôn
+        } else if (res?.status === 'CANCELLED' || res?.status === 'EXPIRED') {
           setPaymentStatus('cancelled');
-          try {
-            // Hủy đơn hàng với lý do tự động
-            await api.cancelOrder(id, 'Khách hủy thanh toán qua PayOS');
-          } catch (cancelErr) {
-            // Đơn có thể đã hủy hoặc ở trạng thái không cho hủy — bỏ qua
-            console.warn('Không thể hủy đơn:', cancelErr.message);
-          }
-
+          // BE đã tự hủy đơn + hoàn kho trong checkPaymentStatus, FE không cần làm gì thêm
         } else {
-          // ── Không rõ → hỏi lại BE
-          try {
-            const res = await api.checkPaymentStatus(id);
-            if (res?.status === 'PAID') {
-              setPaymentStatus('success');
-              if (user?.id_nguoi_dung) {
-                try { await api.clearCart(user.id_nguoi_dung); } catch {}
-              }
-            } else if (res?.status === 'CANCELLED' || res?.status === 'EXPIRED') {
-              setPaymentStatus('cancelled');
-              try {
-                await api.cancelOrder(id, 'Thanh toán hết hạn hoặc bị hủy (PayOS)');
-              } catch {}
-            } else {
-              setPaymentStatus('pending');
-            }
-          } catch {
-            setPaymentStatus('pending');
-          }
+          setPaymentStatus('pending');
         }
       } catch {
         setPaymentStatus('pending');
@@ -78,7 +52,7 @@ const ThanhToanKetQuaPage = () => {
       setPaymentStatus('pending');
       setChecking(false);
     }
-  }, [orderId, code, status, user]);
+  }, [orderId, user]);
 
   if (checking) {
     return (

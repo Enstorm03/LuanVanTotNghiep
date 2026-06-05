@@ -23,6 +23,8 @@ public class PlaceOrderRequest {
     @NotBlank
     private String phuongThucThanhToan; // COD, Chuyển khoản, Ví điện tử
 
+    private String ghiChu; // Ghi chú của khách (không bắt buộc)
+
     @NotEmpty
     private List<PlaceOrderItemRequest> items;
     private Boolean allowBackorder;

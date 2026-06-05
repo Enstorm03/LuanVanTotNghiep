@@ -31,6 +31,8 @@ import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminReportPage from './pages/admin/AdminReportPage';
 import AdminReturnsPage from './pages/admin/AdminReturnsPage';
 import AdminBrandsPage from './pages/admin/AdminBrandPage';
+import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
+import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 
 import './assets/styles/App.css';
 
@@ -98,6 +100,8 @@ function App() {
           <Route path="reports" element={<AdminReportPage />} />
           <Route path="returns" element={<AdminReturnsPage />} />
           <Route path="brands" element={<AdminBrandsPage />} />
+          <Route path="categories" element={<AdminCategoriesPage />} />
+          <Route path="reviews" element={<AdminReviewsPage />} />
         </Route>
       </Routes>
     </div>

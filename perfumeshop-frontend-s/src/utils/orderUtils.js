@@ -25,20 +25,23 @@ export const canWriteReview = (order) => {
 
 /**
  * Kiểm tra có thể yêu cầu đổi trả không.
+ * Điều kiện: đơn đã hoàn thành, chưa có phiếu đổi trả, trong vòng 7 ngày kể từ ngày hoàn thành.
  * @param {object} order - đơn hàng
+ * @param {string|null} _unused - (deprecated, giữ để tương thích chữ ký cũ)
  * @param {object|null} returnStatus - object { hasReturnRequest, returnStatus } từ API /kiem-tra
  */
-export const canRequestReturn = (order, orderDate, returnStatus) => {
+export const canRequestReturn = (order, _unused, returnStatus) => {
   // Chỉ cho đơn đã hoàn thành
   if (order.trangThaiVanHanh !== 'Hoàn thành') return false;
 
   // Đã có phiếu đổi trả rồi (bất kể trạng thái)
   if (returnStatus?.hasReturnRequest) return false;
 
-  // Kiểm tra trong vòng 7 ngày kể từ ngày hoàn thành
-  const ngayHoanThanh = order.ngayHoanThanh || orderDate;
+  // Bắt buộc phải có ngày hoàn thành để tính deadline
+  const ngayHoanThanh = order.ngayHoanThanh;
   if (!ngayHoanThanh) return false;
 
+  // Trong vòng 7 ngày kể từ ngày hoàn thành
   const daysDiff = Math.floor(
     (new Date() - new Date(ngayHoanThanh)) / (1000 * 60 * 60 * 24)
   );
