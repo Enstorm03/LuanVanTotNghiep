@@ -79,9 +79,10 @@ public class ReturnService {
         return phieuDoiTraRepository.save(p);
     }
 
-    // ── Bước 1: Admin duyệt → chuyển sang "Chờ hoàn tiền"
-    // hoanKho = true  → hàng còn tốt, hoàn vào kho
-    // hoanKho = false → hàng hỏng/vỡ, không hoàn kho (ghi nhận tổn thất, vẫn hoàn tiền khách)
+   
+
+    // ── Bước 1: Admin duyệt → toàn bộ hàng trả về đều chuyển sang soLuongHangLoi (chờ trả NCC)
+    // Không hoàn kho trong bất kỳ trường hợp nào — hàng đã qua tay khách thì chỉ về NCC.
     @Transactional
     public PhieuDoiTra approve(Integer idDoiTra, Integer nhanVienId, boolean hoanKho) {
         PhieuDoiTra p = getById(idDoiTra);
@@ -92,34 +93,20 @@ public class ReturnService {
         DonHang dh = donHangRepository.findById(p.getIdDonHang())
                 .orElseThrow(() -> new BusinessException("Đơn hàng không tồn tại"));
 
-        if (hoanKho) {
-            // Hàng còn tốt → hoàn vào kho
-            List<ChiTietDonHang> items = dh.getChiTietDonHangs();
-            if (items != null) {
-                for (ChiTietDonHang item : items) {
-                    SanPham sp = item.getSanPham();
-                    if (sp == null) continue;
-                    int ton = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
-                    sp.setSoLuongTonKho(ton + item.getSoLuong());
-                    sanPhamRepository.save(sp);
-                }
-            }
-        } else {
-            // Hàng hỏng/vỡ → không hoàn kho, ghi vào soLuongHangLoi để theo dõi trả NCC
-            List<ChiTietDonHang> items = dh.getChiTietDonHangs();
-            if (items != null) {
-                for (ChiTietDonHang item : items) {
-                    SanPham sp = item.getSanPham();
-                    if (sp == null) continue;
-                    int hangLoi = sp.getSoLuongHangLoi() == null ? 0 : sp.getSoLuongHangLoi();
-                    sp.setSoLuongHangLoi(hangLoi + item.getSoLuong());
-                    sanPhamRepository.save(sp);
-                }
+        // Toàn bộ hàng trả về → soLuongHangLoi, chờ xuất trả NCC
+        List<ChiTietDonHang> items = dh.getChiTietDonHangs();
+        if (items != null) {
+            for (ChiTietDonHang item : items) {
+                SanPham sp = item.getSanPham();
+                if (sp == null) continue;
+                int hangLoi = sp.getSoLuongHangLoi() == null ? 0 : sp.getSoLuongHangLoi();
+                sp.setSoLuongHangLoi(hangLoi + item.getSoLuong());
+                sanPhamRepository.save(sp);
             }
         }
 
-        // Ghi lại quyết định hoàn kho vào ghi chú nội bộ phiếu
-        p.setGhiChuNoiBo(hoanKho ? "Hàng tốt — đã hoàn kho" : "Hàng hỏng/vỡ — không hoàn kho");
+        // Ghi chú: lý do đổi trả của khách để truy xuất khi gửi NCC
+        p.setGhiChuNoiBo("Chờ trả NCC — Lý do KH: " + (p.getLyDo() != null ? p.getLyDo() : ""));
 
         // Đơn hàng chuyển sang "Chờ hoàn tiền"
         dh.setTrangThaiVanHanh("Chờ hoàn tiền");

@@ -94,25 +94,20 @@ const ReturnItem = ({ returnItem, onApprove, onConfirmRefund, onReject, processi
       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
         {returnItem.trangThai === 'Chờ duyệt' && (
           <p className="text-xs text-gray-500">
-            Kiểm tra lý do và điều kiện đổi trả. Bấm <strong>Duyệt</strong> để hoàn kho và chuyển sang bước hoàn tiền.
+            Kiểm tra lý do đổi trả. Bấm <strong>Duyệt</strong> để chuyển hàng vào mục Hàng lỗi/chờ trả NCC và tiến hành hoàn tiền cho khách.
           </p>
         )}
         {returnItem.trangThai === 'Chờ hoàn tiền' && (
-          <p className="text-xs text-orange-600 font-medium">
+          <div className="space-y-1">
             {returnItem.ghiChuNoiBo && (
-              <span className={`inline-block mb-1 px-2 py-0.5 rounded text-[11px] font-semibold ${
-                returnItem.ghiChuNoiBo.includes('không hoàn kho')
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-green-100 text-green-700'
-              }`}>
-                {returnItem.ghiChuNoiBo}
-              </span>
+              <p className="text-xs text-blue-600 font-medium">📦 {returnItem.ghiChuNoiBo}</p>
             )}
-            {returnItem.ghiChuNoiBo && <br />}
-            ⚠ Vui lòng hoàn tiền{' '}
-            <strong>{Number(returnItem.soTienHoan).toLocaleString('vi-VN')}₫</strong>{' '}
-            cho khách, sau đó bấm <strong>"Đã hoàn tiền"</strong> để hoàn tất.
-          </p>
+            <p className="text-xs text-orange-600 font-medium">
+              ⚠ Hàng đã vào mục <strong>Hàng lỗi/chờ trả NCC</strong>. Vui lòng hoàn tiền{' '}
+              <strong>{Number(returnItem.soTienHoan).toLocaleString('vi-VN')}₫</strong>{' '}
+              cho khách, sau đó bấm <strong>"Đã hoàn tiền"</strong> để hoàn tất.
+            </p>
+          </div>
         )}
         {returnItem.trangThai === 'Hoàn tiền thành công' && (
           <p className="text-xs text-teal-600">✓ Quy trình đổi trả đã hoàn tất.</p>

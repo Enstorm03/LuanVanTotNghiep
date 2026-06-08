@@ -158,6 +158,7 @@ const TabBanCham = () => {
                     {sp.soLuongTonKho}
                   </span>
                 </td>
+                
                 <td className="px-4 py-3 text-center">
                   <span className={`font-semibold ${sp.tongBan === 0 ? 'text-red-600' : sp.tongBan < 3 ? 'text-orange-500' : 'text-gray-700'}`}>
                     {sp.tongBan}
