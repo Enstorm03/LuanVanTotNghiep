@@ -51,6 +51,10 @@ const AdminSidebar = () => {
               <span className="material-symbols-outlined">report</span>
               Hàng lỗi
             </NavLink>
+            <NavLink to="/admin/kho" className={navLinkClasses}>
+              <span className="material-symbols-outlined">warehouse</span>
+              Quản lý kho
+            </NavLink>
             <NavLink to="/admin/reviews" className={navLinkClasses}>
               <span className="material-symbols-outlined">star</span>
               Đánh giá
@@ -67,6 +71,10 @@ const AdminSidebar = () => {
             <NavLink to="/admin/reports" className={navLinkClasses}>
               <span className="material-symbols-outlined">monitoring</span>
               Báo cáo
+            </NavLink>
+            <NavLink to="/admin/campaigns" className={navLinkClasses}>
+              <span className="material-symbols-outlined">campaign</span>
+              Chiến dịch
             </NavLink>
           </nav>
         </div>

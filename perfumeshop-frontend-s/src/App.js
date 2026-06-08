@@ -34,6 +34,9 @@ import AdminBrandsPage from './pages/admin/AdminBrandPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminDefectivePage from './pages/admin/AdminDefectivePage';
+import AdminCampaignsPage from './pages/admin/AdminCampaignsPage';
+import AdminKhoPage from './pages/admin/AdminKhoPage';
+import AdminImportKhoPage from './pages/admin/AdminImportKhoPage';
 
 import './assets/styles/App.css';
 
@@ -104,6 +107,9 @@ function App() {
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="reviews" element={<AdminReviewsPage />} />
           <Route path="defective" element={<AdminDefectivePage />} />
+          <Route path="campaigns" element={<AdminCampaignsPage />} />
+          <Route path="kho" element={<AdminKhoPage />} />
+          <Route path="import-kho" element={<AdminImportKhoPage />} />
         </Route>
       </Routes>
     </div>

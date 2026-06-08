@@ -73,6 +73,20 @@
             <version>2.0.1</version>
         </dependency>
 
+        <!-- Apache POI: đọc file Excel (.xlsx) cho tính năng import kho -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
+        <!-- Commons CSV: đọc file CSV cho tính năng import kho -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.10.0</version>
+        </dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>

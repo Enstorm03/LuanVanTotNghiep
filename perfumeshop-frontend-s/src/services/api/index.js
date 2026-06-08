@@ -9,6 +9,8 @@ import returnApi from './returnApi.js';
 import brandApi from './brandApi.js';
 import categoryApi from './categoryApi.js';
 import reviewAdminApi from './reviewAdminApi.js';
+import campaignApi from './campaignApi.js';
+import khoApi from './khoApi.js';
 import dashboardApi from './dashboardApi.js';
 import reportApi from './reportApi.js';
 
@@ -114,6 +116,27 @@ const api = {
   getAllReviews: reviewAdminApi.getAllReviews.bind(reviewAdminApi),
   getReviewsByProduct: reviewAdminApi.getReviewsByProduct.bind(reviewAdminApi),
   deleteReview: reviewAdminApi.deleteReview.bind(reviewAdminApi),
+
+  // Campaign methods
+  getActiveCampaign: campaignApi.getActiveCampaign.bind(campaignApi),
+  getAllCampaigns: campaignApi.getAllCampaigns.bind(campaignApi),
+  getCampaignById: campaignApi.getCampaignById.bind(campaignApi),
+  createCampaign: campaignApi.createCampaign.bind(campaignApi),
+  updateCampaign: campaignApi.updateCampaign.bind(campaignApi),
+  deleteCampaign: campaignApi.deleteCampaign.bind(campaignApi),
+  setCampaignProducts: campaignApi.setCampaignProducts.bind(campaignApi),
+
+  // Kho methods
+  importPreview: khoApi.importPreview.bind(khoApi),
+  getPreview: khoApi.getPreview.bind(khoApi),
+  updateKhoRow: khoApi.updateRow.bind(khoApi),
+  deleteKhoRow: khoApi.deleteRow.bind(khoApi),
+  addKhoRow: khoApi.addRow.bind(khoApi),
+  confirmImport: khoApi.confirmImport.bind(khoApi),
+  listPhieuNhap: khoApi.listPhieuNhap.bind(khoApi),
+  getPhieuNhap: khoApi.getPhieuNhap.bind(khoApi),
+  getBienDong: khoApi.getBienDong.bind(khoApi),
+  getBanCham: khoApi.getBanCham.bind(khoApi),
 
   
 };

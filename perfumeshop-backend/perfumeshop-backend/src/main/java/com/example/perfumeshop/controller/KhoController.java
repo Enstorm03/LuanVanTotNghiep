@@ -1,0 +1,114 @@
+package com.example.perfumeshop.controller;
+
+import com.example.perfumeshop.entity.BienDongKho;
+import com.example.perfumeshop.entity.PhieuNhapKho;
+import com.example.perfumeshop.entity.PhieuNhapTam;
+import com.example.perfumeshop.service.KhoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/kho")
+@CrossOrigin(origins = "*")
+public class KhoController {
+
+    @Autowired
+    private KhoService khoService;
+
+    // ── Import CSV/Excel → staging ─────────────────────────────────────────
+
+    /**
+     * POST /api/kho/import-preview
+     * Form-data: file (CSV hoặc xlsx)
+     * Trả về sessionId + danh sách dòng preview
+     */
+    @PostMapping("/import-preview")
+    public ResponseEntity<Map<String, Object>> importPreview(
+            @RequestParam("file") MultipartFile file) throws Exception {
+        return ResponseEntity.ok(khoService.importPreview(file));
+    }
+
+    /** GET /api/kho/import-preview/{sessionId} — lấy lại preview đã upload */
+    @GetMapping("/import-preview/{sessionId}")
+    public ResponseEntity<List<PhieuNhapTam>> getPreview(@PathVariable String sessionId) {
+        return ResponseEntity.ok(khoService.getPreview(sessionId));
+    }
+
+    /** PUT /api/kho/import-preview/row/{rowId} — admin sửa tất cả field của dòng */
+    @PutMapping("/import-preview/row/{rowId}")
+    public ResponseEntity<PhieuNhapTam> updateRow(
+            @PathVariable Integer rowId,
+            @RequestBody Map<String, Object> body) {
+        Integer idSanPham  = body.get("idSanPham")  != null ? Integer.parseInt(body.get("idSanPham").toString())  : null;
+        Integer soLuong    = body.get("soLuong")    != null ? Integer.parseInt(body.get("soLuong").toString())    : null;
+        BigDecimal giaNhap = body.get("giaNhap")    != null ? new BigDecimal(body.get("giaNhap").toString())      : null;
+        String tenSp       = body.get("tenSanPhamCsv") != null ? body.get("tenSanPhamCsv").toString() : null;
+        String ghiChu      = body.get("ghiChu")     != null ? body.get("ghiChu").toString()      : null;
+        return ResponseEntity.ok(khoService.updateRow(rowId, idSanPham, soLuong, giaNhap, tenSp, ghiChu));
+    }
+
+    /** DELETE /api/kho/import-preview/row/{rowId} — xóa dòng khỏi staging */
+    @DeleteMapping("/import-preview/row/{rowId}")
+    public ResponseEntity<Void> deleteRow(@PathVariable Integer rowId) {
+        khoService.deleteRow(rowId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** POST /api/kho/import-preview/{sessionId}/row — thêm dòng thủ công */
+    @PostMapping("/import-preview/{sessionId}/row")
+    public ResponseEntity<PhieuNhapTam> addRow(@PathVariable String sessionId,
+                                                @RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(khoService.addRow(sessionId, body));
+    }
+
+    /**
+     * POST /api/kho/import-confirm
+     * Body: { sessionId, nhanVienId, nhaCungCap, ghiChu }
+     * Duyệt → cộng kho + tạo phiếu chính thức + xóa staging
+     */
+    @PostMapping("/import-confirm")
+    public ResponseEntity<PhieuNhapKho> confirmImport(@RequestBody Map<String, Object> body) {
+        String sessionId   = (String) body.get("sessionId");
+        Integer nhanVienId = body.get("nhanVienId") != null ? Integer.parseInt(body.get("nhanVienId").toString()) : null;
+        String nhaCungCap  = (String) body.get("nhaCungCap");
+        String ghiChu      = (String) body.get("ghiChu");
+        return ResponseEntity.ok(khoService.confirmImport(sessionId, nhanVienId, nhaCungCap, ghiChu));
+    }
+
+    // ── Lịch sử phiếu nhập ────────────────────────────────────────────────
+
+    @GetMapping("/phieu-nhap")
+    public ResponseEntity<List<PhieuNhapKho>> listPhieuNhap() {
+        return ResponseEntity.ok(khoService.listPhieuNhap());
+    }
+
+    @GetMapping("/phieu-nhap/{id}")
+    public ResponseEntity<PhieuNhapKho> getPhieuNhap(@PathVariable Integer id) {
+        return ResponseEntity.ok(khoService.getPhieuNhap(id));
+    }
+
+    // ── Biến động kho ─────────────────────────────────────────────────────
+
+    /** GET /api/kho/bien-dong?idSanPham=1 — lịch sử 1 SP; bỏ param → tất cả */
+    @GetMapping("/bien-dong")
+    public ResponseEntity<List<BienDongKho>> getBienDong(
+            @RequestParam(value = "idSanPham", required = false) Integer idSanPham) {
+        return ResponseEntity.ok(khoService.getBienDong(idSanPham));
+    }
+
+    // ── Thống kê bán chậm ─────────────────────────────────────────────────
+
+    /** GET /api/kho/ban-cham?days=30&limit=20 */
+    @GetMapping("/ban-cham")
+    public ResponseEntity<List<Map<String, Object>>> getBanCham(
+            @RequestParam(value = "days",  defaultValue = "30")  int days,
+            @RequestParam(value = "limit", defaultValue = "20")  int limit) {
+        return ResponseEntity.ok(khoService.getSlowMoving(days, limit));
+    }
+}

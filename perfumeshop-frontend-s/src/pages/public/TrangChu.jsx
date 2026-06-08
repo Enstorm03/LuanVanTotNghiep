@@ -10,6 +10,7 @@ import diorImg from '../../assets/images/dior.png';
 
 // Ảnh dùng cho danh mục (không thay đổi → để ngoài tránh re-render)
 const CATEGORY_IMAGES = [diorImg, chanelImg, bannerImg];
+const DEFAULT_BANNER = bannerImg;
 
 // Component Loading
 const LoadingBlock = ({ text }) => (
@@ -38,24 +39,43 @@ const HomePage = () => {
     brands: []
   });
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
+  const [campaign, setCampaign] = useState(null); // { tenSuKien, bannerUrl, danhSachSanPham }
 
   // Hàm fetch API
   const loadData = async () => {
     try {
       setLoading(true);
-      const [allProducts, categories, brands] = await Promise.all([
-        api.getAllProducts(),
+
+      // Chạy song song: kiểm tra campaign + tải danh mục + thương hiệu
+      const [campaignRes, categories, brands] = await Promise.all([
+        api.getActiveCampaign(),
         api.getCategories(),
         api.getBrands(),
       ]);
 
-      setData({
-        products: allProducts.slice(0, 4),
-        categories,
-        brands,
-      });
+      if (campaignRes?.active) {
+        // CÓ sự kiện: dùng sản phẩm của chiến dịch
+        setCampaign(campaignRes);
+        const mapped = (campaignRes.danhSachSanPham || []).slice(0, 8).map(sp => ({
+          id_san_pham:      sp.idSanPham,
+          ten_san_pham:     sp.tenSanPham,
+          gia_ban:          Number(sp.giaBan),
+          gia_hien_tai:     sp.angGiamGia && sp.giaHienTai ? Number(sp.giaHienTai) : Number(sp.giaBan),
+          url_hinh_anh:     sp.urlHinhAnh,
+          id_thuong_hieu:   sp.thuongHieu?.idThuongHieu || sp.idThuongHieu || null,
+          so_luong_ton_kho: sp.soLuongTonKho,
+          phan_tram_giam:   sp.phanTramGiam,
+          ang_giam_gia:     sp.angGiamGia,
+        }));
+        setData({ products: mapped, categories, brands });
+      } else {
+        // KHÔNG có sự kiện: lấy top sản phẩm bình thường
+        setCampaign(null);
+        const allProducts = await api.getAllProducts();
+        setData({ products: allProducts.slice(0, 8), categories, brands });
+      }
 
     } catch (err) {
       console.error(err);
@@ -80,15 +100,25 @@ const HomePage = () => {
           <div
             className="flex min-h-[520px] flex-col gap-6 bg-cover bg-center items-center justify-center p-6 text-center"
             style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url(${bannerImg})`
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url(${
+                campaign?.bannerUrl || DEFAULT_BANNER
+              })`
             }}
           >
+            {/* Badge sự kiện */}
+            {campaign && (
+              <span className="z-10 inline-flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full shadow animate-pulse">
+                 {campaign.tenSuKien}
+              </span>
+            )}
             <div className="flex flex-col gap-4 max-w-3xl z-10">
               <h1 className="text-white text-4xl font-black tracking-tight md:text-6xl">
-                Bộ Sưu Tập Mùa Hè 2025
+                {campaign ? campaign.tenSuKien : 'Bộ Sưu Tập Mùa Hè 2025'}
               </h1>
               <p className="text-white/90 text-base md:text-lg font-medium">
-                Tỏa Sáng Dưới Nắng Vàng — Giảm giá 30%.
+                {campaign
+                  ? `Khám phá ${campaign.danhSachSanPham?.length || 0} sản phẩm đặc biệt trong chiến dịch này`
+                  : 'Tỏa Sáng Dưới Nắng Vàng — Giảm giá 30%.'}
               </p>
             </div>
 
@@ -96,7 +126,7 @@ const HomePage = () => {
               to="/products"
               className="z-10 mt-4 h-12 px-8 bg-primary text-white font-bold rounded-lg hover:bg-opacity-90 transition-all shadow-lg flex items-center justify-center"
             >
-              Khám Phá Ngay
+              {campaign ? 'Xem Bộ Sưu Tập' : 'Khám Phá Ngay'}
             </Link>
           </div>
         </div>
@@ -105,7 +135,7 @@ const HomePage = () => {
       {/* === FEATURED PRODUCTS === */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <h2 className="text-3xl font-bold tracking-tight px-4 pb-6">
-          Sản Phẩm Bán Chạy Nhất
+          {campaign ? `Sản phẩm trong "${campaign.tenSuKien}"` : 'Sản Phẩm Bán Chạy Nhất'}
         </h2>
 
         {loading && <LoadingBlock text="Đang tải sản phẩm..." />}

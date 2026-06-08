@@ -42,7 +42,7 @@ class BaseApi {
       gia_ban: Number(product.giaBan),          // Giá gốc (để hiển thị gạch ngang)
       gia_hien_tai: giaHienTai,                 // Giá thực tế khách trả
       url_hinh_anh: product.urlHinhAnh,
-      id_thuong_hieu: product.thuongHieu?.idThuongHieu || product.idThuongHieu || 1,
+      id_thuong_hieu: product.thuongHieu?.idThuongHieu || product.idThuongHieu || null,
       id_danh_muc: product.danhMuc?.idDanhMuc || product.idDanhMuc || 1,
       so_luong_ton_kho: product.soLuongTonKho,
       mo_ta: product.moTa,
