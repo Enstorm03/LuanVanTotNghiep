@@ -99,7 +99,17 @@ const ReturnItem = ({ returnItem, onApprove, onConfirmRefund, onReject, processi
         )}
         {returnItem.trangThai === 'Chờ hoàn tiền' && (
           <p className="text-xs text-orange-600 font-medium">
-            ⚠ Kho đã được hoàn. Vui lòng hoàn tiền{' '}
+            {returnItem.ghiChuNoiBo && (
+              <span className={`inline-block mb-1 px-2 py-0.5 rounded text-[11px] font-semibold ${
+                returnItem.ghiChuNoiBo.includes('không hoàn kho')
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-green-100 text-green-700'
+              }`}>
+                {returnItem.ghiChuNoiBo}
+              </span>
+            )}
+            {returnItem.ghiChuNoiBo && <br />}
+            ⚠ Vui lòng hoàn tiền{' '}
             <strong>{Number(returnItem.soTienHoan).toLocaleString('vi-VN')}₫</strong>{' '}
             cho khách, sau đó bấm <strong>"Đã hoàn tiền"</strong> để hoàn tất.
           </p>

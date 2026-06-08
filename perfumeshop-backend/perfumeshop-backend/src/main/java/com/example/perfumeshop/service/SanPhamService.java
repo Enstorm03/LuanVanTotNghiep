@@ -38,7 +38,6 @@ public class SanPhamService {
         SanPham existing = sanPhamRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại"));
 
-        // Cập nhật toàn phần (PUT): copy các field từ input sang existing
         existing.setTenSanPham(input.getTenSanPham());
         existing.setMoTa(input.getMoTa());
         existing.setUrlHinhAnh(input.getUrlHinhAnh());
@@ -53,5 +52,19 @@ public class SanPhamService {
         existing.setNgayKetThucGiam(input.getNgayKetThucGiam());
 
         return sanPhamRepository.save(existing);
+    }
+
+    /**
+     * Xác nhận xuất trả nhà cung cấp một số lượng hàng lỗi.
+     * Trừ soLuongHangLoi đi soLuong (tối đa về 0).
+     */
+    public SanPham xuatHangLoi(Integer id, int soLuong) {
+        SanPham sp = sanPhamRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại"));
+        if (soLuong <= 0) throw new BusinessException("Số lượng xuất phải > 0");
+        int hangLoi = sp.getSoLuongHangLoi() == null ? 0 : sp.getSoLuongHangLoi();
+        if (soLuong > hangLoi) throw new BusinessException("Số lượng xuất vượt quá số hàng lỗi hiện có (" + hangLoi + ")");
+        sp.setSoLuongHangLoi(hangLoi - soLuong);
+        return sanPhamRepository.save(sp);
     }
 }

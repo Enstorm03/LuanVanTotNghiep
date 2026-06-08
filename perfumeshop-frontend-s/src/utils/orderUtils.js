@@ -25,7 +25,9 @@ export const canWriteReview = (order) => {
 
 /**
  * Kiểm tra có thể yêu cầu đổi trả không.
- * Điều kiện: đơn đã hoàn thành, chưa có phiếu đổi trả, trong vòng 7 ngày kể từ ngày hoàn thành.
+ * Điều kiện: đơn đã hoàn thành và chưa có phiếu đổi trả.
+ * Không giới hạn thời gian — admin xét duyệt theo từng trường hợp cụ thể
+ * (lỗi NSX, giao sai, chưa qua sử dụng còn nguyên tem mác).
  * @param {object} order - đơn hàng
  * @param {string|null} _unused - (deprecated, giữ để tương thích chữ ký cũ)
  * @param {object|null} returnStatus - object { hasReturnRequest, returnStatus } từ API /kiem-tra
@@ -37,15 +39,7 @@ export const canRequestReturn = (order, _unused, returnStatus) => {
   // Đã có phiếu đổi trả rồi (bất kể trạng thái)
   if (returnStatus?.hasReturnRequest) return false;
 
-  // Bắt buộc phải có ngày hoàn thành để tính deadline
-  const ngayHoanThanh = order.ngayHoanThanh;
-  if (!ngayHoanThanh) return false;
-
-  // Trong vòng 7 ngày kể từ ngày hoàn thành
-  const daysDiff = Math.floor(
-    (new Date() - new Date(ngayHoanThanh)) / (1000 * 60 * 60 * 24)
-  );
-  return daysDiff <= 7;
+  return true;
 };
 
 export const formatOrderDate = (dateString) => {

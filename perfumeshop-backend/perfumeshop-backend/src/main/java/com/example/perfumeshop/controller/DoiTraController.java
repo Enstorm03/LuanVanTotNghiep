@@ -56,7 +56,8 @@ public class DoiTraController {
     @PostMapping("/{id}/duyet")
     public ResponseEntity<PhieuDoiTra> approve(@PathVariable Integer id,
                                                 @Valid @RequestBody ApproveReturnRequest req) {
-        return ResponseEntity.ok(returnService.approve(id, req.getNhanVienId()));
+        boolean hoanKho = req.getHoanKho() == null || req.getHoanKho(); // default true
+        return ResponseEntity.ok(returnService.approve(id, req.getNhanVienId(), hoanKho));
     }
 
     @PostMapping("/{id}/xac-nhan-hoan-tien")

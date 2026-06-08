@@ -69,6 +69,7 @@ class CartApi extends BaseApi {
     try {
       const params = new URLSearchParams({ userId });
       return await this._fetch(`${API_BASE_URL}/cart?${params}`, { method: 'DELETE' });
+      
     } catch (error) {
       console.error('Lỗi xóa giỏ hàng:', error);
       throw error;

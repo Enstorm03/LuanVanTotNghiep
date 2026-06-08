@@ -37,6 +37,14 @@ public class SanPham {
     @Column(name = "so_luong_ton_kho")
     private Integer soLuongTonKho;
 
+    /**
+     * Số lượng hàng lỗi/hỏng từ đổi trả khách hàng — chờ trả nhà cung cấp.
+     * Tăng khi admin duyệt đổi trả với hoanKho=false.
+     * Giảm về 0 khi admin xác nhận đã xuất trả nhà cung cấp.
+     */
+    @Column(name = "so_luong_hang_loi", columnDefinition = "INT DEFAULT 0")
+    private Integer soLuongHangLoi = 0;
+
     /** Phần trăm giảm giá (0–100). Null = không giảm giá. */
     @Column(name = "phan_tram_giam")
     private Integer phanTramGiam;

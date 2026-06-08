@@ -50,4 +50,26 @@ public class SanPhamController {
     public void delete(@PathVariable Integer id) {
         sanPhamService.deleteSanPham(id);
     }
+
+    /**
+     * Danh sách sản phẩm có hàng lỗi đang chờ trả nhà cung cấp.
+     * GET /api/san-pham/hang-loi
+     */
+    @GetMapping("/hang-loi")
+    public List<SanPham> getHangLoi() {
+        return sanPhamService.getAllSanPhams().stream()
+                .filter(sp -> sp.getSoLuongHangLoi() != null && sp.getSoLuongHangLoi() > 0)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Xác nhận đã xuất trả nhà cung cấp — reset soLuongHangLoi về 0.
+     * POST /api/san-pham/{id}/xuat-hang-loi
+     * Body: { "soLuong": 5 }  (số lượng đã xuất, <= soLuongHangLoi)
+     */
+    @PostMapping("/{id}/xuat-hang-loi")
+    public SanPham xuatHangLoi(@PathVariable Integer id,
+                                @RequestBody java.util.Map<String, Integer> body) {
+        return sanPhamService.xuatHangLoi(id, body.getOrDefault("soLuong", 0));
+    }
 }

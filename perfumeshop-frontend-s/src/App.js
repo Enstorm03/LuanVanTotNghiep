@@ -33,6 +33,7 @@ import AdminReturnsPage from './pages/admin/AdminReturnsPage';
 import AdminBrandsPage from './pages/admin/AdminBrandPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import AdminReviewsPage from './pages/admin/AdminReviewsPage';
+import AdminDefectivePage from './pages/admin/AdminDefectivePage';
 
 import './assets/styles/App.css';
 
@@ -102,6 +103,7 @@ function App() {
           <Route path="brands" element={<AdminBrandsPage />} />
           <Route path="categories" element={<AdminCategoriesPage />} />
           <Route path="reviews" element={<AdminReviewsPage />} />
+          <Route path="defective" element={<AdminDefectivePage />} />
         </Route>
       </Routes>
     </div>

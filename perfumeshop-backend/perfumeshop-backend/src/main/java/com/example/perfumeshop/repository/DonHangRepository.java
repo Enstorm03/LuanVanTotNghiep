@@ -16,12 +16,14 @@ public interface DonHangRepository extends JpaRepository<DonHang, Integer> {
     List<DonHang> findByIdNguoiDungAndTrangThaiVanHanh(Integer idNguoiDung, String trangThaiVanHanh);
     List<DonHang> findByIdNguoiDungAndTrangThaiVanHanhNot(Integer idNguoiDung, String trangThaiVanHanh);
 
-    // SỬA DÒNG NÀY: Thay o.id_don_hang thành o.idDonHang (hoặc tên chính xác trong class DonHang)
+    // Tìm kiếm có phân trang, ưu tiên đơn online (PayOS) lên đầu để admin xác nhận sớm
     @Query("SELECT o FROM DonHang o WHERE " +
             "(:trangThai IS NULL OR o.trangThaiVanHanh = :trangThai) " +
             "AND (:search IS NULL OR LOWER(CAST(o.idDonHang AS string)) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(o.tenNguoiNhan) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "AND (:trangThai IS NOT NULL OR o.trangThaiVanHanh <> 'Giỏ hàng')")
+            "AND (:trangThai IS NOT NULL OR o.trangThaiVanHanh <> 'Giỏ hàng') " +
+            "ORDER BY CASE WHEN o.phuongThucThanhToan = 'online' AND o.trangThaiVanHanh = 'Đang chờ' AND o.trangThaiThanhToan = 'Đã thanh toán' THEN 0 ELSE 1 END ASC, " +
+            "o.ngayDatHang DESC")
     Page<DonHang> searchWithPage(@Param("trangThai") String trangThai,
                                  @Param("search") String search,
                                  Pageable pageable);

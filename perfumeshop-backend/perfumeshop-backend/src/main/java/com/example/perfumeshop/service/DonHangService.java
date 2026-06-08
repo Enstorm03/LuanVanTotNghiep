@@ -112,9 +112,31 @@ public class DonHangService {
     @Transactional
     public DonHang confirm(Integer id, Integer nhanVienId) {
         DonHang dh = getById(id);
-        if (!(TT_CHO_XAC_NHAN.equals(dh.getTrangThaiVanHanh()) )) {
-            throw new BusinessException("Chỉ xác nhận đơn ở trạng thái 'Đang chờ' hoặc 'Chờ hàng'");
+        if (!TT_CHO_XAC_NHAN.equals(dh.getTrangThaiVanHanh())) {
+            throw new BusinessException("Chỉ xác nhận đơn ở trạng thái 'Đang chờ'");
         }
+
+        // Đơn online (PayOS): phải đã thanh toán mới được xác nhận
+        boolean isOnline = "online".equalsIgnoreCase(dh.getPhuongThucThanhToan());
+        if (isOnline && !"Đã thanh toán".equals(dh.getTrangThaiThanhToan())) {
+            throw new BusinessException("Đơn thanh toán online chưa được xác nhận thanh toán. Vui lòng chờ khách thanh toán trước.");
+        }
+
+        // Trừ kho khi admin xác nhận — áp dụng cho cả COD và online
+        List<ChiTietDonHang> items = dh.getChiTietDonHangs();
+        if (items != null) {
+            for (ChiTietDonHang ct : items) {
+                SanPham sp = ct.getSanPham();
+                if (sp == null) continue;
+                int updated = sanPhamRepository.decrementStock(sp.getIdSanPham(), ct.getSoLuong());
+                if (updated == 0) {
+                    throw new BusinessException(
+                        "Sản phẩm '" + sp.getTenSanPham() + "' không đủ tồn kho để xác nhận đơn hàng."
+                    );
+                }
+            }
+        }
+
         dh.setIdNhanVien(nhanVienId);
         dh.setTrangThaiVanHanh(TT_DA_XAC_NHAN);
         return donHangRepository.save(dh);
@@ -162,11 +184,15 @@ public class DonHangService {
         if (!(TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt))) {
             throw new BusinessException("Không thể hủy đơn ở trạng thái hiện tại");
         }
-        // Hoàn kho theo quy tắc
-        if (TT_CHO_XAC_NHAN.equals(tt) || TT_DA_XAC_NHAN.equals(tt)) {
 
+        // Hoàn kho chỉ khi kho đã bị trừ:
+        // Kho được trừ khi admin confirm (TT_DA_XAC_NHAN), không trừ lúc đặt hàng.
+        // → TT_CHO_XAC_NHAN: chưa trừ kho → không hoàn
+        // → TT_DA_XAC_NHAN: đã trừ kho lúc confirm → hoàn
+        if (TT_DA_XAC_NHAN.equals(tt)) {
             restoreInventory(dh);
         }
+
         dh.setTrangThaiVanHanh(TT_DA_HUY);
         dh.setLyDoHuy(lyDo);
         return donHangRepository.save(dh);
@@ -184,5 +210,8 @@ public class DonHangService {
         }
     }
 
-                
+
+    public void delete(Integer id) {
+        donHangRepository.deleteById(id);
+    }
 }

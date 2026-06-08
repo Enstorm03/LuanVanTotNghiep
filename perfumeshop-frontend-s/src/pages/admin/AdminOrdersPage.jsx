@@ -12,6 +12,7 @@ const AdminOrdersPage = () => {
     statusFilter,
     currentOrders,
     totalPages,
+    totalElements,
     currentPage,
     setSearchTerm,
     setStatusFilter,
@@ -75,12 +76,19 @@ const AdminOrdersPage = () => {
 
       <OrdersTable orders={currentOrders} />
 
-      {/* Pagination Controls */}
-      <OrdersPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={paginate}
-      />
+      {/* Tổng số + Phân trang */}
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <span>
+          {totalElements > 0
+            ? `Hiển thị trang ${currentPage}/${totalPages} — ${totalElements} đơn hàng`
+            : 'Không có đơn hàng nào'}
+        </span>
+        <OrdersPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={paginate}
+        />
+      </div>
     </div>
   );
 };

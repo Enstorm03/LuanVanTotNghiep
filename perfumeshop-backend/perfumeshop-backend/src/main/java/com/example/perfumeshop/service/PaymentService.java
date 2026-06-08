@@ -110,8 +110,10 @@ public class PaymentService {
             boolean coTheHuy = DonHangService.TT_CHO_XAC_NHAN.equals(tt)
                     || DonHangService.TT_DA_XAC_NHAN.equals(tt);
             if (coTheHuy) {
-                // Hoàn kho
-                if (dh.getChiTietDonHangs() != null) {
+                // Kho chỉ bị trừ khi admin confirm (TT_DA_XAC_NHAN).
+                // Đơn đang TT_CHO_XAC_NHAN → chưa trừ kho → không cần hoàn.
+                boolean daGiamKho = DonHangService.TT_DA_XAC_NHAN.equals(tt);
+                if (daGiamKho && dh.getChiTietDonHangs() != null) {
                     for (var item : dh.getChiTietDonHangs()) {
                         var sp = item.getSanPham();
                         if (sp == null) continue;
@@ -144,14 +146,14 @@ public class PaymentService {
                 donHangRepository.save(dh);
             }
         } else if ("CANCELLED".equals(status)) {
-            // Vì Webhook không bắn khi Hủy, ta phải tự bắt trạng thái CANCELLED ở đây
             String tt = dh.getTrangThaiVanHanh();
             boolean coTheHuy = DonHangService.TT_CHO_XAC_NHAN.equals(tt)
                     || DonHangService.TT_DA_XAC_NHAN.equals(tt);
 
             if (coTheHuy) {
-                // Hoàn kho
-                if (dh.getChiTietDonHangs() != null) {
+                // Chỉ hoàn kho nếu đơn đã qua confirm (kho đã bị trừ)
+                boolean daGiamKho = DonHangService.TT_DA_XAC_NHAN.equals(tt);
+                if (daGiamKho && dh.getChiTietDonHangs() != null) {
                     for (var item : dh.getChiTietDonHangs()) {
                         var sp = item.getSanPham();
                         if (sp == null) continue;

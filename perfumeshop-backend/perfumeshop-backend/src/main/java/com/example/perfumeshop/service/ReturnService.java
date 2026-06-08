@@ -13,14 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class ReturnService {
-
-    private static final int RETURN_WINDOW_DAYS = 7;
 
     // Trạng thái phiếu đổi trả
     public static final String TT_CHO_DUYET       = "Chờ duyệt";
@@ -63,19 +60,8 @@ public class ReturnService {
             throw new BusinessException("Chỉ nhận đổi trả cho đơn hàng đang giao hoặc đã hoàn thành");
         }
 
-        // Nếu đã hoàn thành: kiểm tra trong 7 ngày kể từ ngày hoàn thành
-        if (daHoanThanh) {
-            LocalDateTime ngayHoanThanh = dh.getNgayHoanThanh();
-            if (ngayHoanThanh == null) {
-                throw new BusinessException("Đơn hàng chưa có ngày hoàn thành");
-            }
-            long days = Duration.between(ngayHoanThanh, LocalDateTime.now()).toDays();
-            if (days > RETURN_WINDOW_DAYS) {
-                throw new BusinessException(
-                    "Đã quá " + RETURN_WINDOW_DAYS + " ngày kể từ ngày hoàn thành. Không thể đổi trả."
-                );
-            }
-        }
+        // Nếu đã hoàn thành: không giới hạn thời gian — admin xét duyệt theo từng trường hợp cụ thể
+        // (lỗi NSX, giao sai sản phẩm, chưa qua sử dụng còn nguyên tem mác)
 
         List<PhieuDoiTra> existing = phieuDoiTraRepository.findByIdDonHangAndIdNguoiDung(idDonHang, idNguoiDung);
         if (!existing.isEmpty()) {
@@ -93,9 +79,11 @@ public class ReturnService {
         return phieuDoiTraRepository.save(p);
     }
 
-    // ── Bước 1: Admin duyệt → hoàn kho, chuyển sang "Chờ hoàn tiền" ────────
+    // ── Bước 1: Admin duyệt → chuyển sang "Chờ hoàn tiền"
+    // hoanKho = true  → hàng còn tốt, hoàn vào kho
+    // hoanKho = false → hàng hỏng/vỡ, không hoàn kho (ghi nhận tổn thất, vẫn hoàn tiền khách)
     @Transactional
-    public PhieuDoiTra approve(Integer idDoiTra, Integer nhanVienId) {
+    public PhieuDoiTra approve(Integer idDoiTra, Integer nhanVienId, boolean hoanKho) {
         PhieuDoiTra p = getById(idDoiTra);
         if (!TT_CHO_DUYET.equals(p.getTrangThai())) {
             throw new BusinessException("Phiếu không ở trạng thái 'Chờ duyệt'");
@@ -104,19 +92,36 @@ public class ReturnService {
         DonHang dh = donHangRepository.findById(p.getIdDonHang())
                 .orElseThrow(() -> new BusinessException("Đơn hàng không tồn tại"));
 
-        // Hoàn kho ngay khi duyệt
-        List<ChiTietDonHang> items = dh.getChiTietDonHangs();
-        if (items != null) {
-            for (ChiTietDonHang item : items) {
-                SanPham sp = item.getSanPham();
-                if (sp == null) continue;
-                int ton = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
-                sp.setSoLuongTonKho(ton + item.getSoLuong());
-                sanPhamRepository.save(sp);
+        if (hoanKho) {
+            // Hàng còn tốt → hoàn vào kho
+            List<ChiTietDonHang> items = dh.getChiTietDonHangs();
+            if (items != null) {
+                for (ChiTietDonHang item : items) {
+                    SanPham sp = item.getSanPham();
+                    if (sp == null) continue;
+                    int ton = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
+                    sp.setSoLuongTonKho(ton + item.getSoLuong());
+                    sanPhamRepository.save(sp);
+                }
+            }
+        } else {
+            // Hàng hỏng/vỡ → không hoàn kho, ghi vào soLuongHangLoi để theo dõi trả NCC
+            List<ChiTietDonHang> items = dh.getChiTietDonHangs();
+            if (items != null) {
+                for (ChiTietDonHang item : items) {
+                    SanPham sp = item.getSanPham();
+                    if (sp == null) continue;
+                    int hangLoi = sp.getSoLuongHangLoi() == null ? 0 : sp.getSoLuongHangLoi();
+                    sp.setSoLuongHangLoi(hangLoi + item.getSoLuong());
+                    sanPhamRepository.save(sp);
+                }
             }
         }
 
-        // Đơn hàng chuyển sang "Chờ hoàn tiền" (chưa phải "Đã hoàn trả")
+        // Ghi lại quyết định hoàn kho vào ghi chú nội bộ phiếu
+        p.setGhiChuNoiBo(hoanKho ? "Hàng tốt — đã hoàn kho" : "Hàng hỏng/vỡ — không hoàn kho");
+
+        // Đơn hàng chuyển sang "Chờ hoàn tiền"
         dh.setTrangThaiVanHanh("Chờ hoàn tiền");
         donHangRepository.save(dh);
 

@@ -47,6 +47,10 @@ const AdminSidebar = () => {
               <span className="material-symbols-outlined">assignment_return</span>
               Đổi trả
             </NavLink>
+            <NavLink to="/admin/defective" className={navLinkClasses}>
+              <span className="material-symbols-outlined">report</span>
+              Hàng lỗi
+            </NavLink>
             <NavLink to="/admin/reviews" className={navLinkClasses}>
               <span className="material-symbols-outlined">star</span>
               Đánh giá

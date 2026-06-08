@@ -1,6 +1,29 @@
 import BaseApi, { API_BASE_URL } from './baseApi.js';
 
 class ProductApi extends BaseApi {
+  // Lấy danh sách sản phẩm có hàng lỗi chờ trả NCC
+  async getDefectiveProducts() {
+    try {
+      return await this._fetch(`${API_BASE_URL}/san-pham/hang-loi`);
+    } catch (error) {
+      console.error('Lỗi lấy hàng lỗi:', error);
+      throw error;
+    }
+  }
+
+  // Xác nhận xuất trả NCC
+  async exportDefectiveProduct(id, soLuong) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/san-pham/${id}/xuat-hang-loi`, {
+        method: 'POST',
+        body: JSON.stringify({ soLuong })
+      });
+    } catch (error) {
+      console.error('Lỗi xuất hàng lỗi:', error);
+      throw error;
+    }
+  }
+
   // Lấy tất cả sản phẩm (cơ bản)
   async getAllProducts() {
     try {

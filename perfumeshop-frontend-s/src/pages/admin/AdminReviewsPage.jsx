@@ -120,7 +120,7 @@ const AdminReviewsPage = () => {
               <tr key={r.idDanhGia} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                 <td className="px-4 py-3 text-gray-400">#{r.idDanhGia}</td>
                 <td className="px-4 py-3">
-                  <span className="font-medium">SP #{r.idSanPham}</span>
+                  <span className="font-medium">{r.tenSanPham || `SP #${r.idSanPham}`}</span>
                 </td>
                 <td className="px-4 py-3 text-gray-500">KH #{r.idNguoiDung}</td>
                 <td className="px-4 py-3">

@@ -4,14 +4,18 @@ import com.example.perfumeshop.dto.CreateReviewRequest;
 import com.example.perfumeshop.entity.ChiTietDonHang;
 import com.example.perfumeshop.entity.DanhGiaSanPham;
 import com.example.perfumeshop.entity.DonHang;
+import com.example.perfumeshop.entity.SanPham;
 import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.DanhGiaSanPhamRepository;
 import com.example.perfumeshop.repository.DonHangRepository;
+import com.example.perfumeshop.repository.SanPhamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -22,12 +26,35 @@ public class ReviewService {
     @Autowired
     private DanhGiaSanPhamRepository danhGiaSanPhamRepository;
 
+    @Autowired
+    private SanPhamRepository sanPhamRepository;
+
+    /** Lấy tất cả sản phẩm dưới dạng map id → tên để fill nhanh */
+    private Map<Integer, String> buildProductNameMap() {
+        return sanPhamRepository.findAll().stream()
+                .collect(Collectors.toMap(
+                        SanPham::getIdSanPham,
+                        sp -> sp.getTenSanPham() != null ? sp.getTenSanPham() : "(Sản phẩm không còn)",
+                        (a, b) -> a
+                ));
+    }
+
+    private void fillTenSanPham(List<DanhGiaSanPham> list) {
+        if (list.isEmpty()) return;
+        Map<Integer, String> nameMap = buildProductNameMap();
+        list.forEach(r -> r.setTenSanPham(nameMap.getOrDefault(r.getIdSanPham(), "(Sản phẩm không còn)")));
+    }
+
     public List<DanhGiaSanPham> getByProduct(Integer productId) {
-        return danhGiaSanPhamRepository.findByIdSanPham(productId);
+        List<DanhGiaSanPham> list = danhGiaSanPhamRepository.findByIdSanPham(productId);
+        fillTenSanPham(list);
+        return list;
     }
 
     public List<DanhGiaSanPham> getAll() {
-        return danhGiaSanPhamRepository.findAll();
+        List<DanhGiaSanPham> list = danhGiaSanPhamRepository.findAll();
+        fillTenSanPham(list);
+        return list;
     }
 
     public void delete(Integer id) {

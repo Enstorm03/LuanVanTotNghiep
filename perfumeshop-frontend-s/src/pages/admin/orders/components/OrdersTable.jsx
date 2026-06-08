@@ -12,6 +12,7 @@ const OrdersTable = ({ orders }) => {
               <th className="h-12 px-4 text-left align-middle font-medium hidden md:table-cell">Khách hàng</th>
               <th className="h-12 px-4 text-left align-middle font-medium hidden md:table-cell">Ngày đặt</th>
               <th className="h-12 px-4 text-left align-middle font-medium hidden sm:table-cell">Trạng thái</th>
+              <th className="h-12 px-4 text-left align-middle font-medium hidden lg:table-cell">Thanh toán</th>
               <th className="h-12 px-4 text-right align-middle font-medium">Tổng tiền</th>
             </tr>
           </thead>

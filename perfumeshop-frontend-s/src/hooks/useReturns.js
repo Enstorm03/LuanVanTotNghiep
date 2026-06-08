@@ -28,13 +28,32 @@ const useReturns = () => {
   };
 
   const handleApproveReturn = async (returnId) => {
-    if (!window.confirm('Duyệt phiếu đổi trả? Hệ thống sẽ hoàn kho ngay. Bước tiếp theo: xác nhận đã hoàn tiền cho khách.')) return;
+    // Hỏi admin tình trạng hàng trả về để quyết định có hoàn kho không
+    const choice = window.confirm(
+      'Tình trạng hàng trả về:\n\n' +
+      '✅ Bấm OK  → Hàng còn tốt, hoàn vào kho\n' +
+      '❌ Bấm Hủy → Hàng bị hỏng/vỡ, KHÔNG hoàn kho (vẫn hoàn tiền khách)'
+    );
+    // null = đóng dialog (ESC) → hủy luôn, không xử lý
+    // true  = OK  → hoanKho = true
+    // false = Hủy → hoanKho = false (vẫn duyệt, chỉ không hoàn kho)
+    // Phân biệt: confirm trả về true/false, không có null trên web → dùng thêm bước xác nhận
+    const confirmed = window.confirm(
+      choice
+        ? 'Xác nhận duyệt và HOÀN KHO hàng trả về?'
+        : 'Xác nhận duyệt KHÔNG HOÀN KHO (hàng hỏng)? Khách vẫn được hoàn tiền.'
+    );
+    if (!confirmed) return;
 
     try {
       setProcessing(returnId);
       const employeeId = user?.id_nhan_vien || user?.id || 1;
-      await api.approveReturn(returnId, employeeId);
-      alert('Đã duyệt! Vui lòng hoàn tiền cho khách và bấm "Xác nhận đã hoàn tiền".');
+      await api.approveReturn(returnId, employeeId, choice);
+      alert(
+        choice
+          ? 'Đã duyệt và hoàn kho! Vui lòng hoàn tiền cho khách và bấm "Xác nhận đã hoàn tiền".'
+          : 'Đã duyệt (hàng hỏng — không hoàn kho). Vui lòng hoàn tiền cho khách.'
+      );
       await fetchAllReturns();
     } catch (error) {
       alert('Không thể duyệt: ' + error.message);

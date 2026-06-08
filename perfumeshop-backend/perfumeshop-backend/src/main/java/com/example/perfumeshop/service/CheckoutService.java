@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,7 +28,8 @@ public class CheckoutService {
     @Autowired
     private DonHangRepository donHangRepository;
 
-    // Đặt hàng online: nếu tất cả đều còn hàng -> "Đang chờ" và trừ kho; nếu có món hết hàng -> "Chờ hàng" và tính cọc 50%, không trừ kho
+    // Đặt hàng: tạo đơn và lưu vào DB — KHÔNG trừ kho tại bước này.
+    // Kho sẽ được trừ khi admin bấm "Xác nhận đơn hàng", áp dụng cho cả COD lẫn online (PayOS).
     @Transactional
     public DonHang placeOrder(PlaceOrderRequest req) {
         if (req.getItems() == null || req.getItems().isEmpty()) {
@@ -80,21 +82,11 @@ public class CheckoutService {
         // Tự động tạo mã vận đơn
         dh.setMaVanDon(generateMaVanDon());
 
+        // Mọi đơn hàng (cả COD lẫn online) đều KHÔNG trừ kho khi đặt.
+        // Kho được trừ khi admin bấm xác nhận — đảm bảo tồn kho chỉ giảm cho đơn thực sự được xử lý.
         if (allInStock) {
-            // Trường hợp đủ hàng: Trừ kho atomic — tránh race condition khi nhiều đơn đặt cùng lúc
-            for (ChiTietDonHang ct : ctList) {
-                SanPham sp = ct.getSanPham();
-                int updated = sanPhamRepository.decrementStock(sp.getIdSanPham(), ct.getSoLuong());
-                if (updated == 0) {
-                    // Sản phẩm vừa bị người khác mua hết trong khoảng thời gian kiểm tra
-                    throw new BusinessException(
-                        "Sản phẩm '" + sp.getTenSanPham() + "' vừa hết hàng. Vui lòng thử lại."
-                    );
-                }
-            }
             dh.setTrangThaiVanHanh(DonHangService.TT_CHO_XAC_NHAN);
         } else {
-            // Trường hợp thiếu hàng: Đặt trạng thái Chờ hàng
             dh.setTrangThaiVanHanh("Chờ hàng");
         }
 

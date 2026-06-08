@@ -80,4 +80,9 @@ public class DonHangController {
     public ResponseEntity<DonHang> cancel(@PathVariable Integer id, @Valid @RequestBody CancelDonRequest req) {
         return ResponseEntity.ok(donHangService.cancel(id, req.getLyDo()));
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        donHangService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

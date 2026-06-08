@@ -34,6 +34,8 @@ const api = {
   searchProducts: productApi.searchProducts.bind(productApi),
   searchProductsAdvanced: productApi.searchProductsAdvanced.bind(productApi),
   getRelatedProducts: productApi.getRelatedProducts.bind(productApi),
+  getDefectiveProducts: productApi.getDefectiveProducts.bind(productApi),
+  exportDefectiveProduct: productApi.exportDefectiveProduct.bind(productApi),
 
   // Cart methods
   getCart: cartApi.getCart.bind(cartApi),

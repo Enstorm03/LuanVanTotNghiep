@@ -2,12 +2,14 @@ package com.example.perfumeshop.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Danh_Gia_San_Pham")
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DanhGiaSanPham {
 
     @Id
@@ -29,4 +31,8 @@ public class DanhGiaSanPham {
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
+
+    /** Tên sản phẩm — không lưu DB, được fill bởi service khi trả về response */
+    @Transient
+    private String tenSanPham;
 }
