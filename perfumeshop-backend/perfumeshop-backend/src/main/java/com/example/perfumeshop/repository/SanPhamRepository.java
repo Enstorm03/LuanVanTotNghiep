@@ -14,12 +14,13 @@ import java.util.List;
 @Repository
 public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
-    // Search có phân trang
+    // Search có phân trang — nongDoMin/nongDoMax để lọc theo range
     @Query("SELECT p FROM SanPham p " +
             "WHERE (:kw IS NULL OR LOWER(p.tenSanPham) LIKE LOWER(CONCAT('%', :kw, '%'))) " +
             "AND (:danhMucId IS NULL OR p.danhMuc.idDanhMuc = :danhMucId) " +
             "AND (:thuongHieuId IS NULL OR p.thuongHieu.idThuongHieu = :thuongHieuId) " +
-            "AND (:nongDo IS NULL OR p.nongDo = :nongDo) " +
+            "AND (:nongDoMin IS NULL OR p.nongDo >= :nongDoMin) " +
+            "AND (:nongDoMax IS NULL OR p.nongDo < :nongDoMax) " +
             "AND (:dungTich IS NULL OR p.dungTichMl = :dungTich) " +
             "AND (:minGia IS NULL OR p.giaBan >= :minGia) " +
             "AND (:maxGia IS NULL OR p.giaBan <= :maxGia)")
@@ -27,7 +28,8 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
             @Param("kw") String keyword,
             @Param("danhMucId") Integer danhMucId,
             @Param("thuongHieuId") Integer thuongHieuId,
-            @Param("nongDo") Integer nongDo,
+            @Param("nongDoMin") Integer nongDoMin,
+            @Param("nongDoMax") Integer nongDoMax,
             @Param("dungTich") Integer dungTich,
             @Param("minGia") java.math.BigDecimal minGia,
             @Param("maxGia") java.math.BigDecimal maxGia,

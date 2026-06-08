@@ -61,15 +61,21 @@ const useCategoryProducts = (categoryId, brandId, searchQuery) => {
             break;
         }
 
-        // Map concentrations
-        let nongDo = undefined;
+        // Map concentrations — mỗi lựa chọn là { min, max } range nồng độ
+        // Nếu chọn nhiều → dùng range rộng nhất (min nhỏ nhất, max lớn nhất)
+        // Định nghĩa range theo label trong categoryHelpers:
+        //   Parfum >= 20%        → min=20, max=null
+        //   EDP    15–20%        → min=15, max=20
+        //   EDT    5–15%         → min=5,  max=15
+        //   EDC    2–4%          → min=2,  max=5
+        const CONCENTRATION_RANGES = { 20: { min: 20, max: null }, 15: { min: 15, max: 20 }, 5: { min: 5, max: 15 }, 2: { min: 2, max: 5 } };
+        let nongDoMin = undefined;
+        let nongDoMax = undefined;
         if (filters.selectedConcentrations.length > 0) {
-           // BE might need specific format. We'll join them or map them if needed.
-           // BE typically receives them as string. Assuming BE can search by string match.
-           // In original code, concentration was min-max. If BE takes a string "nongDo", 
-           // let's pass the first one or join. Wait, BE search query param is 'nongDo'. 
-           // In Java it's likely a Float for percentage or String. We should check BE param type.
-           nongDo = filters.selectedConcentrations.join(',');
+          const ranges = filters.selectedConcentrations.map(v => CONCENTRATION_RANGES[v]).filter(Boolean);
+          nongDoMin = Math.min(...ranges.map(r => r.min));
+          const maxes = ranges.map(r => r.max).filter(v => v != null);
+          nongDoMax = maxes.length === ranges.length ? Math.max(...maxes) : undefined; // nếu có Parfum (max=null) thì bỏ maxGia
         }
 
         // Dùng API advanced search của BE (filter + sort + paginate ALL-IN-ONE)
@@ -77,11 +83,12 @@ const useCategoryProducts = (categoryId, brandId, searchQuery) => {
           kw: searchQuery || undefined,
           danhMucId: categoryId || undefined,
           thuongHieuId: (filters.selectedBrands.length > 0 ? filters.selectedBrands.join(',') : brandId) || undefined,
-          nongDo: nongDo,
-          maxGia: filters.maxPrice < 10000000 ? filters.maxPrice : undefined, // only send if customized
+          nongDoMin,
+          nongDoMax,
+          maxGia: filters.maxPrice < 10000000 ? filters.maxPrice : undefined,
           sortBy: apiSortBy,
           sortDir: apiSortDir,
-        page: page > 0 ? page - 1 : 0,
+          page: page > 0 ? page - 1 : 0,
           size: pageSize
         });
 

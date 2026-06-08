@@ -113,7 +113,7 @@ const HomePage = () => {
             )}
             <div className="flex flex-col gap-4 max-w-3xl z-10">
               <h1 className="text-white text-4xl font-black tracking-tight md:text-6xl">
-                {campaign ? campaign.tenSuKien : 'Bộ Sưu Tập Mùa Hè 2025'}
+                {campaign ? campaign.tenSuKien : 'Bộ Sưu Tập Enstorm 2026'}
               </h1>
               <p className="text-white/90 text-base md:text-lg font-medium">
                 {campaign

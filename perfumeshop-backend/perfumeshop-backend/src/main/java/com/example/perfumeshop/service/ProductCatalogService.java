@@ -29,9 +29,13 @@ public class ProductCatalogService {
     @Autowired
     private ThuongHieuRepository thuongHieuRepository;
 
+    /**
+     * nongDoMin / nongDoMax: range lọc nồng độ (%).
+     * VD: EDP → min=15, max=20; Parfum → min=20, max=null
+     */
     public PagedResponse<SanPham> searchWithPage(
             String kw, Integer danhMucId, Integer thuongHieuId,
-            Integer nongDo, Integer dungTich,
+            Integer nongDoMin, Integer nongDoMax, Integer dungTich,
             BigDecimal minGia, BigDecimal maxGia,
             String sortBy, String sortDir,
             int page, int size
@@ -46,7 +50,7 @@ public class ProductCatalogService {
         }
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<SanPham> result = sanPhamRepository.searchWithPage(
-                kw, danhMucId, thuongHieuId, nongDo, dungTich, minGia, maxGia, pageable
+                kw, danhMucId, thuongHieuId, nongDoMin, nongDoMax, dungTich, minGia, maxGia, pageable
         );
         PagedResponse<SanPham> resp = new PagedResponse<>();
         resp.setContent(result.getContent());
@@ -65,11 +69,11 @@ public class ProductCatalogService {
         return sanPhamRepository.findRelatedProducts(current.getThuongHieu().getIdThuongHieu(), productId, pageable);
     }
 
-    // Giữ lại các method cũ
+    // Compatibility method — gọi không có range nồng độ
     public List<SanPham> search(String kw, Integer danhMucId, Integer thuongHieuId, Integer nongDo, Integer dungTich) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
         return sanPhamRepository.searchWithPage(
-                kw, danhMucId, thuongHieuId, nongDo, dungTich, null, null, pageable
+                kw, danhMucId, thuongHieuId, nongDo, null, dungTich, null, null, pageable
         ).getContent();
     }
 

@@ -25,6 +25,9 @@ public class CatalogController {
             @RequestParam(value = "kw", required = false) String kw,
             @RequestParam(value = "danhMucId", required = false) Integer danhMucId,
             @RequestParam(value = "thuongHieuId", required = false) Integer thuongHieuId,
+            @RequestParam(value = "nongDoMin", required = false) Integer nongDoMin,
+            @RequestParam(value = "nongDoMax", required = false) Integer nongDoMax,
+            // Giữ nongDo cũ để backward compat (FE cũ gửi nongDo=15 → dùng làm nongDoMin)
             @RequestParam(value = "nongDo", required = false) Integer nongDo,
             @RequestParam(value = "dungTich", required = false) Integer dungTich,
             @RequestParam(value = "minGia", required = false) BigDecimal minGia,
@@ -34,8 +37,12 @@ public class CatalogController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size
     ) {
+        // Ưu tiên nongDoMin/Max; fallback về nongDo (exact = min, không max)
+        Integer resolvedMin = nongDoMin != null ? nongDoMin : nongDo;
+        Integer resolvedMax = nongDoMax;
         return ResponseEntity.ok(catalogService.searchWithPage(
-                kw, danhMucId, thuongHieuId, nongDo, dungTich, minGia, maxGia, sortBy, sortDir, page, size
+                kw, danhMucId, thuongHieuId, resolvedMin, resolvedMax,
+                dungTich, minGia, maxGia, sortBy, sortDir, page, size
         ));
     }
 

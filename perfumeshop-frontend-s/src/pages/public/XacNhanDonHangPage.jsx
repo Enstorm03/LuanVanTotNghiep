@@ -209,7 +209,7 @@ const XacNhanDonHangPage = () => {
             ))}
           </div>
           <p className="text-center text-[9px] text-gray-300 mt-1 tracking-widest">
-            {String(order.idDonHang).padStart(12, '0')}
+            {String(order.idDonHang).padStart(4, '0')}
           </p>
         </div>
 

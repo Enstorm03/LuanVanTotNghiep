@@ -30,14 +30,10 @@ public class ReportService {
     private NhanVienRepository nhanVienRepository;
     public Map<String, Object> getSummary(LocalDate startDate, LocalDate endDate) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime end   = endDate   != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
-        List<DonHang> orders = donHangRepository.findAll().stream()
-                .filter(o -> o.getNgayDatHang() != null
-                        && !"Giỏ hàng".equals(o.getTrangThaiVanHanh())
-                        && o.getNgayDatHang().isAfter(start)
-                        && o.getNgayDatHang().isBefore(end))
-                .collect(Collectors.toList());
+        // Dùng query có WHERE thay vì findAll() để tránh load toàn bộ DB
+        List<DonHang> orders = donHangRepository.findForReport(start, end);
 
         long totalOrders = orders.size();
 
@@ -77,15 +73,11 @@ public class ReportService {
 
     public List<Map<String, Object>> getTopProducts(LocalDate startDate, LocalDate endDate, int limit) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime end   = endDate   != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
-        // Tính tổng số lượng bán của từng sản phẩm từ các đơn hoàn thành
         Map<Integer, Map<String, Object>> productSales = new HashMap<>();
-        donHangRepository.findAll().stream()
-                .filter(o -> "Hoàn thành".equals(o.getTrangThaiVanHanh())
-                        && o.getNgayDatHang() != null
-                        && o.getNgayDatHang().isAfter(start)
-                        && o.getNgayDatHang().isBefore(end))
+        donHangRepository.findForReport(start, end).stream()
+                .filter(o -> "Hoàn thành".equals(o.getTrangThaiVanHanh()))
                 .flatMap(o -> o.getChiTietDonHangs() != null ? o.getChiTietDonHangs().stream() : java.util.stream.Stream.empty())
                 .forEach(ct -> {
                     SanPham sp = ct.getSanPham();
@@ -114,17 +106,12 @@ public class ReportService {
 
     public Map<String, Object> getRevenueByStatus(LocalDate startDate, LocalDate endDate) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime end   = endDate   != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
         Map<String, Object> result = new HashMap<>();
         Map<String, BigDecimal> byStatus = new HashMap<>();
 
-        donHangRepository.findAll().stream()
-                .filter(o -> !"Giỏ hàng".equals(o.getTrangThaiVanHanh())
-                        && o.getNgayDatHang() != null
-                        && o.getNgayDatHang().isAfter(start)
-                        && o.getNgayDatHang().isBefore(end))
-                .forEach(o -> {
+        donHangRepository.findForReport(start, end).forEach(o -> {
                     String status = o.getTrangThaiVanHanh();
                     BigDecimal amount = o.getTongTien() == null ? BigDecimal.ZERO : o.getTongTien();
                     byStatus.merge(status, amount, BigDecimal::add);
@@ -136,17 +123,12 @@ public class ReportService {
 
     public String exportCsv(LocalDate startDate, LocalDate endDate) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime end = endDate != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
+        LocalDateTime end   = endDate   != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
         StringBuilder csv = new StringBuilder();
         csv.append("Mã đơn,Ngày đặt,Khách hàng,Trạng thái,Tổng tiền,Thanh toán\n");
 
-        donHangRepository.findAll().stream()
-                .filter(o -> !"Giỏ hàng".equals(o.getTrangThaiVanHanh())
-                        && o.getNgayDatHang() != null
-                        && o.getNgayDatHang().isAfter(start)
-                        && o.getNgayDatHang().isBefore(end))
-                .forEach(o -> {
+        donHangRepository.findForReport(start, end).forEach(o -> {
                     csv.append(o.getIdDonHang()).append(",");
                     csv.append(o.getNgayDatHang()).append(",");
                     csv.append(o.getTenNguoiNhan() != null ? o.getTenNguoiNhan() : "").append(",");

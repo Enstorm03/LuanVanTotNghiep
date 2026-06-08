@@ -95,19 +95,22 @@ class ProductApi extends BaseApi {
   }
 
   // Tìm kiếm sản phẩm NÂNG CAO (BE xử lý filter + sort + paginate)
- async searchProductsAdvanced({ kw, danhMucId, thuongHieuId, nongDo, dungTich, minGia, maxGia, sortBy, sortDir, page, size } = {}) {
+  async searchProductsAdvanced({ kw, danhMucId, thuongHieuId, nongDoMin, nongDoMax, nongDo, dungTich, minGia, maxGia, sortBy, sortDir, page, size } = {}) {
     try {
       const params = new URLSearchParams();
       if (kw) params.append('kw', kw);
       if (danhMucId) params.append('danhMucId', danhMucId);
       if (thuongHieuId) params.append('thuongHieuId', thuongHieuId);
-      if (nongDo) params.append('nongDo', nongDo);
+      // Ưu tiên nongDoMin/Max (range); fallback nongDo cũ
+      if (nongDoMin != null) params.append('nongDoMin', nongDoMin);
+      if (nongDoMax != null) params.append('nongDoMax', nongDoMax);
+      if (nongDo != null && nongDoMin == null) params.append('nongDo', nongDo);
       if (dungTich) params.append('dungTich', dungTich);
       if (minGia) params.append('minGia', minGia);
       if (maxGia) params.append('maxGia', maxGia);
       if (sortBy) params.append('sortBy', sortBy);
       if (sortDir) params.append('sortDir', sortDir);
-      if (page !== undefined) params.append('page', page); // Cho phép truyền 0
+      if (page !== undefined) params.append('page', page);
       if (size) params.append('size', size);
 
       const response = await this._fetch(`${API_BASE_URL}/catalog/san-pham/search?${params.toString()}`);

@@ -18,7 +18,8 @@ export const getCategoryTitle = (categoryId, brandId, searchQuery, categories, b
 };
 
 export const getConcentrationTypes = () => [
-  'Eau de Parfum (EDP 5-15%)',
-  'Eau de Toilette (EDT 15-20%)',
-  'Extrait de Parfum 20-40%'
+  { label: 'Parfum / Extrait (>= 20%)',     value: 20 },
+  { label: 'Eau de Parfum – EDP (15–20%)',  value: 15 },
+  { label: 'Eau de Toilette – EDT (5–15%)', value: 5  },
+  { label: 'Eau de Cologne – EDC (2–4%)',   value: 2  },
 ];

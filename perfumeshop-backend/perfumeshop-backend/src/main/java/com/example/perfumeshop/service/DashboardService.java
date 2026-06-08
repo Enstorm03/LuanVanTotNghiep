@@ -9,7 +9,6 @@ import com.example.perfumeshop.repository.SanPhamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,59 +30,46 @@ public class DashboardService {
     private PhieuDoiTraRepository phieuDoiTraRepository;
 
     public Map<String, Object> getStats() {
-        List<DonHang> allOrders = donHangRepository.findAll();
         List<PhieuDoiTra> allReturns = phieuDoiTraRepository.findAll();
 
         Map<String, Object> stats = new HashMap<>();
 
-        // Doanh thu tổng (chỉ tính đơn hoàn thành)
-        BigDecimal totalRevenue = allOrders.stream()
-                .filter(o -> "Hoàn thành".equals(o.getTrangThaiVanHanh()))
-                .map(o -> o.getTongTien() == null ? BigDecimal.ZERO : o.getTongTien())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        stats.put("totalRevenue", totalRevenue);
+        // Doanh thu và tổng đơn — dùng aggregate query thay findAll()
+        stats.put("totalRevenue",    donHangRepository.sumRevenueCompleted());
+        stats.put("totalOrders",     donHangRepository.countByTrangThaiVanHanhNot("Giỏ hàng"));
+        stats.put("totalProducts",   sanPhamRepository.count());
+        stats.put("totalCustomers",  nguoiDungRepository.count());
 
-        stats.put("totalOrders", (long) allOrders.size());
-        stats.put("totalProducts", sanPhamRepository.count());
-        stats.put("totalCustomers", nguoiDungRepository.count());
+        // Đếm theo trạng thái — chạy COUNT ở DB
+        stats.put("pendingOrders",   donHangRepository.countByTrangThai("Đang chờ"));
+        stats.put("confirmedOrders", donHangRepository.countByTrangThai("Đã xác nhận"));
+        stats.put("shippingOrders",  donHangRepository.countByTrangThai("Đang giao hàng"));
+        stats.put("completedOrders", donHangRepository.countByTrangThai("Hoàn thành"));
+        stats.put("cancelledOrders", donHangRepository.countByTrangThai("Đã hủy"));
 
-        // Đếm theo trạng thái
-        stats.put("pendingOrders", countByStatus(allOrders, "Đang chờ"));
-        stats.put("confirmedOrders", countByStatus(allOrders, "Đã xác nhận"));
-        stats.put("shippingOrders", countByStatus(allOrders, "Đang giao hàng"));
-        stats.put("completedOrders", countByStatus(allOrders, "Hoàn thành"));
-        stats.put("cancelledOrders", countByStatus(allOrders, "Đã hủy"));
-
-        // Đổi trả — dùng đúng trạng thái thực tế của hệ thống
-        long pendingReturns      = allReturns.stream().filter(r -> "Chờ duyệt".equals(r.getTrangThai())).count();
-        long waitingRefund       = allReturns.stream().filter(r -> "Chờ hoàn tiền".equals(r.getTrangThai())).count();
-        long completedReturns    = allReturns.stream().filter(r -> "Hoàn tiền thành công".equals(r.getTrangThai())).count();
-        long rejectedReturns     = allReturns.stream().filter(r -> "Từ chối".equals(r.getTrangThai())).count();
-        stats.put("pendingReturns", pendingReturns);
-        stats.put("waitingRefundReturns", waitingRefund);
-        stats.put("completedReturns", completedReturns);
-        stats.put("rejectedReturns", rejectedReturns);
-        stats.put("totalReturns", (long) allReturns.size());
+        // Đổi trả
+        long pendingReturns   = allReturns.stream().filter(r -> "Chờ duyệt".equals(r.getTrangThai())).count();
+        long waitingRefund    = allReturns.stream().filter(r -> "Chờ hoàn tiền".equals(r.getTrangThai())).count();
+        long completedReturns = allReturns.stream().filter(r -> "Hoàn tiền thành công".equals(r.getTrangThai())).count();
+        long rejectedReturns  = allReturns.stream().filter(r -> "Từ chối".equals(r.getTrangThai())).count();
+        stats.put("pendingReturns",      pendingReturns);
+        stats.put("waitingRefundReturns",waitingRefund);
+        stats.put("completedReturns",    completedReturns);
+        stats.put("rejectedReturns",     rejectedReturns);
+        stats.put("totalReturns",        (long) allReturns.size());
 
         return stats;
     }
 
     public List<DonHang> getRecentOrders(int limit) {
-        return donHangRepository.findAll().stream()
-                .filter(o -> !"Giỏ hàng".equals(o.getTrangThaiVanHanh()))
-                .sorted((a, b) -> {
-                    if (a.getNgayDatHang() == null && b.getNgayDatHang() == null) return 0;
-                    if (a.getNgayDatHang() == null) return 1;
-                    if (b.getNgayDatHang() == null) return -1;
-                    return b.getNgayDatHang().compareTo(a.getNgayDatHang());
-                })
-                .limit(limit)
-                .collect(Collectors.toList());
+        // Dùng query sắp xếp ở DB, chỉ lấy đúng số cần thiết
+        return donHangRepository.findAllExceptCart()
+                .stream().limit(limit).collect(Collectors.toList());
     }
 
     public Map<String, Object> getAlerts() {
-        List<DonHang> allOrders = donHangRepository.findAll();
-        long pendingOrders = countByStatus(allOrders, "Đang chờ");
+        // Dùng COUNT query thay vì findAll + stream filter
+        long pendingOrders = donHangRepository.countByTrangThai("Đang chờ");
 
         long lowStockItems = sanPhamRepository.findAll().stream()
                 .filter(p -> p.getSoLuongTonKho() != null && p.getSoLuongTonKho() < 10)
@@ -93,9 +79,5 @@ public class DashboardService {
         alerts.put("pendingOrders", pendingOrders);
         alerts.put("lowStockItems", lowStockItems);
         return alerts;
-    }
-
-    private long countByStatus(List<DonHang> orders, String status) {
-        return orders.stream().filter(o -> status.equals(o.getTrangThaiVanHanh())).count();
     }
 }

@@ -93,7 +93,7 @@ const AdminOrderDetailPage = () => {
           Chi tiết Đơn hàng #{order.idDonHang}
         </h1>
         {/* Nút tạo QR — hiện từ khi đặt hàng cho đến khi hoàn thành */}
-        {!['Đã hủy', 'Hoàn thành', 'Đã hoàn trả'].includes(order.trangThaiVanHanh) && (
+        {!['Đã hủy',  'Đã hoàn trả'].includes(order.trangThaiVanHanh) && (
           <button
             onClick={() => setShowQRDialog(true)}
             className="ml-auto flex items-center gap-2 bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors text-sm font-semibold"
