@@ -79,7 +79,7 @@ public class ReturnService {
         return phieuDoiTraRepository.save(p);
     }
 
-   
+
 
     // ── Bước 1: Admin duyệt → toàn bộ hàng trả về đều chuyển sang soLuongHangLoi (chờ trả NCC)
     // Không hoàn kho trong bất kỳ trường hợp nào — hàng đã qua tay khách thì chỉ về NCC.

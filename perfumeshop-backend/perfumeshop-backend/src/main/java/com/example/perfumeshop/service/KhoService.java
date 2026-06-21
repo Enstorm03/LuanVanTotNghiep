@@ -405,7 +405,7 @@ public class KhoService {
             try { row.setGiaNhap(new BigDecimal(giaNhapStr.replace(",", "").trim())); } catch (Exception ignored) {}
         }
 
-        row.setTrangThai("PENDING"); // sẽ được map sau
+        row.setTrangThai("PENDING");
         return row;
     }
 

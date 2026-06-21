@@ -39,7 +39,7 @@ const Footer = ({ brandName = "a" }) => {
           </div>
         </div>
         <div className="mt-8 border-t border-border-light dark:border-border-dark pt-8 flex flex-col sm:flex-row items-center justify-between">
-          <p className="text-sm text-subtle-light dark:text-subtle-dark">© 2025 {brandName} . All rights reserved.</p>
+          <p className="text-sm text-subtle-light dark:text-subtle-dark">© 2026 {brandName} . All rights reserved.</p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             {/* Social media icons would go here */}
           </div>
