@@ -11,6 +11,7 @@ import categoryApi from './categoryApi.js';
 import reviewAdminApi from './reviewAdminApi.js';
 import campaignApi from './campaignApi.js';
 import khoApi from './khoApi.js';
+import procurementApi from './procurementApi.js';
 import dashboardApi from './dashboardApi.js';
 import reportApi from './reportApi.js';
 
@@ -137,8 +138,37 @@ const api = {
   getPhieuNhap: khoApi.getPhieuNhap.bind(khoApi),
   getBienDong: khoApi.getBienDong.bind(khoApi),
   getBanCham: khoApi.getBanCham.bind(khoApi),
+  // PO Workflow
+  khoGetPoChoKiemTra: khoApi.getPoChoKiemTra.bind(khoApi),
+  khoGetPoChoAdminDuyet: khoApi.getPoChoAdminDuyet.bind(khoApi),
+  khoXacNhan: khoApi.khoXacNhan.bind(khoApi),
+  khoAdminDuyetCuoi: khoApi.adminDuyetCuoi.bind(khoApi),
+  khoAdminTuChoi: khoApi.adminTuChoi.bind(khoApi),
 
-  
+  // Procurement (Đấu thầu) methods
+  procurementGetOpen: procurementApi.getOpenRequests.bind(procurementApi),
+  procurementGetPublicDetail: procurementApi.getPublicDetail.bind(procurementApi),
+  procurementSubmitOffer: procurementApi.submitOffer.bind(procurementApi),
+  procurementGetAll: procurementApi.getAllRequests.bind(procurementApi),
+  procurementGetDetail: procurementApi.getDetail.bind(procurementApi),
+  procurementGetLowStock: procurementApi.getLowStock.bind(procurementApi),
+  procurementCreate: procurementApi.createRequest.bind(procurementApi),
+  procurementGetOffers: procurementApi.getOffers.bind(procurementApi),
+  procurementChooseOffer: procurementApi.chooseOffer.bind(procurementApi),
+  // Sản phẩm đề xuất (NCC đề xuất, Admin duyệt)
+  procurementSubmitProposedProduct: procurementApi.submitProposedProduct.bind(procurementApi),
+  procurementGetAllProposedProducts: procurementApi.getAllProposedProducts.bind(procurementApi),
+  procurementGetProposedProductsOfRequest: procurementApi.getProposedProductsOfRequest.bind(procurementApi),
+  procurementApproveProposedProduct: procurementApi.approveProposedProduct.bind(procurementApi),
+  procurementRejectProposedProduct: procurementApi.rejectProposedProduct.bind(procurementApi),
+
+  // Đề xuất sản phẩm độc lập (NCC tự đề xuất không cần phiếu gọi thầu)
+  procurementSubmitIndependentProposal: procurementApi.submitIndependentProposal.bind(procurementApi),
+  procurementGetIndependentProposals: procurementApi.getIndependentProposals.bind(procurementApi),
+  // Đề xuất hàng loạt qua Excel/CSV
+  procurementBulkPreview: procurementApi.bulkPreview.bind(procurementApi),
+  procurementBulkConfirm: procurementApi.bulkConfirm.bind(procurementApi),
+
 };
 
 export default api;
@@ -154,6 +184,11 @@ export {
   reviewApi,
   returnApi,
   brandApi,
+  categoryApi,
+  reviewAdminApi,
+  campaignApi,
+  khoApi,
+  procurementApi,
   dashboardApi,
   reportApi
 };

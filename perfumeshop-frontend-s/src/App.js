@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useParams } from 'react-router-dom';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout';
@@ -6,6 +6,9 @@ import AdminLayout from './layouts/AdminLayout';
 
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
+
+// Contexts
+import { SupplierProvider } from './contexts/SupplierContext';
 
 // Public Pages
 import HomePage from './pages/public/TrangChu';
@@ -37,11 +40,24 @@ import AdminDefectivePage from './pages/admin/AdminDefectivePage';
 import AdminCampaignsPage from './pages/admin/AdminCampaignsPage';
 import AdminKhoPage from './pages/admin/AdminKhoPage';
 import AdminImportKhoPage from './pages/admin/AdminImportKhoPage';
+import AdminProcurementPage from './pages/admin/AdminProcurementPage';
+import AdminProcurementDetailPage from './pages/admin/AdminProcurementDetailPage';
+import AdminSuppliersPage from './pages/admin/AdminSuppliersPage';
+import ProcurementPortalPage, { ProcurementDetailPage } from './pages/public/ProcurementPortalPage';
+import SupplierLoginPage from './pages/public/SupplierLoginPage';
+import SupplierPortalPage from './pages/public/SupplierPortalPage';
 
-import './assets/styles/App.css';
+// Wrapper lấy :id từ URL và truyền vào ProcurementDetailPage
+const ProcurementDetailWrapper = () => {
+  const { id } = useParams();
+  return <ProcurementDetailPage requestId={id} />;
+};
+
+
 
 function App() {
   return (
+    <SupplierProvider>
     <div className="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
       <Routes>
         {/* Public Routes with Layout */}
@@ -84,6 +100,14 @@ function App() {
         <Route path="/login" element={<DangNhapPage />} />
         <Route path="/register" element={<DangKyPage />} />
 
+        {/* Route công khai — NCC xem đợt gọi thầu và chào giá */}
+        <Route path="/procurement" element={<ProcurementPortalPage />} />
+        <Route path="/procurement/login" element={<SupplierLoginPage />} />
+        <Route path="/procurement/:id" element={<ProcurementDetailWrapper />} />
+
+        {/* Route công khai — NCC chào hàng độc lập */}
+        <Route path="/supplier-portal" element={<SupplierPortalPage />} />
+
         {/* Route công khai — khách quét QR xác nhận nhận hàng / đổi trả (không cần login) */}
         <Route path="/don-hang/:orderId/xac-nhan" element={<XacNhanDonHangPage />} />
 
@@ -110,9 +134,13 @@ function App() {
           <Route path="campaigns" element={<AdminCampaignsPage />} />
           <Route path="kho" element={<AdminKhoPage />} />
           <Route path="import-kho" element={<AdminImportKhoPage />} />
+          <Route path="procurement" element={<AdminProcurementPage />} />
+          <Route path="procurement/:id" element={<AdminProcurementDetailPage />} />
+          <Route path="suppliers" element={<AdminSuppliersPage />} />
         </Route>
       </Routes>
     </div>
+    </SupplierProvider>
   );
 }
 

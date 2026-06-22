@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Phiếu nhập kho chính thức — đã được admin duyệt.
- * Tồn kho đã được cộng vào SanPham khi phiếu này được tạo.
+ * Phiếu nhập kho — luồng từ đấu thầu đi qua 3 bước xác nhận.
+ * trangThai: CHO_KHO_KIEM_TRA → CHO_ADMIN_DUYET → DA_NHAP | BI_TU_CHOI
+ * Phiếu tạo thủ công từ CSV/Excel gán thẳng DA_NHAP.
  */
 @Entity
 @Table(name = "phieu_nhap_kho")
@@ -34,6 +35,23 @@ public class PhieuNhapKho {
 
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
+
+    /**
+     * Giá bán chốt từ đấu thầu — áp dụng cho tất cả SP trong phiếu khi admin duyệt cuối.
+     * null nếu phiếu được tạo thủ công (CSV/Excel).
+     */
+    @Column(name = "gia_ban_chot", precision = 15, scale = 2)
+    private java.math.BigDecimal giaBanChot;
+
+    /**
+     * Trạng thái xử lý phiếu:
+     *   CHO_KHO_KIEM_TRA — vừa tạo từ chốt thầu, kho chưa kiểm
+     *   CHO_ADMIN_DUYET  — kho đã xác nhận, chờ admin duyệt cuối
+     *   DA_NHAP          — admin duyệt, tồn kho đã được cộng
+     *   BI_TU_CHOI       — admin từ chối sau khi kho xác nhận
+     */
+    @Column(name = "trang_thai", nullable = false, length = 30)
+    private String trangThai = "DA_NHAP";
 
     @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ChiTietPhieuNhap> chiTiet = new ArrayList<>();

@@ -55,6 +55,14 @@ const AdminSidebar = () => {
               <span className="material-symbols-outlined">warehouse</span>
               Quản lý kho
             </NavLink>
+            <NavLink to="/admin/procurement" className={navLinkClasses}>
+              <span className="material-symbols-outlined">gavel</span>
+              Đấu thầu
+            </NavLink>
+            <NavLink to="/admin/suppliers" className={navLinkClasses}>
+              <span className="material-symbols-outlined">business</span>
+              Nhà cung cấp
+            </NavLink>
             <NavLink to="/admin/reviews" className={navLinkClasses}>
               <span className="material-symbols-outlined">star</span>
               Đánh giá

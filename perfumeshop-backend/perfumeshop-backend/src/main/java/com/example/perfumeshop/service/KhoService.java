@@ -27,6 +27,140 @@ public class KhoService {
     @Autowired private PhieuNhapKhoRepository phieuNhapKhoRepository;
     @Autowired private PhieuNhapTamRepository phieuNhapTamRepository;
     @Autowired private BienDongKhoRepository bienDongKhoRepository;
+    @Autowired private BaoGiaNCCRepository baoGiaNCCRepo;
+
+    // ══════════════════════════════════════════════════════════
+    //  PO WORKFLOW: Kho xác nhận → Admin duyệt cuối
+    // ══════════════════════════════════════════════════════════
+
+    /** Lấy danh sách PO đang chờ kho kiểm tra */
+    public List<PhieuNhapKho> getPoChoKhoKiemTra() {
+        return phieuNhapKhoRepository.findByTrangThaiOrderByNgayNhapDesc("CHO_KHO_KIEM_TRA");
+    }
+
+    /** Lấy danh sách PO đang chờ admin duyệt cuối */
+    public List<PhieuNhapKho> getPoChoAdminDuyet() {
+        return phieuNhapKhoRepository.findByTrangThaiOrderByNgayNhapDesc("CHO_ADMIN_DUYET");
+    }
+
+    /**
+     * Kho xác nhận hàng thực nhận.
+     * chiTietList = [{ idChiTiet, soLuongThucNhan, soLuongLoi, urlHinhAnhMoi, ghiChuKho }]
+     * KHÔNG cộng kho — chỉ lưu thông tin kiểm hàng và chuyển trạng thái.
+     */
+    @Transactional
+    public PhieuNhapKho khoXacNhan(Integer idPhieu, List<Map<String, Object>> chiTietList, Integer nhanVienId) {
+        PhieuNhapKho po = phieuNhapKhoRepository.findById(idPhieu)
+            .orElseThrow(() -> new BusinessException("Phiếu nhập không tồn tại: " + idPhieu));
+
+        if (!"CHO_KHO_KIEM_TRA".equals(po.getTrangThai()))
+            throw new BusinessException("Phiếu đang ở trạng thái [" + po.getTrangThai() + "], không thể xác nhận kiểm hàng");
+
+        // Build map idChiTiet → payload
+        Map<Integer, Map<String, Object>> payloadMap = new HashMap<>();
+        if (chiTietList != null) {
+            for (Map<String, Object> item : chiTietList) {
+                Integer id = Integer.parseInt(item.get("idChiTiet").toString());
+                payloadMap.put(id, item);
+            }
+        }
+
+        for (ChiTietPhieuNhap ct : po.getChiTiet()) {
+            Map<String, Object> item = payloadMap.get(ct.getId());
+            if (item == null) continue;
+
+            Integer slThucNhan = item.get("soLuongThucNhan") != null
+                ? Integer.parseInt(item.get("soLuongThucNhan").toString()) : null;
+            Integer slLoi = item.get("soLuongLoi") != null
+                ? Integer.parseInt(item.get("soLuongLoi").toString()) : 0;
+
+            // Validate
+            if (slThucNhan == null || slThucNhan < 0)
+                throw new BusinessException("soLuongThucNhan không hợp lệ cho chi tiết #" + ct.getId());
+            if (slLoi < 0 || slLoi > slThucNhan)
+                throw new BusinessException("soLuongLoi không hợp lệ cho chi tiết #" + ct.getId() + " (phải <= soLuongThucNhan)");
+
+            ct.setSoLuongThucNhan(slThucNhan);
+            ct.setSoLuongLoi(slLoi);
+            if (item.get("urlHinhAnhMoi") != null)
+                ct.setUrlHinhAnhMoi(item.get("urlHinhAnhMoi").toString().trim());
+            if (item.get("ghiChuKho") != null)
+                ct.setGhiChuKho(item.get("ghiChuKho").toString().trim());
+        }
+
+        po.setTrangThai("CHO_ADMIN_DUYET");
+        return phieuNhapKhoRepository.save(po);
+    }
+
+    /**
+     * Admin duyệt cuối PO:
+     *  - Cộng soLuongThucNhan vào tồn kho
+     *  - Cập nhật giaBan từ giaBanChot trong BaoGiaNCC
+     *  - Cập nhật urlHinhAnh nếu kho đã điền
+     *  - Ghi BienDongKho
+     */
+    @Transactional
+    public PhieuNhapKho adminDuyetCuoi(Integer idPhieu, Integer nhanVienId) {
+        PhieuNhapKho po = phieuNhapKhoRepository.findById(idPhieu)
+            .orElseThrow(() -> new BusinessException("Phiếu nhập không tồn tại: " + idPhieu));
+
+        if (!"CHO_ADMIN_DUYET".equals(po.getTrangThai()))
+            throw new BusinessException("Phiếu đang ở trạng thái [" + po.getTrangThai() + "], không thể duyệt cuối");
+
+        BigDecimal giaBanChot = po.getGiaBanChot();
+
+        for (ChiTietPhieuNhap ct : po.getChiTiet()) {
+            if (ct.getSoLuongThucNhan() == null || ct.getSoLuongThucNhan() <= 0) continue;
+
+            SanPham sp = sanPhamRepository.findById(ct.getIdSanPham()).orElse(null);
+            if (sp == null) continue;
+
+            // Cộng kho
+            int tonCu = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
+            int tonMoi = tonCu + ct.getSoLuongThucNhan();
+            sp.setSoLuongTonKho(tonMoi);
+
+            // Cập nhật giá bán nếu có
+            if (giaBanChot != null && giaBanChot.compareTo(BigDecimal.ZERO) > 0) {
+                sp.setGiaBan(giaBanChot);
+            }
+
+            // Cập nhật ảnh nếu kho đã điền URL mới
+            if (ct.getUrlHinhAnhMoi() != null && !ct.getUrlHinhAnhMoi().trim().isEmpty()) {
+                sp.setUrlHinhAnh(ct.getUrlHinhAnhMoi().trim());
+            }
+
+            sanPhamRepository.save(sp);
+
+            // Ghi biến động kho
+            ghiBienDong(sp.getIdSanPham(), sp.getTenSanPham(),
+                "NHAP", ct.getSoLuongThucNhan(), tonMoi,
+                "Nhập từ PO " + po.getMaPhieu() + " (kho xác nhận, admin duyệt)",
+                null, po.getIdPhieu(), nhanVienId);
+        }
+
+        po.setTrangThai("DA_NHAP");
+        return phieuNhapKhoRepository.save(po);
+    }
+
+    /**
+     * Admin từ chối PO sau khi kho xác nhận.
+     */
+    @Transactional
+    public PhieuNhapKho adminTuChoi(Integer idPhieu, String lyDo, Integer nhanVienId) {
+        PhieuNhapKho po = phieuNhapKhoRepository.findById(idPhieu)
+            .orElseThrow(() -> new BusinessException("Phiếu nhập không tồn tại: " + idPhieu));
+
+        if (!"CHO_ADMIN_DUYET".equals(po.getTrangThai()))
+            throw new BusinessException("Phiếu đang ở trạng thái [" + po.getTrangThai() + "], không thể từ chối");
+
+        if (lyDo == null || lyDo.trim().isEmpty())
+            throw new BusinessException("Lý do từ chối không được để trống");
+
+        po.setTrangThai("BI_TU_CHOI");
+        po.setGhiChu((po.getGhiChu() != null ? po.getGhiChu() + "\n" : "") + "⚠ Từ chối: " + lyDo.trim());
+        return phieuNhapKhoRepository.save(po);
+    }
 
     // ══════════════════════════════════════════════════════════
     //  1. IMPORT CSV/EXCEL → STAGING
@@ -207,6 +341,7 @@ public class KhoService {
         phieu.setNhaCungCap(nhaCungCap);
         phieu.setNgayNhap(LocalDateTime.now());
         phieu.setGhiChu(ghiChu);
+        phieu.setTrangThai("DA_NHAP"); // nhập thủ công — cộng kho ngay
 
         List<ChiTietPhieuNhap> chiTiet = new ArrayList<>();
         for (PhieuNhapTam row : okRows) {

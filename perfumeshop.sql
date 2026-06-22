@@ -24,7 +24,35 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `chi_tiet_don_hang`
+-- Cấu trúc bảng cho bảng `san_pham_de_xuat`
+--
+
+DROP TABLE IF EXISTS `san_pham_de_xuat`;
+CREATE TABLE IF NOT EXISTS `san_pham_de_xuat` (
+  `id_san_pham_de_xuat` int NOT NULL AUTO_INCREMENT,
+  `id_phieu_goi_thau` int DEFAULT NULL,
+  `ten_ncc` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lien_he_ncc` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ten_san_pham` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mo_ta` text COLLATE utf8mb4_unicode_ci,
+  `url_hinh_anh` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gia_de_xuat` decimal(15,2) DEFAULT NULL,
+  `so_luong_co_the_cung_cap` int DEFAULT NULL,
+  `dung_tich_ml` int DEFAULT NULL,
+  `nong_do` decimal(5,2) DEFAULT NULL,
+  `trang_thai` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'CHO_DUYET',
+  `ghi_chu` text COLLATE utf8mb4_unicode_ci,
+  `ghi_chu_duyet` text COLLATE utf8mb4_unicode_ci,
+  `ghi_chu_tu_choi` text COLLATE utf8mb4_unicode_ci,
+  `thoi_gian_de_xuat` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_san_pham_de_xuat`),
+  KEY `san_pham_de_xuat_ibfk_1` (`id_phieu_goi_thau`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `phieu_goi_thau`
 --
 
 DROP TABLE IF EXISTS `chi_tiet_don_hang`;
@@ -278,6 +306,12 @@ INSERT INTO `thuong_hieu` (`id_thuong_hieu`, `ten_thuong_hieu`) VALUES
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
+
+--
+-- Các ràng buộc cho bảng `san_pham_de_xuat`
+--
+ALTER TABLE `san_pham_de_xuat`
+  ADD CONSTRAINT `san_pham_de_xuat_ibfk_1` FOREIGN KEY (`id_phieu_goi_thau`) REFERENCES `phieu_goi_thau` (`id_phieu_goi_thau`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Các ràng buộc cho bảng `chi_tiet_don_hang`

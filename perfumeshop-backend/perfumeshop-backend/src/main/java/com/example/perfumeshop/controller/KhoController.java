@@ -21,6 +21,62 @@ public class KhoController {
     @Autowired
     private KhoService khoService;
 
+    // ── PO Workflow: Kho xác nhận → Admin duyệt ──────────────────────────
+
+    /** GET /api/kho/po-cho-kiem-tra — PO đang chờ kho kiểm tra */
+    @GetMapping("/po-cho-kiem-tra")
+    public ResponseEntity<List<PhieuNhapKho>> getPoChoKiemTra() {
+        return ResponseEntity.ok(khoService.getPoChoKhoKiemTra());
+    }
+
+    /** GET /api/kho/po-cho-admin-duyet — PO đang chờ admin duyệt cuối */
+    @GetMapping("/po-cho-admin-duyet")
+    public ResponseEntity<List<PhieuNhapKho>> getPoChoAdminDuyet() {
+        return ResponseEntity.ok(khoService.getPoChoAdminDuyet());
+    }
+
+    /**
+     * POST /api/kho/po/{id}/kho-xac-nhan
+     * Body: { nhanVienId, chiTiet: [{ idChiTiet, soLuongThucNhan, soLuongLoi, urlHinhAnhMoi, ghiChuKho }] }
+     */
+    @PostMapping("/po/{id}/kho-xac-nhan")
+    public ResponseEntity<PhieuNhapKho> khoXacNhan(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Object> body) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> chiTiet = (List<Map<String, Object>>) body.get("chiTiet");
+        Integer nhanVienId = body.get("nhanVienId") != null
+            ? Integer.parseInt(body.get("nhanVienId").toString()) : null;
+        return ResponseEntity.ok(khoService.khoXacNhan(id, chiTiet, nhanVienId));
+    }
+
+    /**
+     * POST /api/kho/po/{id}/admin-duyet-cuoi
+     * Body: { nhanVienId }
+     */
+    @PostMapping("/po/{id}/admin-duyet-cuoi")
+    public ResponseEntity<PhieuNhapKho> adminDuyetCuoi(
+            @PathVariable Integer id,
+            @RequestBody(required = false) Map<String, Object> body) {
+        Integer nhanVienId = (body != null && body.get("nhanVienId") != null)
+            ? Integer.parseInt(body.get("nhanVienId").toString()) : null;
+        return ResponseEntity.ok(khoService.adminDuyetCuoi(id, nhanVienId));
+    }
+
+    /**
+     * POST /api/kho/po/{id}/admin-tu-choi
+     * Body: { lyDo, nhanVienId }
+     */
+    @PostMapping("/po/{id}/admin-tu-choi")
+    public ResponseEntity<PhieuNhapKho> adminTuChoi(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Object> body) {
+        String lyDo = (String) body.get("lyDo");
+        Integer nhanVienId = body.get("nhanVienId") != null
+            ? Integer.parseInt(body.get("nhanVienId").toString()) : null;
+        return ResponseEntity.ok(khoService.adminTuChoi(id, lyDo, nhanVienId));
+    }
+
     // ── Import CSV/Excel → staging ─────────────────────────────────────────
 
     /**

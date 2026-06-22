@@ -15,12 +15,10 @@ class KhoApi extends BaseApi {
     return response.json();
   }
 
-  /** Lấy lại preview theo sessionId */
   async getPreview(sessionId) {
     return this._fetch(`${API_BASE_URL}/kho/import-preview/${sessionId}`);
   }
 
-  /** Admin sửa toàn bộ field của dòng (không chỉ map SP) */
   async updateRow(rowId, data) {
     return this._fetch(`${API_BASE_URL}/kho/import-preview/row/${rowId}`, {
       method: 'PUT',
@@ -28,7 +26,6 @@ class KhoApi extends BaseApi {
     });
   }
 
-  /** Admin xóa dòng khỏi staging */
   async deleteRow(rowId) {
     const res = await fetch(`${API_BASE_URL}/kho/import-preview/row/${rowId}`, {
       method: 'DELETE',
@@ -38,7 +35,6 @@ class KhoApi extends BaseApi {
     return null;
   }
 
-  /** Admin thêm dòng thủ công */
   async addRow(sessionId, data) {
     return this._fetch(`${API_BASE_URL}/kho/import-preview/${sessionId}/row`, {
       method: 'POST',
@@ -46,7 +42,6 @@ class KhoApi extends BaseApi {
     });
   }
 
-  /** Duyệt session → cộng kho */
   async confirmImport(sessionId, nhanVienId, nhaCungCap, ghiChu) {
     return this._fetch(`${API_BASE_URL}/kho/import-confirm`, {
       method: 'POST',
@@ -54,25 +49,57 @@ class KhoApi extends BaseApi {
     });
   }
 
-  /** Danh sách phiếu nhập đã duyệt */
   async listPhieuNhap() {
     return this._fetch(`${API_BASE_URL}/kho/phieu-nhap`);
   }
 
-  /** Chi tiết phiếu nhập */
   async getPhieuNhap(id) {
     return this._fetch(`${API_BASE_URL}/kho/phieu-nhap/${id}`);
   }
 
-  /** Biến động kho — truyền idSanPham để lọc theo SP */
   async getBienDong(idSanPham = null) {
     const q = idSanPham ? `?idSanPham=${idSanPham}` : '';
     return this._fetch(`${API_BASE_URL}/kho/bien-dong${q}`);
   }
 
-  /** Thống kê sản phẩm bán chậm */
   async getBanCham(days = 30, limit = 20) {
     return this._fetch(`${API_BASE_URL}/kho/ban-cham?days=${days}&limit=${limit}`);
+  }
+
+  // ── PO Workflow ────────────────────────────────────────────────────────
+
+  /** PO đang chờ kho kiểm tra */
+  async getPoChoKiemTra() {
+    return this._fetch(`${API_BASE_URL}/kho/po-cho-kiem-tra`);
+  }
+
+  /** PO đang chờ admin duyệt cuối */
+  async getPoChoAdminDuyet() {
+    return this._fetch(`${API_BASE_URL}/kho/po-cho-admin-duyet`);
+  }
+
+  /** Kho xác nhận kiểm hàng */
+  async khoXacNhan(idPhieu, nhanVienId, chiTiet) {
+    return this._fetch(`${API_BASE_URL}/kho/po/${idPhieu}/kho-xac-nhan`, {
+      method: 'POST',
+      body: JSON.stringify({ nhanVienId, chiTiet }),
+    });
+  }
+
+  /** Admin duyệt cuối → cộng kho + áp giá */
+  async adminDuyetCuoi(idPhieu, nhanVienId) {
+    return this._fetch(`${API_BASE_URL}/kho/po/${idPhieu}/admin-duyet-cuoi`, {
+      method: 'POST',
+      body: JSON.stringify({ nhanVienId }),
+    });
+  }
+
+  /** Admin từ chối PO */
+  async adminTuChoi(idPhieu, lyDo, nhanVienId) {
+    return this._fetch(`${API_BASE_URL}/kho/po/${idPhieu}/admin-tu-choi`, {
+      method: 'POST',
+      body: JSON.stringify({ lyDo, nhanVienId }),
+    });
   }
 }
 

@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface PhieuNhapKhoRepository extends JpaRepository<PhieuNhapKho, Integer> {
     List<PhieuNhapKho> findAllByOrderByNgayNhapDesc();
+    List<PhieuNhapKho> findByTrangThaiOrderByNgayNhapDesc(String trangThai);
 }
