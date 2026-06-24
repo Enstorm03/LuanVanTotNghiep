@@ -152,6 +152,18 @@ class ProcurementApi extends BaseApi {
       body: JSON.stringify({ sessionId }),
     });
   }
+
+  /**
+   * Admin duyệt hàng loạt nhiều đề xuất cùng lúc.
+   * items: [{ idSanPhamDeXuat, idDanhMuc?, idThuongHieu?, phanTramBienDo, soLuongNhap?, phanHoi? }]
+   * Trả về: { thanhCong, thatBai, tong, chiTiet }
+   */
+  async bulkApprove(idNhanVien, items) {
+    return this._fetch(`${API_BASE_URL}/procurement/san-pham-de-xuat/duyet-hang-loat`, {
+      method: 'POST',
+      body: JSON.stringify({ idNhanVien, items }),
+    });
+  }
 }
 
 const procurementApi = new ProcurementApi();

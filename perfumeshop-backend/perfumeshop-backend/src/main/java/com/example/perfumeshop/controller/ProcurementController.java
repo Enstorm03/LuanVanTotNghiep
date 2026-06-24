@@ -260,4 +260,22 @@ public class ProcurementController {
         String lyDo        = (String) body.getOrDefault("lyDo", "");
         return ResponseEntity.ok(procurementService.tuChoiSanPhamDeXuat(id, idNhanVien, lyDo));
     }
+
+    /**
+     * POST /api/procurement/san-pham-de-xuat/duyet-hang-loat — Duyệt nhiều đề xuất cùng lúc
+     * Body: { idNhanVien, items: [{ idSanPhamDeXuat, idDanhMuc?, idThuongHieu?, 
+     *         phanTramBienDo, soLuongNhap?, phanHoi? }] }
+     * Trả về: { thanhCong, thatBai, tong, chiTiet }
+     */
+    @PostMapping("/san-pham-de-xuat/duyet-hang-loat")
+    public ResponseEntity<Map<String, Object>> duyetHangLoat(@RequestBody Map<String, Object> body) {
+        Integer idNhanVien = body.get("idNhanVien") != null
+            ? Integer.parseInt(body.get("idNhanVien").toString()) : 1;
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
+        if (items == null || items.isEmpty()) {
+            throw new RuntimeException("Danh sách items không được rỗng");
+        }
+        return ResponseEntity.ok(procurementService.duyetHangLoat(idNhanVien, items));
+    }
 }

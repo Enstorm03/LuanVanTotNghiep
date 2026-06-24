@@ -5,6 +5,7 @@ import StatsCards from './dashboard/components/StatsCards';
 import QuickActions from './dashboard/components/QuickActions';
 import RecentOrders from './dashboard/components/RecentOrders';
 import OrderStatusOverview from './dashboard/components/OrderStatusOverview';
+import ProductInsights from './dashboard/components/ProductInsights';
 
 const DashboardPage = () => {
   const { stats, recentOrders, loading, error, fetchDashboardData } = useDashboard();
@@ -41,6 +42,8 @@ const DashboardPage = () => {
       <StatsCards stats={stats} />
 
       <QuickActions />
+
+      <ProductInsights />
 
       <RecentOrders recentOrders={recentOrders} />
 

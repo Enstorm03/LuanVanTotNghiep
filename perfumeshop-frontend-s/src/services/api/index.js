@@ -168,6 +168,8 @@ const api = {
   // Đề xuất hàng loạt qua Excel/CSV
   procurementBulkPreview: procurementApi.bulkPreview.bind(procurementApi),
   procurementBulkConfirm: procurementApi.bulkConfirm.bind(procurementApi),
+  // Duyệt hàng loạt
+  procurementBulkApprove: procurementApi.bulkApprove.bind(procurementApi),
 
 };
 

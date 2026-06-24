@@ -7,6 +7,7 @@ const DangKyPage = () => {
     tenDangNhap: '',
     matKhau: '',
     hoTen: '',
+    email: '',
     soDienThoai: '',
     diaChi: ''
   });
@@ -79,6 +80,21 @@ const DangKyPage = () => {
                 onChange={handleInputChange}
                 className="form-input w-full h-12 rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary/50"
                 placeholder="Nguyễn Văn A"
+                required
+              />
+            </div>
+
+            {/* Email Input */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium mb-2 text-text-subtle-light dark:text-text-subtle-dark">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="form-input w-full h-12 rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary/50"
+                placeholder="example@gmail.com"
                 required
               />
             </div>

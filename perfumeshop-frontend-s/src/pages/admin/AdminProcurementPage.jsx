@@ -18,12 +18,15 @@ const CreateRequestModal = ({ onClose, onCreated, adminId }) => {
   const [note,       setNote]       = useState('');
   const [deadline,   setDeadline]   = useState('');
   const [saving,     setSaving]     = useState(false);
-  const [threshold,  setThreshold]  = useState(5);
+  const [threshold,  setThreshold]  = useState(10);
 
   const fetchLowStock = useCallback(() => {
     setLoading(true);
     api.procurementGetLowStock(threshold)
-      .then(d => setLowStock(Array.isArray(d) ? d : []))
+      .then(d => {
+        console.log('📊 Low stock data:', d);
+        setLowStock(Array.isArray(d) ? d : []);
+      })
       .finally(() => setLoading(false));
   }, [threshold]);
 
@@ -101,14 +104,39 @@ const CreateRequestModal = ({ onClose, onCreated, adminId }) => {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{sp.tenSanPham}</p>
-                  <p className="text-xs text-gray-400">Tồn: <span className="text-red-600 font-semibold">{sp.soLuongTonKho}</span> · Giá bán: {fmt(sp.giaBan)}</p>
+                  <div className="flex items-center gap-3 text-xs text-gray-400 mt-0.5">
+                    <span>Tồn: <span className="text-red-600 font-semibold">{sp.soLuongTonKho}</span></span>
+                    <span>·</span>
+                    <span>Giá bán: {fmt(sp.giaBan)}</span>
+                  </div>
+                  {sp.tocDoBan != null && (
+                    <div className="flex items-center gap-2 text-xs mt-1">
+                      <span className="text-blue-600"> {sp.tocDoBan.toFixed(2)} sp/ngày</span>
+                      {sp.soNgayBienDo != null && (
+                        <span className="text-gray-500">· Da nhap  {sp.soNgayBienDo} ngày truoc </span>
+                      )}
+                      {sp.soLuongGoiY != null && sp.soLuongGoiY > 0 && (
+                        <span className="text-green-600">· 💡 Gợi ý: {sp.soLuongGoiY} sp</span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {sel && (
-                  <input type="number" value={sel.qty} min={1}
-                    onChange={e => setQty(sp.idSanPham, e.target.value)}
-                    onClick={e => e.preventDefault()}
-                    className="w-20 border border-indigo-300 rounded px-2 py-1 text-sm text-center"
-                    placeholder="SL cần" />
+                  <div className="flex flex-col items-end gap-1">
+                    <input type="number" value={sel.qty} min={1}
+                      onChange={e => setQty(sp.idSanPham, e.target.value)}
+                      onClick={e => e.preventDefault()}
+                      className="w-20 border border-indigo-300 rounded px-2 py-1 text-sm text-center"
+                      placeholder="SL cần" />
+                    {sp.soLuongGoiY != null && sp.soLuongGoiY > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQty(sp.idSanPham, sp.soLuongGoiY); }}
+                        className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline">
+                        Dùng gợi ý
+                      </button>
+                    )}
+                  </div>
                 )}
               </label>
             );
@@ -145,6 +173,13 @@ const AdminProcurementPage = () => {
   const [propSaving, setPropSaving] = useState(false);
   const [propToast, setPropToast] = useState('');
 
+  // View theo NCC
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+
+  // Chọn nhiều để duyệt hàng loạt
+  const [selectedProposals, setSelectedProposals] = useState(new Set());
+  const [bulkApproving, setBulkApproving] = useState(false);
+
   // Modal duyệt đề xuất
   const [approveModal, setApproveModal] = useState(null);
   const [approveForm, setApproveForm] = useState({
@@ -152,6 +187,10 @@ const AdminProcurementPage = () => {
   });
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+
+  // Modal duyệt hàng loạt
+  const [bulkApproveModal, setBulkApproveModal] = useState(null);
+  const [bulkPct, setBulkPct] = useState('20');
 
   // Load danh mục + thương hiệu một lần
   useEffect(() => {
@@ -229,11 +268,242 @@ const AdminProcurementPage = () => {
     finally { setPropSaving(false); }
   };
 
+  // Duyệt hàng loạt
+  const toggleProposalSelection = (idSanPhamDeXuat) => {
+    setSelectedProposals(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(idSanPhamDeXuat)) {
+        newSet.delete(idSanPhamDeXuat);
+      } else {
+        newSet.add(idSanPhamDeXuat);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const pendingProposals = proposals.filter(p => p.trangThai === 'PENDING');
+    if (selectedProposals.size === pendingProposals.length) {
+      setSelectedProposals(new Set());
+    } else {
+      setSelectedProposals(new Set(pendingProposals.map(p => p.idSanPhamDeXuat)));
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedProposals.size === 0) {
+      alert('Chọn ít nhất 1 sản phẩm để duyệt');
+      return;
+    }
+
+    const phanTramBienDo = prompt('Nhập % biên lợi nhuận (mặc định: 20%):', '20');
+    if (phanTramBienDo === null) return;
+
+    const pct = parseFloat(phanTramBienDo) || 20;
+    if (pct < 0 || pct > 500) {
+      alert('% biên lợi nhuận phải từ 0-500');
+      return;
+    }
+
+    if (!confirm(`Duyệt ${selectedProposals.size} sản phẩm với % biên lợi nhuận ${pct}%?`)) {
+      return;
+    }
+
+    try {
+      setBulkApproving(true);
+      const items = Array.from(selectedProposals).map(id => ({
+        idSanPhamDeXuat: id,
+        phanTramBienDo: pct,
+        phanHoi: 'Duyệt hàng loạt',
+      }));
+
+      const result = await api.procurementBulkApprove(user?.id_nhan_vien || user?.id || 1, items);
+      
+      showPropToast(`✅ Duyệt hàng loạt: ${result.thanhCong} thành công, ${result.thatBai} thất bại`);
+      setSelectedProposals(new Set());
+      fetchProposals();
+    } catch (e) {
+      alert('Lỗi duyệt hàng loạt: ' + e.message);
+    } finally {
+      setBulkApproving(false);
+    }
+  };
+
   const PROP_STYLE = { PENDING: 'bg-yellow-100 text-yellow-800', APPROVED: 'bg-green-100 text-green-800', REJECTED: 'bg-red-100 text-red-800' };
   const PROP_LABEL = { PENDING: '⏳ Chờ duyệt', APPROVED: '✓ Đã duyệt', REJECTED: '✗ Từ chối' };
 
+  // Nhóm proposals theo NCC
+  const groupedBySupplier = () => {
+    const groups = {};
+    proposals.forEach(p => {
+      const key = p.tenNCC || 'Không rõ NCC';
+      if (!groups[key]) {
+        groups[key] = {
+          tenNCC: p.tenNCC,
+          lienHeNCC: p.lienHeNCC,
+          proposals: [],
+        };
+      }
+      groups[key].proposals.push(p);
+    });
+    return Object.values(groups);
+  };
+
+  // Duyệt hàng loạt theo NCC - mở modal
+  const handleBulkApproveSupplier = (supplierProposals) => {
+    const pendingIds = supplierProposals.filter(p => p.trangThai === 'PENDING').map(p => p.idSanPhamDeXuat);
+    if (pendingIds.length === 0) {
+      alert('Không có sản phẩm nào đang chờ duyệt từ NCC này');
+      return;
+    }
+    setBulkApproveModal({ pendingIds, count: pendingIds.length });
+    setBulkPct('20');
+  };
+
+  // Xác nhận duyệt hàng loạt
+  const confirmBulkApprove = async () => {
+    const pct = parseFloat(bulkPct) || 20;
+    if (pct < 0 || pct > 500) {
+      alert('% biên lợi nhuận phải từ 0-500');
+      return;
+    }
+
+    try {
+      setBulkApproving(true);
+      const items = bulkApproveModal.pendingIds.map(id => ({
+        idSanPhamDeXuat: id,
+        phanTramBienDo: pct,
+        phanHoi: 'Duyệt hàng loạt theo NCC',
+      }));
+
+      console.log('🔍 Bulk approve debug:', {
+        pendingIds: bulkApproveModal.pendingIds,
+        items,
+        count: items.length
+      });
+
+      const result = await api.procurementBulkApprove(user?.id_nhan_vien || user?.id || 1, items);
+      
+      console.log('✅ Bulk approve result:', result);
+      showPropToast(`✅ Duyệt hàng loạt NCC: ${result.thanhCong} thành công, ${result.thatBai} thất bại`);
+      setBulkApproveModal(null);
+      setSelectedSupplier(null);
+      fetchProposals();
+    } catch (e) {
+      console.error('❌ Bulk approve error:', e);
+      alert('Lỗi duyệt hàng loạt: ' + e.message);
+    } finally {
+      setBulkApproving(false);
+    }
+  };
+
   return (
     <>
+      {/* ── Modal chi tiết NCC ── */}
+      {selectedSupplier && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-4xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+              <div>
+                <h3 className="font-bold text-lg">{selectedSupplier.tenNCC || 'Không rõ NCC'}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{selectedSupplier.lienHeNCC || 'Chưa có thông tin liên hệ'}</p>
+              </div>
+              <button onClick={() => setSelectedSupplier(null)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {selectedSupplier.proposals.some(p => p.trangThai === 'PENDING') && (
+              <div className="px-5 py-3 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800 flex items-center justify-between shrink-0">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  {selectedSupplier.proposals.filter(p => p.trangThai === 'PENDING').length} sản phẩm đang chờ duyệt
+                </p>
+                <button
+                  onClick={() => handleBulkApproveSupplier(selectedSupplier.proposals)}
+                  disabled={bulkApproving}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors">
+                  {bulkApproving && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />}
+                  <span className="material-symbols-outlined text-sm">done_all</span>
+                  Duyệt tất cả
+                </button>
+              </div>
+            )}
+
+            <div className="overflow-y-auto flex-1">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-700/50 sticky top-0">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Sản phẩm</th>
+                    <th className="text-right px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Giá đề xuất</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">SL</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Trạng thái</th>
+                    <th className="px-4 py-3 w-32 text-center" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {selectedSupplier.proposals.map(p => (
+                    <tr key={p.idSanPhamDeXuat} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {p.urlHinhAnh && <img src={p.urlHinhAnh} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-200 shrink-0" onError={e => { e.target.style.display = 'none'; }} />}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-800 dark:text-gray-200">{p.tenSanPham}</p>
+                              {p.idSanPhamKhop && (
+                                <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-semibold rounded border border-blue-200 dark:border-blue-800">
+                                  Đã có #{p.idSanPhamKhop}
+                                </span>
+                              )}
+                              {!p.idSanPhamKhop && p.trangThai === 'PENDING' && (
+                                <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold rounded border border-amber-200 dark:border-amber-800">
+                                  Sản phẩm mới
+                                </span>
+                              )}
+                            </div>
+                            {p.moTa && <p className="text-xs text-gray-400 max-w-[300px] truncate mt-0.5">{p.moTa}</p>}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-green-600">{fmt(p.giaDeXuat)}</td>
+                      <td className="px-4 py-3 text-center text-gray-600">{p.soLuongCoTheCungCap || '—'}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${PROP_STYLE[p.trangThai] || 'bg-gray-100 text-gray-500'}`}>
+                          {PROP_LABEL[p.trangThai] || p.trangThai}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {p.trangThai === 'PENDING' && (
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={(e) => { e.stopPropagation(); openApproveModal(p); }} disabled={propSaving}
+                              className="px-2 py-1 bg-green-500 text-white text-xs font-semibold rounded hover:bg-green-600 disabled:opacity-50 transition-colors">
+                              Duyệt
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); handleReject(p.idSanPhamDeXuat); }} disabled={propSaving}
+                              className="px-2 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded hover:bg-red-200 transition-colors">
+                              Từ chối
+                            </button>
+                          </div>
+                        )}
+                        {p.trangThai === 'APPROVED' && p.idSanPhamTaoRa && (
+                          <span className="text-xs text-gray-400">SP #{p.idSanPhamTaoRa}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end shrink-0">
+              <button onClick={() => setSelectedSupplier(null)}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Modal duyệt đề xuất ── */}
       {approveModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
@@ -444,63 +714,37 @@ const AdminProcurementPage = () => {
                 <p className="text-gray-500">Chưa có đề xuất độc lập nào</p>
               </div>
             ) : (
-              <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Sản phẩm</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">NCC</th>
-                      <th className="text-right px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Giá đề xuất</th>
-                      <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Trạng thái</th>
-                      <th className="px-4 py-3 w-40 text-center" />
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                    {proposals.map(p => (
-                      <tr key={p.idSanPhamDeXuat} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            {p.urlHinhAnh && <img src={p.urlHinhAnh} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-200 shrink-0" onError={e => { e.target.style.display = 'none'; }} />}
-                            <div>
-                              <p className="font-medium text-gray-800 dark:text-gray-200">{p.tenSanPham}</p>
-                              {p.moTa && <p className="text-xs text-gray-400 max-w-[200px] truncate">{p.moTa}</p>}
-                            </div>
+              /* View theo NCC */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {groupedBySupplier().map((group, idx) => {
+                  const pendingCount = group.proposals.filter(p => p.trangThai === 'PENDING').length;
+                  const totalCount = group.proposals.length;
+                  return (
+                    <div key={idx} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => setSelectedSupplier(group)}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-200">{group.tenNCC || 'Không rõ NCC'}</h3>
+                          <p className="text-xs text-gray-400 mt-0.5">{group.lienHeNCC || 'Chưa có thông tin liên hệ'}</p>
+                        </div>
+                        <span className="material-symbols-outlined text-gray-400">chevron_right</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <span className="text-gray-500">Tổng:</span>
+                          <span className="font-semibold text-gray-800 dark:text-gray-200">{totalCount}</span>
+                        </div>
+                        {pendingCount > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span className="font-semibold text-yellow-700 dark:text-yellow-500">{pendingCount} chờ duyệt</span>
                           </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-sm">{p.tenNCC}</p>
-                          <p className="text-xs text-gray-400">{p.lienHeNCC || '—'}</p>
-                        </td>
-                        <td className="px-4 py-3 text-right font-semibold text-green-600">{fmt(p.giaDeXuat)}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${PROP_STYLE[p.trangThai] || 'bg-gray-100 text-gray-500'}`}>
-                            {PROP_LABEL[p.trangThai] || p.trangThai}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          {p.trangThai === 'PENDING' && (
-                            <div className="flex items-center justify-center gap-2">
-                              <button onClick={() => openApproveModal(p)} disabled={propSaving}
-                                className="px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors">
-                                Duyệt
-                              </button>
-                              <button onClick={() => handleReject(p.idSanPhamDeXuat)} disabled={propSaving}
-                                className="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-200 transition-colors">
-                                Từ chối
-                              </button>
-                            </div>
-                            
-                          )}
-                          {p.trangThai === 'APPROVED' && p.idSanPhamTaoRa && (
-                            <span className="text-xs text-gray-400">SP #{p.idSanPhamTaoRa}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              
             )}
           </div>
           
@@ -537,6 +781,77 @@ const AdminProcurementPage = () => {
           onCreated={handleCreated}
           adminId={user?.id_nhan_vien || user?.id || 1}
         />
+      )}
+
+      {/* Modal duyệt hàng loạt */}
+      {bulkApproveModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h3 className="font-bold text-lg">Duyệt hàng loạt</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{bulkApproveModal.count} sản phẩm sẽ được duyệt</p>
+              </div>
+              <button onClick={() => setBulkApproveModal(null)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="px-5 py-5 space-y-4">
+              <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-indigo-800 dark:text-indigo-200 mb-2">
+                  <span className="material-symbols-outlined text-lg">info</span>
+                  <span className="font-semibold text-sm">Thông tin duyệt</span>
+                </div>
+                <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                  Tất cả sản phẩm sẽ được duyệt với cùng một % biên lợi nhuận. 
+                  Sau khi duyệt, sản phẩm mới sẽ được tạo và PO chuyển về kho để kiểm tra.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  % Biên lợi nhuận <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min={0}
+                    max={500}
+                    value={bulkPct}
+                    onChange={e => setBulkPct(e.target.value)}
+                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Nhập % biên lợi nhuận"
+                    autoFocus
+                  />
+                  <span className="text-sm text-gray-500 font-medium">%</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Giá bán = Giá đề xuất × (1 + {bulkPct}%/100)
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={confirmBulkApprove}
+                  disabled={bulkApproving || !bulkPct}
+                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+                  {bulkApproving && (
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                  )}
+                  <span className="material-symbols-outlined text-base">done_all</span>
+                  Xác nhận duyệt {bulkApproveModal.count} SP
+                </button>
+                <button
+                  onClick={() => setBulkApproveModal(null)}
+                  disabled={bulkApproving}
+                  className="px-5 py-3 bg-gray-100 dark:bg-gray-700 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                  Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

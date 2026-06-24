@@ -320,6 +320,14 @@ const TabPoChoKiemTra = ({ nhanVienId }) => {
     setTimeout(() => setToast(''), 3000);
   };
 
+  // Group PO by supplier
+  const groupedBySupplier = data.reduce((acc, po) => {
+    const ncc = po.nhaCungCap || 'Không rõ NCC';
+    if (!acc[ncc]) acc[ncc] = [];
+    acc[ncc].push(po);
+    return acc;
+  }, {});
+
   if (loading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" /></div>;
 
   return (
@@ -332,38 +340,52 @@ const TabPoChoKiemTra = ({ nhanVienId }) => {
           <p className="text-gray-500 font-medium">Không có PO nào đang chờ kiểm tra</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-yellow-50 dark:bg-yellow-900/20">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Mã PO</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">Nhà cung cấp</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">SP</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">Ngày tạo</th>
-                <th className="px-4 py-3 text-center w-36" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light dark:divide-border-dark">
-              {data.map(po => (
-                <tr key={po.idPhieu} className="hover:bg-yellow-50/50 dark:hover:bg-gray-700/30 transition-colors">
-                  <td className="px-4 py-3 font-mono font-semibold text-yellow-700 dark:text-yellow-400">{po.maPhieu}</td>
-                  <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{po.nhaCungCap || '—'}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
-                      {(po.chiTiet || []).length} SP
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(po.ngayNhap)}</td>
-                  <td className="px-4 py-3 text-center">
-                    <button onClick={() => setSelected(po)}
-                      className="px-3 py-1.5 bg-yellow-500 text-white text-xs font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
-                      Kiểm hàng
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {Object.entries(groupedBySupplier).map(([ncc, poList]) => (
+            <div key={ncc} className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow overflow-hidden">
+              {/* Supplier header */}
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 px-4 py-3 flex items-center justify-between border-b border-border-light dark:border-border-dark">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-yellow-600">store</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{ncc}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{poList.length} PO chờ kiểm tra</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* PO table */}
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-700/30">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Mã PO</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">SP</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">Ngày tạo</th>
+                    <th className="px-4 py-3 text-center w-36" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {poList.map(po => (
+                    <tr key={po.idPhieu} className="hover:bg-yellow-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                      <td className="px-4 py-3 font-mono font-semibold text-yellow-700 dark:text-yellow-400">{po.maPhieu}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+                          {(po.chiTiet || []).length} SP
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(po.ngayNhap)}</td>
+                      <td className="px-4 py-3 text-center">
+                        <button onClick={() => setSelected(po)}
+                          className="px-3 py-1.5 bg-yellow-500 text-white text-xs font-semibold rounded-lg hover:bg-yellow-600 transition-colors">
+                          Kiểm hàng
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -405,6 +427,26 @@ const TabPoChoAdminDuyet = ({ nhanVienId }) => {
     finally { setSaving(false); }
   };
 
+  const handleDuyetTatCa = async (ncc, poList) => {
+    if (!window.confirm(`Duyệt tất cả ${poList.length} PO của NCC "${ncc}"?`)) return;
+    try {
+      setSaving(true);
+      let success = 0, failed = 0;
+      for (const po of poList) {
+        try {
+          await api.khoAdminDuyetCuoi(po.idPhieu, nhanVienId);
+          success++;
+        } catch (e) {
+          console.error(`Failed PO ${po.maPhieu}:`, e);
+          failed++;
+        }
+      }
+      showToast(`Đã duyệt ${success}/${poList.length} PO. ${failed > 0 ? `${failed} thất bại.` : ''}`, failed > 0 ? 'warning' : 'success');
+      load();
+    } catch (e) { showToast('Lỗi: ' + e.message, 'error'); }
+    finally { setSaving(false); }
+  };
+
   const handleTuChoi = async () => {
     if (!lyDo.trim()) { alert('Vui lòng nhập lý do từ chối'); return; }
     try {
@@ -416,6 +458,14 @@ const TabPoChoAdminDuyet = ({ nhanVienId }) => {
     } catch (e) { showToast('Lỗi: ' + e.message, 'error'); }
     finally { setSaving(false); }
   };
+
+  // Group PO by supplier
+  const groupedBySupplier = data.reduce((acc, po) => {
+    const ncc = po.nhaCungCap || 'Không rõ NCC';
+    if (!acc[ncc]) acc[ncc] = [];
+    acc[ncc].push(po);
+    return acc;
+  }, {});
 
   if (loading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" /></div>;
 
@@ -505,35 +555,57 @@ const TabPoChoAdminDuyet = ({ nhanVienId }) => {
           <p className="text-gray-500 font-medium">Không có PO nào đang chờ duyệt</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-blue-50 dark:bg-blue-900/20">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Mã PO</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">NCC</th>
-                <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Giá bán dự kiến</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">Ngày</th>
-                <th className="px-4 py-3 text-center w-48" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-light dark:divide-border-dark">
-              {data.map(po => (
-                <tr key={po.idPhieu} className="hover:bg-blue-50/50 dark:hover:bg-gray-700/30 transition-colors">
-                  <td className="px-4 py-3 font-mono font-semibold text-blue-700 dark:text-blue-400">{po.maPhieu}</td>
-                  <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{po.nhaCungCap || '—'}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-green-600">{fmt(po.giaBanChot)}</td>
-                  <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(po.ngayNhap)}</td>
-                  <td className="px-4 py-3 text-center flex items-center justify-center gap-2">
-                    <button onClick={() => setDetail(po)} className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-200 transition-colors">Xem báo cáo</button>
-                    <button onClick={() => handleDuyet(po.idPhieu)} disabled={saving}
-                      className="px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors">Duyệt</button>
-                    <button onClick={() => setTuChoiModal(po.idPhieu)}
-                      className="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-200 transition-colors">Từ chối</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {Object.entries(groupedBySupplier).map(([ncc, poList]) => (
+            <div key={ncc} className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow overflow-hidden">
+              {/* Supplier header */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-3 flex items-center justify-between border-b border-border-light dark:border-border-dark">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-blue-600">store</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{ncc}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{poList.length} PO chờ duyệt</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDuyetTatCa(ncc, poList)}
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">done_all</span>
+                  Duyệt tất cả
+                </button>
+              </div>
+
+              {/* PO table */}
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-700/30">
+                  <tr>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Mã PO</th>
+                    <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Giá bán dự kiến</th>
+                    <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">Ngày</th>
+                    <th className="px-4 py-3 text-center w-48" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {poList.map(po => (
+                    <tr key={po.idPhieu} className="hover:bg-blue-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                      <td className="px-4 py-3 font-mono font-semibold text-blue-700 dark:text-blue-400">{po.maPhieu}</td>
+                      <td className="px-4 py-3 text-center font-semibold text-green-600">{fmt(po.giaBanChot)}</td>
+                      <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(po.ngayNhap)}</td>
+                      <td className="px-4 py-3 text-center flex items-center justify-center gap-2">
+                        <button onClick={() => setDetail(po)} className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-200 transition-colors">Xem báo cáo</button>
+                        <button onClick={() => handleDuyet(po.idPhieu)} disabled={saving}
+                          className="px-3 py-1.5 bg-green-500 text-white text-xs font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors">Duyệt</button>
+                        <button onClick={() => setTuChoiModal(po.idPhieu)}
+                          className="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-200 transition-colors">Từ chối</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
         </div>
       )}
     </div>

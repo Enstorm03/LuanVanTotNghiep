@@ -3,7 +3,8 @@ package com.example.perfumeshop.service;
 import com.example.perfumeshop.entity.*;
 import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -31,6 +32,7 @@ public class ProcurementService {
     @Autowired private PhieuNhapKhoRepository phieuNhapKhoRepository;
     @Autowired private SanPhamDeXuatRepository sanPhamDeXuatRepo;
     @Autowired private KhoService khoService;
+    @Autowired private ChiTietDonHangRepository chiTietDonHangRepo;
 
     // ── Giai đoạn 1: Admin tạo phiếu gọi thầu ─────────────────────────────
 
@@ -46,10 +48,96 @@ public class ProcurementService {
                 m.put("giaBan",        sp.getGiaBan());
                 m.put("giaHienTai",    sp.getGiaHienTai());
                 m.put("urlHinhAnh",    sp.getUrlHinhAnh());
+                
+                // Tính toán biên độ bán (Sales Velocity)
+                Map<String, Object> velocity = tinhBienDoBan(sp.getIdSanPham());
+                m.putAll(velocity);
+                
                 return m;
             })
             .sorted(Comparator.comparingInt(m -> (int) m.get("soLuongTonKho")))
             .toList();
+    }
+    
+    /**
+     * Tính toán biên độ bán cho một sản phẩm.
+     * Trả về: ngayNhapGanNhat, soNgayBienDo, tongBanRa, tocDoBan, soLuongGoiY
+     */
+    private Map<String, Object> tinhBienDoBan(Integer idSanPham) {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            // D: Tìm ngày nhập kho gần nhất
+            LocalDateTime ngayNhapGanNhat = phieuNhapKhoRepository.findAll().stream()
+                .flatMap(phieu -> phieu.getChiTiet() != null ? phieu.getChiTiet().stream() : java.util.stream.Stream.empty())
+                .filter(ct -> ct.getIdSanPham().equals(idSanPham))
+                .map(ct -> ct.getPhieuNhap().getNgayNhap())
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+            
+            if (ngayNhapGanNhat == null) {
+                // Chưa từng nhập hàng
+                result.put("ngayNhapGanNhat", null);
+                result.put("soNgayBienDo", 0);
+                result.put("tongBanRa", 0);
+                result.put("tocDoBan", 0.0);
+                result.put("soLuongGoiY", null);
+                return result;
+            }
+            
+            result.put("ngayNhapGanNhat", ngayNhapGanNhat);
+            
+            // D: Số ngày từ lần nhập gần nhất đến nay
+            long soNgayBienDo = java.time.temporal.ChronoUnit.DAYS.between(
+                ngayNhapGanNhat.toLocalDate(), 
+                LocalDate.now()
+            );
+            if (soNgayBienDo <= 0) soNgayBienDo = 1; // Tránh chia cho 0
+            result.put("soNgayBienDo", soNgayBienDo);
+            
+            // S: Tổng số lượng đã bán từ ngày nhập đến nay
+            int tongBanRa = chiTietDonHangRepo.findAll().stream()
+                .filter(ct -> ct.getSanPham() != null && ct.getSanPham().getIdSanPham().equals(idSanPham))
+                .filter(ct -> {
+                    DonHang dh = ct.getDonHang();
+                    if (dh == null || dh.getNgayDatHang() == null) return false;
+                    // Chỉ tính đơn đã hoàn thành
+                    if (!"Hoàn thành".equals(dh.getTrangThaiVanHanh())) return false;
+                    // Đơn hàng sau ngày nhập
+                    return !dh.getNgayDatHang().isBefore(ngayNhapGanNhat);
+                })
+                .mapToInt(ct -> ct.getSoLuong() != null ? ct.getSoLuong() : 0)
+                .sum();
+            result.put("tongBanRa", tongBanRa);
+            
+            // V: Tốc độ tiêu thụ trung bình (sản phẩm/ngày)
+            double tocDoBan = (double) tongBanRa / soNgayBienDo;
+            result.put("tocDoBan", Math.round(tocDoBan * 100.0) / 100.0);
+            
+            // Q: Số lượng gợi ý nhập = (V × T) + SS - I
+            // T = 30 ngày (chu kỳ nhập mặc định)
+            // SS = V × 5 (tồn kho an toàn 5 ngày)
+            // I = tồn kho hiện tại
+            int T = 30;
+            double SS = tocDoBan * 5;
+            SanPham sp = sanPhamRepository.findById(idSanPham).orElse(null);
+            int I = (sp != null && sp.getSoLuongTonKho() != null) ? sp.getSoLuongTonKho() : 0;
+            
+            int soLuongGoiY = (int) Math.ceil((tocDoBan * T) + SS - I);
+            if (soLuongGoiY < 0) soLuongGoiY = 0;
+            result.put("soLuongGoiY", soLuongGoiY);
+            
+        } catch (Exception e) {
+            // Nếu có lỗi, trả về giá trị mặc định
+            result.put("ngayNhapGanNhat", null);
+            result.put("soNgayBienDo", 0);
+            result.put("tongBanRa", 0);
+            result.put("tocDoBan", 0.0);
+            result.put("soLuongGoiY", null);
+        }
+        
+        return result;
     }
 
     /**
@@ -313,8 +401,26 @@ public class ProcurementService {
                 .setScale(0, RoundingMode.HALF_UP)
             : BigDecimal.ZERO;
 
-        // Tạo sản phẩm mới — soLuongTonKho = 0, kho sẽ cộng sau khi duyệt PO
-        SanPham sp = new SanPham();
+        // Kiểm tra xem sản phẩm đã tồn tại chưa (match theo tên)
+        SanPham sanPhamKhop = sanPhamRepository.findAll().stream()
+            .filter(sp -> sp.getTenSanPham() != null && 
+                         dx.getTenSanPham() != null &&
+                         sp.getTenSanPham().trim().equalsIgnoreCase(dx.getTenSanPham().trim()))
+            .findFirst()
+            .orElse(null);
+
+        SanPham spMoi;
+        boolean daTonTai = false;
+
+        if (sanPhamKhop != null) {
+            // Sản phẩm đã tồn tại — KHÔNG tạo mới, dùng SP có sẵn
+            spMoi = sanPhamKhop;
+            daTonTai = true;
+            dx.setIdSanPhamKhop(sanPhamKhop.getIdSanPham());
+            System.out.println("✓ Sản phẩm '" + dx.getTenSanPham() + "' đã tồn tại với ID: " + sanPhamKhop.getIdSanPham());
+        } else {
+            // Tạo sản phẩm mới — soLuongTonKho = 0, kho sẽ cộng sau khi duyệt PO
+            SanPham sp = new SanPham();
         sp.setTenSanPham(dx.getTenSanPham());
         sp.setMoTa(dx.getMoTa());
         sp.setUrlHinhAnh(dx.getUrlHinhAnh());
@@ -330,7 +436,9 @@ public class ProcurementService {
         if (idThuongHieu != null) {
             ThuongHieu th = new ThuongHieu(); th.setIdThuongHieu(idThuongHieu); sp.setThuongHieu(th);
         }
-        SanPham spMoi = sanPhamRepository.save(sp);
+            spMoi = sanPhamRepository.save(sp);
+            System.out.println("✓ Tạo sản phẩm mới '" + dx.getTenSanPham() + "' với ID: " + spMoi.getIdSanPham());
+        }
 
         // Tạo PO CHO_KHO_KIEM_TRA — kho sẽ kiểm và admin duyệt cuối mới cộng kho + áp giá
         int slNhap = (soLuongNhap != null && soLuongNhap > 0) ? soLuongNhap
@@ -343,10 +451,11 @@ public class ProcurementService {
         po.setIdNhanVien(idNhanVien);
         po.setTrangThai("CHO_KHO_KIEM_TRA");
         po.setGiaBanChot(giaBanChot);
-        po.setGhiChu("PO từ đề xuất NCC: " + dx.getTenSanPham()
+        po.setGhiChu((daTonTai ? "PO nhập thêm SP đã có" : "PO từ đề xuất NCC") + ": " + dx.getTenSanPham()
             + " | NCC: " + dx.getTenNCC()
             + " | Giá nhập: " + (dx.getGiaDeXuat() != null ? dx.getGiaDeXuat().toPlainString() : "?") + "₫"
-            + " | Giá bán dự kiến: " + giaBanChot.toPlainString() + "₫");
+            + " | Giá bán dự kiến: " + giaBanChot.toPlainString() + "₫"
+            + (daTonTai ? " | ⚠ SP đã tồn tại #" + spMoi.getIdSanPham() : ""));
 
         ChiTietPhieuNhap ct = new ChiTietPhieuNhap();
         ct.setPhieuNhap(po);
@@ -383,6 +492,82 @@ public class ProcurementService {
         dx.setNgayXuLy(LocalDateTime.now());
         dx.setIdNhanVienXuLy(idNhanVien);
         return sanPhamDeXuatRepo.save(dx);
+    }
+
+    /**
+     * Duyệt hàng loạt nhiều đề xuất cùng lúc.
+     * Mỗi đề xuất được xử lý độc lập trong transaction riêng.
+     */
+    public Map<String, Object> duyetHangLoat(Integer idNhanVien, List<Map<String, Object>> items) {
+        int thanhCong = 0;
+        int thatBai = 0;
+        List<Map<String, Object>> chiTiet = new ArrayList<>();
+
+        System.out.println("🔍 [BULK APPROVE] Starting bulk approval for " + items.size() + " items");
+
+        for (Map<String, Object> item : items) {
+            try {
+                Integer idSanPhamDeXuat = ((Number) item.get("idSanPhamDeXuat")).intValue();
+                BigDecimal phanTramBienDo = item.get("phanTramBienDo") != null 
+                    ? new BigDecimal(item.get("phanTramBienDo").toString())
+                    : new BigDecimal("20");
+
+                Integer idDanhMuc = item.containsKey("idDanhMuc") && item.get("idDanhMuc") != null
+                    ? ((Number) item.get("idDanhMuc")).intValue() : null;
+                Integer idThuongHieu = item.containsKey("idThuongHieu") && item.get("idThuongHieu") != null
+                    ? ((Number) item.get("idThuongHieu")).intValue() : null;
+                Integer soLuongNhap = item.containsKey("soLuongNhap") && item.get("soLuongNhap") != null
+                    ? ((Number) item.get("soLuongNhap")).intValue() : null;
+                String phanHoi = item.containsKey("phanHoi") ? (String) item.get("phanHoi") : "Duyệt hàng loạt";
+
+                System.out.println("🔍 [BULK APPROVE] Processing item " + idSanPhamDeXuat);
+
+                // Gọi method duyệt trong transaction riêng
+                duyetDeXuatIndependent(idSanPhamDeXuat, idDanhMuc, idThuongHieu, 
+                    idNhanVien.intValue(), phanHoi, phanTramBienDo, soLuongNhap);
+                thanhCong++;
+
+                System.out.println("✅ [BULK APPROVE] Success for item " + idSanPhamDeXuat);
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("idSanPhamDeXuat", idSanPhamDeXuat);
+                result.put("status", "success");
+                chiTiet.add(result);
+
+            } catch (Exception e) {
+                thatBai++;
+                System.out.println("❌ [BULK APPROVE] Error for item " + item.get("idSanPhamDeXuat") + ": " + e.getMessage());
+                e.printStackTrace();
+                
+                Map<String, Object> result = new HashMap<>();
+                result.put("idSanPhamDeXuat", item.get("idSanPhamDeXuat"));
+                result.put("status", "error");
+                result.put("message", e.getMessage());
+                chiTiet.add(result);
+            }
+        }
+
+        System.out.println("🔍 [BULK APPROVE] Finished: " + thanhCong + " success, " + thatBai + " failed");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("thanhCong", thanhCong);
+        response.put("thatBai", thatBai);
+        response.put("tong", items.size());
+        response.put("chiTiet", chiTiet);
+        return response;
+    }
+
+    /**
+     * Wrapper method để duyệt đề xuất trong transaction riêng biệt.
+     * Sử dụng REQUIRES_NEW để mỗi lần gọi tạo transaction mới.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public SanPham duyetDeXuatIndependent(Integer idSanPhamDeXuat, Integer idDanhMuc,
+                                           Integer idThuongHieu, Integer idNhanVien,
+                                           String phanHoi, BigDecimal phanTramBienDo,
+                                           Integer soLuongNhap) {
+        return duyetSanPhamDeXuat(idSanPhamDeXuat, idDanhMuc, idThuongHieu, 
+            idNhanVien, phanHoi, phanTramBienDo, soLuongNhap);
     }
 
     // ── NCC đề xuất hàng loạt qua Excel/CSV ─────────────────────────────────
@@ -590,6 +775,8 @@ public class ProcurementService {
 
     private String taoMaPO() {
         String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmmss"));
-        return "PO" + ts;
+        // Thêm 4 ký tự random để tránh trùng khi tạo nhiều PO cùng lúc
+        String random = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+        return "PO" + ts + "-" + random;
     }
 }

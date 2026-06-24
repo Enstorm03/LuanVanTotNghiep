@@ -76,6 +76,13 @@ public class SanPhamDeXuat {
     @Column(name = "id_san_pham_tao_ra")
     private Integer idSanPhamTaoRa;
 
+    /** 
+     * ID sản phẩm khớp trong hệ thống (nếu sản phẩm đã tồn tại)
+     * Dùng để phân biệt sản phẩm mới vs sản phẩm đã có
+     */
+    @Column(name = "id_san_pham_khop")
+    private Integer idSanPhamKhop;
+
     /** Ghi chú thêm từ NCC */
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
