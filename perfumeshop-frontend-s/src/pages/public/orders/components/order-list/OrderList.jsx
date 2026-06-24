@@ -8,7 +8,8 @@ const OrderList = ({
   onCancelOrder,
   onWriteReview,
   onRequestReturn,
-  onOrderUpdate
+  onOrderUpdate,
+  onViewDetail
 }) => (
   <div className="space-y-6">
     {orders.map((order) => (
@@ -21,6 +22,7 @@ const OrderList = ({
         onWriteReview={onWriteReview}
         onRequestReturn={onRequestReturn}
         onOrderUpdate={onOrderUpdate}
+        onViewDetail={onViewDetail}
       />
     ))}
   </div>

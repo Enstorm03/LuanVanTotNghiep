@@ -13,11 +13,7 @@ const OrderFooter = ({ order }) => (
         <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
           Phương thức: {order.phuongThucThanhToan}
         </p>
-        {order.tienDatCoc > 0 && (
-          <p className="text-sm text-orange-600">
-            Đã cọc: {formatCurrency(order.tienDatCoc)}
-          </p>
-        )}
+        
         <p className="text-lg font-bold text-primary">
           Tổng: {formatCurrency(order.tongTien)}
         </p>

@@ -9,6 +9,7 @@ import EmptyOrders from './orders/components/EmptyOrders';
 import OrderList from './orders/components/order-list/OrderList';
 import ReviewModal from './orders/components/modals/ReviewModal';
 import ReturnModal from './orders/components/modals/ReturnModal';
+import OrderDetailModal from './orders/components/modals/OrderDetailModal';
 import api from '../../services/api';
 
 const LichSuDonHangPage = () => {
@@ -55,6 +56,9 @@ const LichSuDonHangPage = () => {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [returningOrder, setReturningOrder] = useState(null);
   const [returnData, setReturnData] = useState({ lyDo: '' });
+
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailOrder, setDetailOrder] = useState(null);
 
   // Handle order updates (for payment status changes)
   const handleOrderUpdate = (updatedOrder) => {
@@ -110,6 +114,16 @@ const LichSuDonHangPage = () => {
     setReturnData({ lyDo: '' });
   };
 
+  const handleViewDetail = (order) => {
+    setDetailOrder(order);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setDetailOrder(null);
+  };
+
   if (!isUser()) {
     return (
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
@@ -163,6 +177,7 @@ const LichSuDonHangPage = () => {
             onWriteReview={handleWriteReview}
             onRequestReturn={handleRequestReturn}
             onOrderUpdate={handleOrderUpdate}
+            onViewDetail={handleViewDetail}
           />
         )}
       </div>
@@ -185,6 +200,12 @@ const LichSuDonHangPage = () => {
         onReturnDataChange={setReturnData}
         onSubmit={handleReturnSubmit}
         submitting={submittingReturn}
+      />
+
+      <OrderDetailModal
+        show={showDetailModal}
+        onClose={handleCloseDetailModal}
+        order={detailOrder}
       />
     </main>
   );

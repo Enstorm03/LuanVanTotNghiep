@@ -550,7 +550,7 @@ const AdminKhoPage = () => {
     { id: 'po-kiem-tra',    label: 'PO chờ kiểm tra',    icon: 'inventory_2',   badge: true },
     { id: 'po-admin-duyet', label: 'Chờ admin duyệt',    icon: 'fact_check',    badge: true },
     { id: 'bien-dong',      label: 'Biến động kho',       icon: 'history'       },
-    { id: 'ban-cham',       label: 'Bán chậm',            icon: 'trending_down' },
+    // { id: 'ban-cham',       label: 'Bán chậm',            icon: 'trending_down' },
     { id: 'phieu-nhap',     label: 'Lịch sử nhập kho',   icon: 'receipt'       },
   ];
 

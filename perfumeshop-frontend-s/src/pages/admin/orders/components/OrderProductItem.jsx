@@ -45,14 +45,21 @@ const OrderProductItem = ({ item, productDetails, brandDetails }) => {
   }
 
   return (
+    
     <div className="flex justify-between items-center p-4 border border-border-light dark:border-border-dark rounded-lg">
       <div className="flex items-center gap-4">
+         
         <img
+        
           src={productInfo.urlHinhAnh || "https://placehold.co/60x60?text=No+Image"}
           alt={productInfo.tenSanPham || 'Sản phẩm'}
           className="w-16 h-16 object-cover rounded-lg"
         />
         <div className="flex-1">
+          
+          <h1 className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
+            ten sp : 
+          </h1>
           <h4 className="font-semibold text-text-light dark:text-text-dark">
             {productInfo.tenSanPham || 'Sản phẩm không xác định'}
           </h4>
@@ -65,10 +72,15 @@ const OrderProductItem = ({ item, productDetails, brandDetails }) => {
           <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
             Nồng độ: {productInfo.nongDo || 'N/A'}
           </p>
-          <p className="text-sm font-medium text-primary">
+          
+        </div>
+        
+      </div>
+      <div className="text-middle">
+        
+         <p className="text-sm font-medium text-primary">
             Số lượng: {quantity || 0}
           </p>
-        </div>
       </div>
       <div className="text-right">
         <p className="font-bold text-primary text-lg">
@@ -77,6 +89,7 @@ const OrderProductItem = ({ item, productDetails, brandDetails }) => {
         <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
           Đơn giá: {(price || 0).toLocaleString('vi-VN')}₫
         </p>
+         
       </div>
     </div>
   );

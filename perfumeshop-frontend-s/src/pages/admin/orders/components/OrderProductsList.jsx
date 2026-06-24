@@ -14,7 +14,27 @@ const OrderProductsList = ({ order, productDetails, brandDetails }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">
       <h3 className="text-lg font-bold mb-4">Các sản phẩm</h3>
+      
       <div className="space-y-4">
+         
+<div className="flex items-center mb-2">
+  <h1 className="flex-1 text-sm text-text-subtle-light dark:text-text-subtle-dark">
+    hinh anh san pham 
+  </h1>
+  <h1 className="flex-1 text-sm text-text-subtle-light dark:text-text-subtle-dark">
+    ten san pham
+  </h1>
+
+  <h1 className="w-24 text-center text-sm text-text-subtle-light dark:text-text-subtle-dark">
+    sl
+  </h1>
+
+  <h1 className="w-32 text-right text-sm text-text-subtle-light dark:text-text-subtle-dark">
+    gia
+  </h1>
+</div>
+  
+
         {itemsToDisplay.length > 0 ? (
           itemsToDisplay.map((item, index) => (
             <OrderProductItem

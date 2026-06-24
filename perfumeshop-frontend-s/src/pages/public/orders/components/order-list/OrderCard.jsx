@@ -14,7 +14,10 @@ import {
 // Nút QR — hiện khi đơn đang giao hàng
 const QRButton = ({ onClick }) => (
   <button
-    onClick={onClick}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick();
+    }}
     className="px-4 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1"
   >
     <span className="material-symbols-outlined text-base">qr_code</span>
@@ -44,7 +47,10 @@ const CardHeader = ({ order, returnStatuses, cancelLoading, onCancelOrder, onWri
 
       {canWriteReview(order) && (
         <button
-          onClick={() => onWriteReview(order)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onWriteReview(order);
+          }}
           className="px-4 py-2 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-colors"
         >
           Viết đánh giá
@@ -66,7 +72,10 @@ const CardHeader = ({ order, returnStatuses, cancelLoading, onCancelOrder, onWri
 
       {canRequestReturn(order, order.ngayHoanThanh, returnStatuses[order.idDonHang]) && (
         <button
-          onClick={() => onRequestReturn(order)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRequestReturn(order);
+          }}
           className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
         >
           Yêu cầu đổi trả
@@ -75,7 +84,10 @@ const CardHeader = ({ order, returnStatuses, cancelLoading, onCancelOrder, onWri
 
       {canCancelOrder(order) && (
         <button
-          onClick={() => onCancelOrder(order.idDonHang)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCancelOrder(order.idDonHang);
+          }}
           disabled={cancelLoading === order.idDonHang}
           className="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400"
         >
@@ -94,6 +106,7 @@ const OrderCard = ({
   onWriteReview,
   onRequestReturn,
   onOrderUpdate,
+  onViewDetail,
 }) => {
   const [showQR, setShowQR] = useState(false);
 
@@ -113,12 +126,18 @@ const OrderCard = ({
   return (
     <>
       {needsSpecialHandling ? (
-        <div className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm">
+        <div 
+          className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => onViewDetail(order)}
+        >
           <CardHeader {...sharedHeaderProps} />
           <OrderStatus order={order} onOrderUpdate={onOrderUpdate} />
         </div>
       ) : (
-        <div className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm">
+        <div 
+          className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => onViewDetail(order)}
+        >
           <CardHeader {...sharedHeaderProps} />
 
           {order.trangThaiVanHanh === 'Đã hủy' && order.lyDoHuy && (
