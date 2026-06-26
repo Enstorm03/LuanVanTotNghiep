@@ -87,6 +87,13 @@ const Header = () => {
                   <div className="px-4 py-2 text-sm text-text-secondary-light dark:text-text-secondary-dark border-b border-border-light dark:border-border-dark">
                     Xin chào, {user?.ho_ten || 'User'}
                   </div>
+                   <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-sm hover:bg-background-light dark:hover:bg-background-dark transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Hồ sơ cá nhân
+                  </Link>
                   <Link
                     to="/lich-su-don-hang"
                     className="block px-4 py-2 text-sm hover:bg-background-light dark:hover:bg-background-dark transition-colors"
@@ -94,6 +101,7 @@ const Header = () => {
                   >
                     Lịch sử đơn hàng
                   </Link>
+                 
                   <button
                     onClick={() => {
                       logout();

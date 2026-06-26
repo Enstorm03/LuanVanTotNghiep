@@ -359,6 +359,17 @@ public class ProcurementService {
         dx.setGhiChu(ghiChu);
         dx.setTrangThai("PENDING");
         dx.setNgayTao(LocalDateTime.now());
+
+        // Kiểm tra sản phẩm trùng ngay khi tạo đề xuất
+        if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
+            String cleanName = tenSanPham.trim();
+            List<SanPham> results = sanPhamRepository.findByTenSanPhamIgnoreCase(cleanName);
+            if (!results.isEmpty()) {
+                SanPham matched = results.get(0);
+                dx.setIdSanPhamKhop(matched.getIdSanPham());
+            }
+        }
+
         return sanPhamDeXuatRepo.save(dx);
     }
 
@@ -374,12 +385,40 @@ public class ProcurementService {
 
     /** Admin xem tất cả đề xuất độc lập */
     public List<SanPhamDeXuat> getTatCaDeXuatDocLap() {
-        return sanPhamDeXuatRepo.findByPhieuGoiThauIsNullOrderByNgayTaoDesc();
+        List<SanPhamDeXuat> proposals = sanPhamDeXuatRepo.findByPhieuGoiThauIsNullOrderByNgayTaoDesc();
+        autoCheckAndUpdateProductMatch(proposals);
+        return proposals;
     }
 
     /** Admin xem đề xuất độc lập theo trạng thái */
     public List<SanPhamDeXuat> getDeXuatDocLapTheoTrangThai(String trangThai) {
-        return sanPhamDeXuatRepo.findByPhieuGoiThauIsNullAndTrangThaiOrderByNgayTaoDesc(trangThai);
+        List<SanPhamDeXuat> proposals = sanPhamDeXuatRepo.findByPhieuGoiThauIsNullAndTrangThaiOrderByNgayTaoDesc(trangThai);
+        autoCheckAndUpdateProductMatch(proposals);
+        return proposals;
+    }
+
+    /**
+     * Tự động kiểm tra và cập nhật idSanPhamKhop cho tất cả đề xuất.
+     * Nếu chưa có idSanPhamKhop nhưng tìm thấy SP trùng tên → set ngay.
+     */
+    private void autoCheckAndUpdateProductMatch(List<SanPhamDeXuat> proposals) {
+        if (proposals == null || proposals.isEmpty()) return;
+        
+        for (SanPhamDeXuat dx : proposals) {
+            if (dx.getIdSanPhamKhop() != null) continue;
+            if (dx.getTenSanPham() == null || dx.getTenSanPham().trim().isEmpty()) continue;
+            
+            String cleanName = dx.getTenSanPham().trim();
+            List<SanPham> results = sanPhamRepository.findByTenSanPhamIgnoreCase(cleanName);
+            
+            if (!results.isEmpty()) {
+                SanPham matched = results.get(0);
+                dx.setIdSanPhamKhop(matched.getIdSanPham());
+                System.out.println("✅ [AUTO-CHECK] Cập nhật đề xuất #" + dx.getIdSanPhamDeXuat() 
+                    + " '" + cleanName + "' → SP #" + matched.getIdSanPham());
+                sanPhamDeXuatRepo.save(dx);
+            }
+        }
     }
 
     /** Admin duyệt đề xuất → tạo sản phẩm mới + tạo PO CHO_KHO_KIEM_TRA */
@@ -402,12 +441,12 @@ public class ProcurementService {
             : BigDecimal.ZERO;
 
         // Kiểm tra xem sản phẩm đã tồn tại chưa (match theo tên)
-        SanPham sanPhamKhop = sanPhamRepository.findAll().stream()
-            .filter(sp -> sp.getTenSanPham() != null && 
-                         dx.getTenSanPham() != null &&
-                         sp.getTenSanPham().trim().equalsIgnoreCase(dx.getTenSanPham().trim()))
-            .findFirst()
-            .orElse(null);
+        // Tìm sản phẩm đã tồn tại trong DB theo tên (không phân biệt hoa/thường)
+        SanPham sanPhamKhop = null;
+        if (dx.getTenSanPham() != null && !dx.getTenSanPham().trim().isEmpty()) {
+            List<SanPham> results = sanPhamRepository.findByTenSanPhamIgnoreCase(dx.getTenSanPham().trim());
+            sanPhamKhop = results.isEmpty() ? null : results.get(0);
+        }
 
         SanPham spMoi;
         boolean daTonTai = false;

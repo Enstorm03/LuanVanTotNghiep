@@ -47,8 +47,12 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
      * Trả về số rows bị ảnh hưởng: 1 = thành công, 0 = không đủ hàng.
      * Dùng thay cho đọc-rồi-ghi để tránh race condition khi nhiều đơn đặt cùng lúc.
      */
-    @Modifying
-    @Query("UPDATE SanPham s SET s.soLuongTonKho = s.soLuongTonKho - :qty " +
-           "WHERE s.idSanPham = :id AND s.soLuongTonKho >= :qty")
-    int decrementStock(@Param("id") Integer id, @Param("qty") int qty);
+     @Modifying
+     @Query("UPDATE SanPham s SET s.soLuongTonKho = s.soLuongTonKho - :qty " +
+            "WHERE s.idSanPham = :id AND s.soLuongTonKho >= :qty")
+     int decrementStock(@Param("id") Integer id, @Param("qty") int qty);
+
+     // Tìm sản phẩm theo tên (không phân biệt hoa/thường)
+     @Query("SELECT p FROM SanPham p WHERE LOWER(TRIM(p.tenSanPham)) = LOWER(TRIM(:tenSanPham))")
+     List<SanPham> findByTenSanPhamIgnoreCase(@Param("tenSanPham") String tenSanPham);
 }

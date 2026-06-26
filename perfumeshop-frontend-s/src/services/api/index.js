@@ -14,6 +14,7 @@ import khoApi from './khoApi.js';
 import procurementApi from './procurementApi.js';
 import dashboardApi from './dashboardApi.js';
 import reportApi from './reportApi.js';
+import userApi from './userApi.js';
 
 // Combined API object for backward compatibility
 const api = {
@@ -171,6 +172,11 @@ const api = {
   // Duyệt hàng loạt
   procurementBulkApprove: procurementApi.bulkApprove.bind(procurementApi),
 
+  // User profile methods
+  getProfile: userApi.getProfile.bind(userApi),
+  updateUserProfile: userApi.updateProfile.bind(userApi),
+  changeUserPassword: userApi.changePassword.bind(userApi),
+
 };
 
 export default api;
@@ -192,5 +198,6 @@ export {
   khoApi,
   procurementApi,
   dashboardApi,
-  reportApi
+  reportApi,
+  userApi
 };

@@ -214,7 +214,14 @@ const AdminProcurementPage = () => {
   useEffect(() => { fetchAll(); }, [fetchAll]);
   useEffect(() => { if (tab === 'proposals') fetchProposals(); }, [tab, fetchProposals]);
 
-  const handleCreated = (req) => { setShowCreate(false); setRequests(prev => [req, ...prev]); };
+  const handleCreated = (req) => { 
+    setShowCreate(false); 
+    setRequests(prev => [req, ...prev]);
+    // Force refresh proposals để lấy dữ liệu mới có idSanPhamKhop
+    if (tab === 'proposals') {
+      setTimeout(() => fetchProposals(), 500);
+    }
+  };
   const showPropToast = (msg) => { setPropToast(msg); setTimeout(() => setPropToast(''), 3500); };
 
   const openApproveModal = (proposal) => {
@@ -248,7 +255,8 @@ const AdminProcurementPage = () => {
       });
       setApproveModal(null);
       showPropToast('✅ Đã duyệt — SP mới được tạo, PO chuyển về kho kiểm tra!');
-      fetchProposals();
+      // Force refresh sau 300ms để lấy dữ liệu mới có idSanPhamKhop
+      setTimeout(() => fetchProposals(), 300);
     } catch (e) { alert('Lỗi: ' + e.message); }
     finally { setPropSaving(false); }
   };
@@ -263,7 +271,8 @@ const AdminProcurementPage = () => {
         lyDo,
       });
       showPropToast('Đã từ chối đề xuất.');
-      fetchProposals();
+      // Force refresh sau 300ms
+      setTimeout(() => fetchProposals(), 300);
     } catch (e) { alert('Lỗi: ' + e.message); }
     finally { setPropSaving(false); }
   };
@@ -321,7 +330,8 @@ const AdminProcurementPage = () => {
       
       showPropToast(`✅ Duyệt hàng loạt: ${result.thanhCong} thành công, ${result.thatBai} thất bại`);
       setSelectedProposals(new Set());
-      fetchProposals();
+      // Force refresh sau 300ms để lấy dữ liệu mới có idSanPhamKhop
+      setTimeout(() => fetchProposals(), 300);
     } catch (e) {
       alert('Lỗi duyệt hàng loạt: ' + e.message);
     } finally {
@@ -388,7 +398,8 @@ const AdminProcurementPage = () => {
       showPropToast(`✅ Duyệt hàng loạt NCC: ${result.thanhCong} thành công, ${result.thatBai} thất bại`);
       setBulkApproveModal(null);
       setSelectedSupplier(null);
-      fetchProposals();
+      // Force refresh sau 300ms để lấy dữ liệu mới có idSanPhamKhop
+      setTimeout(() => fetchProposals(), 300);
     } catch (e) {
       console.error('❌ Bulk approve error:', e);
       alert('Lỗi duyệt hàng loạt: ' + e.message);
@@ -449,16 +460,15 @@ const AdminProcurementPage = () => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-gray-800 dark:text-gray-200">{p.tenSanPham}</p>
-                              {p.idSanPhamKhop && (
-                                <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-semibold rounded border border-blue-200 dark:border-blue-800">
-                                  Đã có #{p.idSanPhamKhop}
-                                </span>
-                              )}
-                              {!p.idSanPhamKhop && p.trangThai === 'PENDING' && (
-                                <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold rounded border border-amber-200 dark:border-amber-800">
-                                  Sản phẩm mới
-                                </span>
-                              )}
+                               {p.idSanPhamKhop ? (
+                                 <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] font-semibold rounded border border-blue-200 dark:border-blue-800">
+                                   Đã có #{p.idSanPhamKhop}
+                                 </span>
+                               ) : !p.idSanPhamKhop && (p.trangThai === 'PENDING' || p.trangThai === 'APPROVED') ? (
+                                 <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold rounded border border-amber-200 dark:border-amber-800">
+                                   Sản phẩm mới
+                                 </span>
+                               ) : null}
                             </div>
                             {p.moTa && <p className="text-xs text-gray-400 max-w-[300px] truncate mt-0.5">{p.moTa}</p>}
                           </div>

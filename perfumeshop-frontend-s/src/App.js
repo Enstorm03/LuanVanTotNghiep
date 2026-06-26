@@ -20,6 +20,7 @@ import ThanhToanKetQuaPage from './pages/public/checkout/ThanhToanKetQuaPage';
 import LichSuDonHangPage from './pages/public/LichSuDonHangPage';
 import ThuongHieuPage from './pages/public/ThuongHieuPage';
 import XacNhanDonHangPage from './pages/public/XacNhanDonHangPage';
+import UserProfilePage from './pages/public/user-profile';
 
 // Auth Pages
 import DangNhapPage from './pages/auth/DangNhapPage';
@@ -86,15 +87,23 @@ function App() {
           />
           {/* Trang kết quả thanh toán PayOS — không cần login vì PayOS redirect trực tiếp */}
           <Route path="/thanh-toan/ket-qua" element={<ThanhToanKetQuaPage />} />
-          <Route
-            path="/lich-su-don-hang"
-            element={
-              <ProtectedRoute requireUser>
-                <LichSuDonHangPage />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
+           <Route
+             path="/lich-su-don-hang"
+             element={
+               <ProtectedRoute requireUser>
+                 <LichSuDonHangPage />
+               </ProtectedRoute>
+             }
+           />
+           <Route
+             path="/profile"
+             element={
+               <ProtectedRoute requireUser>
+                 <UserProfilePage />
+               </ProtectedRoute>
+             }
+           />
+         </Route>
 
         {/* Auth Routes without Layout */}
         <Route path="/login" element={<DangNhapPage />} />
