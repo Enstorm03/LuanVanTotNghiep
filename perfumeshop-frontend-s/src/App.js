@@ -21,6 +21,7 @@ import LichSuDonHangPage from './pages/public/LichSuDonHangPage';
 import ThuongHieuPage from './pages/public/ThuongHieuPage';
 import XacNhanDonHangPage from './pages/public/XacNhanDonHangPage';
 import UserProfilePage from './pages/public/user-profile';
+import VerifyEmailPage from './pages/public/verify-email/VerifyEmailPage';
 
 // Auth Pages
 import DangNhapPage from './pages/auth/DangNhapPage';
@@ -105,9 +106,11 @@ function App() {
            />
          </Route>
 
-        {/* Auth Routes without Layout */}
-        <Route path="/login" element={<DangNhapPage />} />
-        <Route path="/register" element={<DangKyPage />} />
+         {/* Auth Routes without Layout */}
+         <Route path="/login" element={<DangNhapPage />} />
+         <Route path="/register" element={<DangKyPage />} />
+         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        
 
         {/* Route công khai — NCC xem đợt gọi thầu và chào giá */}
         <Route path="/procurement" element={<ProcurementPortalPage />} />

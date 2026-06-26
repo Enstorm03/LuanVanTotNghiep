@@ -82,6 +82,7 @@ public class AdminUserService {
         kh.setHoTen(req.getHoTen());
         kh.setSoDienThoai(req.getSoDienThoai());
         kh.setDiaChi(req.getDiaChi());
+        kh.setEmail(req.getEmail());
         return NguoiDungResponse.from(nguoiDungRepository.save(kh));
     }
 

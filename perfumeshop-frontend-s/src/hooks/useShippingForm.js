@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import userApi from '../services/api/userApi';
 
 const useShippingForm = (user) => {
   const [shippingInfo, setShippingInfo] = useState({
@@ -11,23 +11,26 @@ const useShippingForm = (user) => {
 
   // Auto-populate shipping info when user logs in
   useEffect(() => {
-    if (user) {
+    if (user && user.userId) {
       const loadUserProfile = async () => {
         try {
           // Fetch full user profile to get address and phone
-          const profile = await api.getProfile();
+          // Send user ID in X-User-Id header
+          const profile = await userApi.getProfile(user.userId);
+          console.log('Profile loaded:', profile);
+          
           setShippingInfo({
-            tenNguoiNhan: profile.ho_ten || user.ho_ten || '',
+            tenNguoiNhan: profile.ho_ten || user.hoTen || user.ho_ten || '',
             diaChiGiaoHang: profile.dia_chi || '',
             soDienThoai: profile.so_dien_thoai || '',
             ghiChu: ''
           });
         } catch (error) {
           console.error('Lỗi tải thông tin cá nhân:', error);
-          // Fallback to basic user info from auth
+          // Fallback to basic user info from auth (user object from login)
           setShippingInfo({
-            tenNguoiNhan: user.ho_ten || '',
-            diaChiGiaoHang: '',
+            tenNguoiNhan: user.ho_ten || user.hoTen || '',
+            diaChiGiaoHang: user.dia_chi || '',
             soDienThoai: '',
             ghiChu: ''
           });

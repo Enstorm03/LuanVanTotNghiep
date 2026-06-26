@@ -9,6 +9,7 @@ import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.NguoiDungRepository;
 import com.example.perfumeshop.repository.NhanVienRepository;
 import com.example.perfumeshop.service.AdminUserService;
+import com.example.perfumeshop.service.EmailVerificationService;
 import com.example.perfumeshop.service.PasswordService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class AuthController {
     @Autowired
     private PasswordService passwordService;
 
-    // Đã xóa PasswordMigrationService
+    @Autowired
+    private EmailVerificationService emailVerificationService;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
@@ -80,6 +82,131 @@ public class AuthController {
     @PostMapping("/register-customer")
     public ResponseEntity<NguoiDungResponse> registerCustomer(@Valid @RequestBody CreateKhachHangRequest req) {
         NguoiDungResponse created = adminUserService.createKhachHang(req);
+        
+        // Gửi email xác thực
+        try {
+            NguoiDung user = nguoiDungRepository.findByTenDangNhap(req.getTenDangNhap()).orElse(null);
+            if (user != null && user.getEmail() != null) {
+                emailVerificationService.sendVerificationEmail(user.getIdNguoiDung(), user.getEmail(), user.getHoTen());
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi email xác thực: " + e.getMessage());
+        }
+        
         return ResponseEntity.ok(created);
+    }
+
+    /**
+     * Verify email với token từ link trong email
+     * GET /api/auth/verify-email?token=xxx
+     */
+     @GetMapping("/verify-email")
+     public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam String token) {
+         try {
+             Map<String, Object> result = emailVerificationService.verifyEmailWithDetails(token);
+             System.out.println("Verification result: " + result);
+             
+             if ("success".equals(result.get("status"))) {
+                 return ResponseEntity.ok(Map.of(
+                     "success", true,
+                     "message", "Email đã được xác thực thành công!",
+                     "email", result.get("email"),
+                     "idNguoiDung", result.get("idNguoiDung")
+                 ));
+             } else if ("already_verified".equals(result.get("status"))) {
+                 return ResponseEntity.ok(Map.of(
+                     "success", true,
+                     "message", "Email đã được xác thực trước đó",
+                     "email", result.get("email")
+                 ));
+             } else {
+                 return ResponseEntity.badRequest().body(Map.of(
+                     "success", false,
+                     "message", "Token không hợp lệ hoặc đã hết hạn"
+                 ));
+             }
+         } catch (Exception e) {
+             System.err.println("Verify email error: " + e.getMessage());
+             e.printStackTrace();
+             return ResponseEntity.badRequest().body(Map.of(
+                 "success", false,
+                 "message", e.getMessage()
+             ));
+         }
+     }
+
+    /**
+     * Resend verification email
+     * POST /api/auth/resend-verification-email
+     * Body: { "email": "user@example.com" }
+     */
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<Map<String, Object>> resendVerificationEmail(@RequestBody Map<String, String> body) {
+        try {
+            String email = body.get("email");
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Email không được để trống"
+                ));
+            }
+            
+            NguoiDung user = nguoiDungRepository.findByEmail(email).orElse(null);
+            if (user == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Email không tồn tại"
+                ));
+            }
+            
+            try {
+                emailVerificationService.resendVerificationEmail(user.getIdNguoiDung(), email, user.getHoTen());
+            } catch (BusinessException be) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", be.getMessage()
+                ));
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư."
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Check verification status
+     * GET /api/auth/verification-status/{userId}
+     */
+    @GetMapping("/verification-status/{userId}")
+    public ResponseEntity<Map<String, Object>> getVerificationStatus(@PathVariable Integer userId) {
+        try {
+            NguoiDung user = nguoiDungRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "User không tồn tại"
+                ));
+            }
+            
+            boolean isVerified = emailVerificationService.isUserVerified(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "isVerified", isVerified,
+                "email", user.getEmail()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
     }
 }

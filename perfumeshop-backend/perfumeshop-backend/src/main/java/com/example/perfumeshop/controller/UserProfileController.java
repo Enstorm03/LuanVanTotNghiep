@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -148,15 +149,20 @@ public class UserProfileController {
         }
     }
 
+    @Autowired
+    private HttpServletRequest request;
+
     /**
      * Lấy ID của user từ context (session/token)
-     * TODO: Integrate với Spring Security context khi authentication được cấu hình
+     * Lấy từ header X-User-Id được gửi từ client
      */
     private Integer getUserIdFromContext() {
         try {
-            // Tạm thời sử dụng placeholder, cần update khi có authentication context
-            // Có thể lấy từ header Authorization hoặc cookie
-            return 1; // Default user ID for testing
+            String userIdHeader = request.getHeader("X-User-Id");
+            if (userIdHeader != null && !userIdHeader.isEmpty()) {
+                return Integer.parseInt(userIdHeader);
+            }
+            return null;
         } catch (Exception e) {
             return null;
         }
