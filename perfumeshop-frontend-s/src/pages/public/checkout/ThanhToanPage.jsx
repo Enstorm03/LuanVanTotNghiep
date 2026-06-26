@@ -20,7 +20,7 @@ const ThanhToanPage = () => {
     items
   } = useCheckoutData();
 
-  const { shippingInfo, updateShippingInfo } = useShippingForm();
+  const { shippingInfo, updateShippingInfo } = useShippingForm(user);
   const { paymentMethod, setPaymentMethod } = usePaymentMethod('cod');
   const { submitOrder, processing } = useSubmitOrder();
 
