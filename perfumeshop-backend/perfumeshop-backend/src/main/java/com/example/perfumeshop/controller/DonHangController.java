@@ -80,6 +80,12 @@ public class DonHangController {
     public ResponseEntity<DonHang> cancel(@PathVariable Integer id, @Valid @RequestBody CancelDonRequest req) {
         return ResponseEntity.ok(donHangService.cancel(id, req.getLyDo()));
     }
+
+    @PostMapping("/{id}/hoan-tien")
+    public ResponseEntity<DonHang> markRefunded(@PathVariable Integer id) {
+        return ResponseEntity.ok(donHangService.markRefunded(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         donHangService.delete(id);

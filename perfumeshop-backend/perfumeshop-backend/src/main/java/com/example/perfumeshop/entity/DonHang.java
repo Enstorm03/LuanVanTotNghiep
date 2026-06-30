@@ -27,7 +27,7 @@ public class DonHang {
     private String trangThaiVanHanh; // Đang chờ, Hoàn thành, Đã hủy, Chờ hàng, Đã xác nhận, Đang giao hàng (mở rộng)
 
     @Column(name = "trang_thai_thanh_toan")
-    private String trangThaiThanhToan; // Chờ cọc, Đã cọc, Đã thanh toán
+    private String trangThaiThanhToan; // Đã thanh toán, Chưa thanh toán,
 
     @Column(name = "tong_tien", precision = 15, scale = 2)
     private BigDecimal tongTien;

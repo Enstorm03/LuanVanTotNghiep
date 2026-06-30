@@ -32,8 +32,7 @@ const OrderInfoCard = ({ order }) => {
           <span>Thanh toán:</span>
           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
             order.trangThaiThanhToan === 'Đã thanh toán'   ? 'bg-green-100 text-green-800'  :
-            order.trangThaiThanhToan === 'Chờ cọc'         ? 'bg-orange-100 text-orange-800' :
-            order.trangThaiThanhToan === 'Đã cọc'          ? 'bg-blue-100 text-blue-800'    :
+            
             order.trangThaiThanhToan === 'Chờ thanh toán'  ? 'bg-yellow-100 text-yellow-800' :
                                                              'bg-gray-100 text-gray-800'
           }`}>
@@ -44,12 +43,7 @@ const OrderInfoCard = ({ order }) => {
           <span>Tổng tiền:</span>
           <span className="text-primary">{order.tongTien ? order.tongTien.toLocaleString('vi-VN') + '₫' : 'N/A'}</span>
         </p>
-        {order.tienDatCoc > 0 && (
-          <p className="flex justify-between text-sm">
-            <span>Đặt cọc:</span>
-            <span>{order.tienDatCoc.toLocaleString('vi-VN')}₫</span>
-          </p>
-        )}
+        
         {/* Lý do hủy */}
         {order.trangThaiVanHanh === 'Đã hủy' && order.lyDoHuy && (
           <div className="mt-3 pt-3 border-t border-border-light dark:border-border-dark">

@@ -154,6 +154,16 @@ class OrderApi extends BaseApi {
     }
   }
 
+  // Đánh dấu hoàn tiền (Admin)
+  async markRefunded(orderId) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/don-hang/${orderId}/hoan-tien`, { method: 'POST', body: JSON.stringify({}) });
+    } catch (error) {
+      console.error('Lỗi đánh dấu hoàn tiền:', error);
+      throw error;
+    }
+  }
+
   // Tìm kiếm đơn hàng theo số vận đơn
   async searchOrdersByTracking(query) {
     try {

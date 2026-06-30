@@ -7,7 +7,6 @@ export const getStatusBadgeColor = (status) => {
     case 'Đã xác nhận':    return 'bg-green-100 text-green-800';
     case 'Đang giao hàng': return 'bg-purple-100 text-purple-800';
     case 'Hoàn thành':     return 'bg-emerald-100 text-emerald-800';
-    case 'Chờ hàng':       return 'bg-orange-100 text-orange-800';
     case 'Đã hủy':         return 'bg-red-100 text-red-800';
     case 'Đã hoàn trả':    return 'bg-teal-100 text-teal-800';
     default:               return 'bg-gray-100 text-gray-800';
@@ -15,7 +14,7 @@ export const getStatusBadgeColor = (status) => {
 };
 
 export const canCancelOrder = (order) => {
-  const cancellableStatuses = ['Đang chờ', 'Đã xác nhận', 'Chờ hàng'];
+  const cancellableStatuses = [ 'Đã xác nhận','Đang chờ' ];
   return cancellableStatuses.includes(order.trangThaiVanHanh);
 };
 

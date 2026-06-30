@@ -130,6 +130,7 @@ public class ReturnService {
 
         // Đơn hàng chuyển sang "Đã hoàn trả" — hoàn tất toàn bộ quy trình
         dh.setTrangThaiVanHanh(DonHangService.TT_DA_HOAN_TRA);
+        dh.setTrangThaiThanhToan(DonHangService.TT_DA_HOAN_TIEN);
         donHangRepository.save(dh);
 
         p.setTrangThai(TT_HOAN_TIEN_TC);

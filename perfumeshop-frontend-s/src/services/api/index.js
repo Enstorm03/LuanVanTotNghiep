@@ -63,6 +63,7 @@ const api = {
   updatePaymentStatus: orderApi.updatePaymentStatus.bind(orderApi),
   moveToPending: orderApi.moveToPending.bind(orderApi),
   completeOrder: orderApi.completeOrder.bind(orderApi),
+  markRefunded: orderApi.markRefunded.bind(orderApi),
   searchOrdersByTracking: orderApi.searchOrdersByTracking.bind(orderApi),
   getOrders: orderApi.getOrders.bind(orderApi),
   checkOrderReturnStatus: orderApi.checkOrderReturnStatus.bind(orderApi),

@@ -11,6 +11,7 @@ const OrderActions = ({
   onUpdateRecipient,
   onPaymentCollected,
   onUpdatePaymentStatus,
+  onMarkRefunded,
   setShowConfirmDialog,
   setShowShipDialog,
   setShowTrackingDialog,
@@ -101,6 +102,16 @@ const OrderActions = ({
             className="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
           >
             Hoàn thành đơn hàng
+          </button>
+        )}
+
+        {order.trangThaiVanHanh === 'Đã hủy' && order.trangThaiThanhToan === 'Đã thanh toán' && (
+          <button
+            onClick={onMarkRefunded}
+            disabled={processing}
+            className="w-full bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50"
+          >
+            Đánh dấu đã hoàn tiền
           </button>
         )}
 

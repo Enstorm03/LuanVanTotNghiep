@@ -229,6 +229,19 @@ const useOrderDetail = () => {
     }
   };
 
+  const handleMarkRefunded = async () => {
+    try {
+      setProcessing(true);
+      const updatedOrder = await api.markRefunded(parseInt(orderId));
+      setOrder(updatedOrder);
+      alert('Đã cập nhật trạng thái đơn hàng thành Đã hoàn tiền!');
+    } catch (error) {
+      alert('Không thể cập nhật trạng thái hoàn tiền: ' + error.message);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   return {
     order,
     loading,
@@ -267,7 +280,8 @@ const useOrderDetail = () => {
     handleMoveToPending,
     handleUpdateRecipient,
     handlePaymentCollected,
-    handleUpdatePaymentStatus
+    handleUpdatePaymentStatus,
+    handleMarkRefunded
   };
 };
 

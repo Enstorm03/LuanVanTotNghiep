@@ -31,6 +31,7 @@ public class DonHangService {
     public static final String TT_HOAN_THANH = "Hoàn thành";
     public static final String TT_DA_HUY = "Đã hủy";
     public static final String TT_DA_HOAN_TRA = "Đã hoàn trả";
+    public static final String TT_DA_HOAN_TIEN = "Đã hoàn tiền";
 
     @Autowired
     private DonHangRepository donHangRepository;
@@ -186,15 +187,26 @@ public class DonHangService {
         }
 
         // Hoàn kho chỉ khi kho đã bị trừ:
-        // Kho được trừ khi admin confirm (TT_DA_XAC_NHAN), không trừ lúc đặt hàng.
-        // → TT_CHO_XAC_NHAN: chưa trừ kho → không hoàn
-        // → TT_DA_XAC_NHAN: đã trừ kho lúc confirm → hoàn
         if (TT_DA_XAC_NHAN.equals(tt)) {
             restoreInventory(dh);
         }
 
         dh.setTrangThaiVanHanh(TT_DA_HUY);
+
         dh.setLyDoHuy(lyDo);
+        return donHangRepository.save(dh);
+    }
+
+    @Transactional
+    public DonHang markRefunded(Integer id) {
+        DonHang dh = getById(id);
+        if (!TT_DA_HUY.equals(dh.getTrangThaiVanHanh())) {
+            throw new BusinessException("Chỉ có thể đánh dấu hoàn tiền cho đơn đã hủy");
+        }
+        if (!"Đã thanh toán".equals(dh.getTrangThaiThanhToan())) {
+            throw new BusinessException("Đơn hàng chưa được thanh toán, không thể hoàn tiền");
+        }
+        dh.setTrangThaiThanhToan(TT_DA_HOAN_TIEN);
         return donHangRepository.save(dh);
     }
 
