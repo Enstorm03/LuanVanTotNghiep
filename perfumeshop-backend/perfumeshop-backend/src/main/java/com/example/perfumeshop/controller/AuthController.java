@@ -66,6 +66,11 @@ public class AuthController {
             NguoiDung kh = khOpt.get();
             // CHỈ SỬ DỤNG BCRYPT ĐỂ KIỂM TRA MẬT KHẨU
             if (passwordService.matches(rawPassword, kh.getMatKhauBam())) {
+                // Kiểm tra email đã xác thực chưa
+                if (kh.getIsVerified() != null && !kh.getIsVerified()) {
+                    throw new BusinessException("Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn.");
+                }
+                
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
                 body.put("type", "customer");
@@ -113,12 +118,18 @@ public class AuthController {
                      "email", result.get("email"),
                      "idNguoiDung", result.get("idNguoiDung")
                  ));
-             } else if ("already_verified".equals(result.get("status"))) {
-                 return ResponseEntity.ok(Map.of(
-                     "success", true,
-                     "message", "Email đã được xác thực trước đó",
-                     "email", result.get("email")
-                 ));
+            } else if ("already_verified".equals(result.get("status"))) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("status", "already_verified");
+                response.put("message", result.get("message") != null ? result.get("message") : "Email đã được xác thực trước đó");
+                
+                // Only add email if it exists
+                if (result.get("email") != null) {
+                    response.put("email", result.get("email"));
+                }
+                
+                return ResponseEntity.ok(response);
              } else {
                  return ResponseEntity.badRequest().body(Map.of(
                      "success", false,

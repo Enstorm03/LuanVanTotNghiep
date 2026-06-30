@@ -102,14 +102,23 @@ public class EmailVerificationService {
             throw new BusinessException("Token không hợp lệ");
         }
 
-        // Find user by token
-        NguoiDung user = (NguoiDung) nguoiDungRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new BusinessException("Token không tồn tại hoặc đã hết hạn"));
+        // Try to find user by token
+        var userOpt = nguoiDungRepository.findByVerificationToken(token);
+        
+        if (userOpt.isEmpty()) {
+            // Token không tồn tại → Đã verify rồi hoặc token invalid
+            response.put("message", "Link xác thực đã được sử dụng hoặc không hợp lệ");
+            response.put("status", "already_verified");
+            return response;
+        }
+        
+        NguoiDung user = userOpt.get();
 
         // Check if already verified
         if (Boolean.TRUE.equals(user.getIsVerified())) {
             response.put("message", "Email đã được xác thực trước đó");
             response.put("status", "already_verified");
+            response.put("email", user.getEmail());
             return response;
         }
 

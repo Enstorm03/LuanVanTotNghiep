@@ -20,7 +20,7 @@ const ThanhToanPage = () => {
     items
   } = useCheckoutData();
 
-  const { shippingInfo, updateShippingInfo } = useShippingForm(user);
+  const { shippingInfo, updateShippingInfo, isLoadingProfile } = useShippingForm(user);
   const { paymentMethod, setPaymentMethod } = usePaymentMethod('cod');
   const { submitOrder, processing } = useSubmitOrder();
 
@@ -92,6 +92,7 @@ const ThanhToanPage = () => {
             <ShippingForm
               shippingInfo={shippingInfo}
               onShippingInfoChange={updateShippingInfo}
+              isLoadingProfile={isLoadingProfile}
             />
 
             <PaymentMethodSelector

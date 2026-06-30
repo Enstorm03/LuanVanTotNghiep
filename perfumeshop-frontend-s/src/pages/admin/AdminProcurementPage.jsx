@@ -314,7 +314,7 @@ const AdminProcurementPage = () => {
       return;
     }
 
-    if (!confirm(`Duyệt ${selectedProposals.size} sản phẩm với % biên lợi nhuận ${pct}%?`)) {
+    if (!window.confirm(`Duyệt ${selectedProposals.size} sản phẩm với % biên lợi nhuận ${pct}%?`)) {
       return;
     }
 

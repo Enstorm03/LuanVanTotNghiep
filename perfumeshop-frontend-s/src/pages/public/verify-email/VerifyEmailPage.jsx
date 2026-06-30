@@ -1,72 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-
+import { useEmailVerification } from '../../../hooks/useEmailVerification';
+import { resendVerificationEmail } from '../../../services/api/authApi';
 
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('loading'); // loading, success, error, expired
-  const [message, setMessage] = useState('');
+  const token = searchParams.get('token');
+  
+  const { status, message } = useEmailVerification(token);
+  
   const [email, setEmail] = useState('');
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
-
-  const token = searchParams.get('token');
-
-   useEffect(() => {
-     const verifyEmail = async () => {
-       try {
-         if (!token) {
-           setStatus('error');
-           setMessage('Token không hợp lệ');
-           return;
-         }
-
-         const apiUrl = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api/auth/verify-email?token=${token}` : `/api/auth/verify-email?token=${token}`;
-         const response = await fetch(apiUrl);
-
-         console.log('Response status:', response.status);
-         console.log('Response ok:', response.ok);
-
-         if (!response.ok) {
-           const text = await response.text();
-           console.error('Response text:', text);
-           setStatus('error');
-           setMessage(`Lỗi từ server: ${response.status}`);
-           return;
-         }
-
-         const data = await response.json();
-         console.log('Verify response:', data);
-
-         if (data.success) {
-           setStatus('success');
-           setMessage(data.message || 'Email đã được xác thực thành công!');
-
-           // Redirect to login after 3 seconds
-           setTimeout(() => {
-             navigate('/login');
-           }, 3000);
-         } else {
-           setStatus('error');
-           setMessage(data.message || 'Xác thực email thất bại');
-         }
-       } catch (error) {
-         console.error('Verify error:', error);
-         const errorMessage = error?.message || 'Xác thực email thất bại';
-         
-         if (errorMessage.includes('hết hạn')) {
-           setStatus('expired');
-           setMessage('Token đã hết hạn. Vui lòng yêu cầu gửi lại email xác thực');
-         } else {
-           setStatus('error');
-           setMessage(errorMessage);
-         }
-       }
-     };
-
-     verifyEmail();
-   }, [token, navigate]);
 
   const handleResendEmail = async () => {
     if (!email) {
@@ -76,19 +22,11 @@ const VerifyEmailPage = () => {
 
     setResendLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api/auth/resend-verification-email` : `/api/auth/resend-verification-email`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
+      await resendVerificationEmail(email);
       setResendMessage('Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư của bạn');
       setTimeout(() => setResendMessage(''), 5000);
     } catch (error) {
-      const errorMessage = error?.message || 'Lỗi gửi lại email';
-      setResendMessage(errorMessage);
+      setResendMessage(error.message);
       setTimeout(() => setResendMessage(''), 5000);
     } finally {
       setResendLoading(false);

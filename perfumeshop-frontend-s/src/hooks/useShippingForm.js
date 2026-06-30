@@ -8,32 +8,54 @@ const useShippingForm = (user) => {
     soDienThoai: '',
     ghiChu: ''
   });
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   // Auto-populate shipping info when user logs in
   useEffect(() => {
-    if (user && user.userId) {
+    if (user) {
       const loadUserProfile = async () => {
+        setIsLoadingProfile(true);
         try {
-          // Fetch full user profile to get address and phone
-          // Send user ID in X-User-Id header
-          const profile = await userApi.getProfile(user.userId);
-          console.log('Profile loaded:', profile);
+          // Get userId from various possible field names
+          const userId = user.id_nguoi_dung || user.userId || user.id;
+          
+          if (!userId) {
+            console.warn('No userId found in user object:', user);
+            // Use whatever info is available from auth
+            setShippingInfo({
+              tenNguoiNhan: user.ho_ten || user.hoTen || '',
+              diaChiGiaoHang: user.dia_chi || user.diaChi || '',
+              soDienThoai: user.so_dien_thoai || user.soDienThoai || '',
+              ghiChu: ''
+            });
+            return;
+          }
+
+          // Fetch full user profile to get complete address and phone
+          const profile = await userApi.getProfile(userId);
+          console.log('✅ Auto-filled shipping info from profile:', {
+            name: profile.ho_ten,
+            hasAddress: !!profile.dia_chi,
+            hasPhone: !!profile.so_dien_thoai
+          });
           
           setShippingInfo({
-            tenNguoiNhan: profile.ho_ten || user.hoTen || user.ho_ten || '',
+            tenNguoiNhan: profile.ho_ten || user.ho_ten || user.hoTen || '',
             diaChiGiaoHang: profile.dia_chi || '',
             soDienThoai: profile.so_dien_thoai || '',
             ghiChu: ''
           });
         } catch (error) {
-          console.error('Lỗi tải thông tin cá nhân:', error);
-          // Fallback to basic user info from auth (user object from login)
+          console.error('❌ Lỗi tải thông tin cá nhân:', error);
+          // Fallback to basic user info from auth
           setShippingInfo({
             tenNguoiNhan: user.ho_ten || user.hoTen || '',
-            diaChiGiaoHang: user.dia_chi || '',
-            soDienThoai: '',
+            diaChiGiaoHang: user.dia_chi || user.diaChi || '',
+            soDienThoai: user.so_dien_thoai || user.soDienThoai || '',
             ghiChu: ''
           });
+        } finally {
+          setIsLoadingProfile(false);
         }
       };
 
@@ -60,7 +82,8 @@ const useShippingForm = (user) => {
   return {
     shippingInfo,
     updateShippingInfo,
-    resetShippingInfo
+    resetShippingInfo,
+    isLoadingProfile
   };
 };
 
