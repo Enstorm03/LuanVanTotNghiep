@@ -66,6 +66,14 @@ class KhoApi extends BaseApi {
     return this._fetch(`${API_BASE_URL}/kho/ban-cham?days=${days}&limit=${limit}`);
   }
 
+  async getNearExpiryProducts(days = 180, limit = 10) {
+    return this._fetch(`${API_BASE_URL}/kho/near-expiry?days=${days}&limit=${limit}`);
+  }
+
+  async getNearExpiryBatches(limit = 10) {
+    return this._fetch(`${API_BASE_URL}/kho/near-expiry?limit=${limit}`);
+  }
+
   // ── PO Workflow ────────────────────────────────────────────────────────
 
   /** PO đang chờ kho kiểm tra */
@@ -100,6 +108,22 @@ class KhoApi extends BaseApi {
       method: 'POST',
       body: JSON.stringify({ lyDo, nhanVienId }),
     });
+  }
+
+  /** Validate HSD — kiểm tra hạn sử dụng hợp lệ */
+  async validateHSD(hanSuDung) {
+    return this._fetch(`${API_BASE_URL}/kho/validate-hsd`, {
+      method: 'POST',
+      body: JSON.stringify({ hanSuDung }),
+    });
+  }
+
+  /** Lấy toàn bộ lô hàng (group theo SP), filter tuỳ chọn */
+  async getLoHang(idSanPham = null, conHang = false) {
+    const params = new URLSearchParams();
+    if (idSanPham) params.set('idSanPham', idSanPham);
+    if (conHang) params.set('conHang', 'true');
+    return this._fetch(`${API_BASE_URL}/kho/lo-hang?${params.toString()}`);
   }
 }
 

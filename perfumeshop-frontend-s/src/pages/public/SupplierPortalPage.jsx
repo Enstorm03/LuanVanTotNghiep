@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useSupplier } from '../../contexts/SupplierContext';
+import { generateCSVTemplate, downloadCSV, CSV_DISPLAY_HEADERS, CSV_HEADERS } from '../../utils/csvFormatUtils';
 
 const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—';
 
@@ -10,16 +11,16 @@ const INIT_FORM = {
   dungTichMl: '', nongDo: '', ghiChu: '',
 };
 
-/* ── Tải template Excel (client-side, dùng dữ liệu mẫu) ── */
+/* ── Tải template Excel (sử dụng csvFormatUtils chuẩn) ── */
 const downloadTemplate = () => {
-  const header = ['ten_san_pham', 'mo_ta', 'gia_de_xuat', 'so_luong', 'dung_tich_ml', 'nong_do', 'url_hinh_anh', 'ghi_chu'];
-  const sample = ['Nước hoa Chanel No.5 EDP', 'Hương hoa cỏ nhẹ nhàng', '350000', '50', '100', '15', 'https://example.com/img.jpg', 'Hàng chính hãng'];
-  const csv = [header.join(','), sample.join(',')].join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const csvContent = generateCSVTemplate();
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'template_chao_hang_ncc.csv';
-  a.click(); URL.revokeObjectURL(url);
+  a.href = url;
+  a.download = 'template_chao_hang_ncc.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 /* ── Section upload hàng loạt ── */
@@ -104,10 +105,12 @@ const BulkUploadSection = ({ prefillTenNCC = '', prefillLienHe = '', locked = fa
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
                   <th className="text-left px-3 py-2 text-gray-500 w-8">#</th>
-                  <th className="text-center px-2 py-2 text-gray-500 w-20">Trạng thái</th>
+                  <th className="text-center px-2 py-2 text-gray-500 w-16">Trạng thái</th>
                   <th className="text-left px-3 py-2 text-gray-500">Tên sản phẩm</th>
                   <th className="text-right px-3 py-2 text-gray-500">Giá đề xuất</th>
-                  <th className="text-center px-2 py-2 text-gray-500">SL</th>
+                  <th className="text-center px-2 py-2 text-gray-500 w-12">SL</th>
+                  <th className="text-center px-2 py-2 text-gray-500 w-24">Số lô</th>
+                  <th className="text-center px-2 py-2 text-gray-500 w-24">HSD</th>
                   <th className="text-left px-3 py-2 text-gray-500">Lỗi</th>
                 </tr>
               </thead>
@@ -120,9 +123,21 @@ const BulkUploadSection = ({ prefillTenNCC = '', prefillLienHe = '', locked = fa
                         ? <span className="text-green-600">✓</span>
                         : <span className="text-red-500">✗</span>}
                     </td>
-                    <td className="px-3 py-2 font-medium text-gray-800 max-w-[160px] truncate">{r.tenSanPham || '—'}</td>
+                    <td className="px-3 py-2 font-medium text-gray-800 max-w-[140px] truncate">{r.tenSanPham || '—'}</td>
                     <td className="px-3 py-2 text-right text-gray-600">{r.giaDeXuat ? fmt(Number(r.giaDeXuat)) : '—'}</td>
                     <td className="px-2 py-2 text-center text-gray-600">{r.soLuong ?? '—'}</td>
+                    <td className="px-2 py-2 text-center">
+                      {r.soLo
+                        ? <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded font-mono">{r.soLo}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-2 py-2 text-center">
+                      {r.hanSuDung
+                        ? <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded whitespace-nowrap">
+                            {(() => { const m = String(r.hanSuDung).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : r.hanSuDung; })()}
+                          </span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
                     <td className="px-3 py-2 text-red-500">{r.loi || ''}</td>
                   </tr>
                 ))}
@@ -199,8 +214,8 @@ const BulkUploadSection = ({ prefillTenNCC = '', prefillLienHe = '', locked = fa
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 space-y-1">
             <p className="font-semibold">📌 Cấu trúc file (theo thứ tự cột):</p>
-            <p className="font-mono">ten_san_pham* | mo_ta | gia_de_xuat* | so_luong* | dung_tich_ml | nong_do | url_hinh_anh | ghi_chu</p>
-            <p>Các cột có dấu * là bắt buộc. <button onClick={downloadTemplate} className="underline text-amber-700 font-semibold">Tải template mẫu</button></p>
+            <p className="font-mono">ten_san_pham* | mo_ta | gia_de_xuat* | so_luong* | dung_tich_ml | nong_do | url_hinh_anh | ghi_chu | <span className="text-emerald-700 font-bold">hanSuDung</span> | <span className="text-indigo-700 font-bold">soLo</span></p>
+            <p>Các cột có dấu * là bắt buộc. Cột <strong>hanSuDung</strong> (định dạng YYYY-MM-DD) và <strong>soLo</strong> là tùy chọn. <button onClick={downloadTemplate} className="underline text-amber-700 font-semibold">Tải template mẫu</button></p>
           </div>
         </div>
       )}

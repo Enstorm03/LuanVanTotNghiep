@@ -106,7 +106,9 @@ public class KhoController {
         BigDecimal giaNhap = body.get("giaNhap")    != null ? new BigDecimal(body.get("giaNhap").toString())      : null;
         String tenSp       = body.get("tenSanPhamCsv") != null ? body.get("tenSanPhamCsv").toString() : null;
         String ghiChu      = body.get("ghiChu")     != null ? body.get("ghiChu").toString()      : null;
-        return ResponseEntity.ok(khoService.updateRow(rowId, idSanPham, soLuong, giaNhap, tenSp, ghiChu));
+        String hanSuDung   = body.get("hanSuDung")  != null ? body.get("hanSuDung").toString()   : null;
+        String soLo        = body.get("soLo")       != null ? body.get("soLo").toString()        : null;
+        return ResponseEntity.ok(khoService.updateRow(rowId, idSanPham, soLuong, giaNhap, tenSp, ghiChu, hanSuDung, soLo));
     }
 
     /** DELETE /api/kho/import-preview/row/{rowId} — xóa dòng khỏi staging */
@@ -166,5 +168,40 @@ public class KhoController {
             @RequestParam(value = "days",  defaultValue = "30")  int days,
             @RequestParam(value = "limit", defaultValue = "20")  int limit) {
         return ResponseEntity.ok(khoService.getSlowMoving(days, limit));
+    }
+
+    // ── Cảnh báo cận Date ──────────────────────────────────────────────────
+
+    /** GET /api/kho/cang-het-han?limit=10 — Top N lô sắp hết hạn */
+    @GetMapping("/cang-het-han")
+    public ResponseEntity<List<Map<String, Object>>> getNearExpiryBatches(
+            @RequestParam(value = "limit", defaultValue = "10")  int limit) {
+        return ResponseEntity.ok(khoService.getNearExpiryBatches(limit));
+    }
+
+    /** GET /api/kho/near-expiry?limit=10 — Alias for getNearExpiryBatches */
+    @GetMapping("/near-expiry")
+    public ResponseEntity<List<Map<String, Object>>> getNearExpiryBatches2(
+            @RequestParam(value = "limit", defaultValue = "10")  int limit) {
+        return ResponseEntity.ok(khoService.getNearExpiryBatches(limit));
+    }
+
+    /** POST /api/kho/validate-hsd — Kiểm tra HSD hợp lệ */
+    @PostMapping("/validate-hsd")
+    public ResponseEntity<Map<String, Object>> validateHSD(@RequestBody Map<String, Object> body) {
+        String hsdStr = (String) body.get("hanSuDung");
+        java.time.LocalDate hsd = hsdStr != null ? java.time.LocalDate.parse(hsdStr) : null;
+        return ResponseEntity.ok(khoService.validateHSD(hsd));
+    }
+
+    /**
+     * GET /api/kho/lo-hang — Toàn bộ lô hàng, group theo sản phẩm
+     * Optional: ?idSanPham=1 để lọc 1 SP, ?conHang=true chỉ lấy lô còn tồn
+     */
+    @GetMapping("/lo-hang")
+    public ResponseEntity<List<Map<String, Object>>> getLoHang(
+            @RequestParam(value = "idSanPham", required = false) Integer idSanPham,
+            @RequestParam(value = "conHang",   defaultValue = "false") boolean conHang) {
+        return ResponseEntity.ok(khoService.getLoHang(idSanPham, conHang));
     }
 }

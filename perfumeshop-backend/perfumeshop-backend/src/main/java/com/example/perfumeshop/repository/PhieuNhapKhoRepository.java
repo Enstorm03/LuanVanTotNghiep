@@ -17,4 +17,17 @@ public interface PhieuNhapKhoRepository extends JpaRepository<PhieuNhapKho, Inte
                    "WHERE ct.id_san_pham = :idSanPham AND ct.so_luong_con_lai > 0 " +
                    "ORDER BY ct.han_su_dung ASC", nativeQuery = true)
     List<Integer> findActiveBatchesByProductFEFO(Integer idSanPham);
+    
+    // Query to get top N near-expiry batches (for dashboard widget)
+    @Query(value = "SELECT ct.id, ct.id_san_pham, sp.ten_san_pham, ct.so_lo, ct.han_su_dung, ct.so_luong_con_lai, sp.gia_nhap " +
+                   "FROM chi_tiet_phieu_nhap ct " +
+                   "JOIN san_pham sp ON ct.id_san_pham = sp.id " +
+                   "WHERE ct.so_luong_con_lai > 0 AND ct.han_su_dung > CURDATE() " +
+                   "ORDER BY ct.han_su_dung ASC " +
+                   "LIMIT :limit", nativeQuery = true)
+    List<Object[]> findNearExpiryBatches(Integer limit);
+    
+    long countByMaPhieuStartingWith(String prefix);
+    
+    List<PhieuNhapKho> findByTrangThai(String trangThai);
 }

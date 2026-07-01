@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupplier } from '../../contexts/SupplierContext';
 import procurementApi from '../../services/api/procurementApi';
+import { calculateMonthsToExpiry } from '../../utils/csvFormatUtils';
 
 /**
  * Trang cho Nhà Cung Cấp tự đề xuất sản phẩm mới
@@ -22,11 +23,14 @@ const SupplierProposeProductPage = () => {
     soLuongCoTheCungCap: '',
     dungTichMl: '',
     nongDo: '',
+    hanSuDung: '',
+    soLo: '',
     ghiChu: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [warnings, setWarnings] = useState({});
 
   // Tự động điền thông tin NCC từ context nếu đã đăng nhập
   useEffect(() => {
@@ -42,6 +46,19 @@ const SupplierProposeProductPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Kiểm tra cảnh báo HSD
+    if (name === 'hanSuDung' && value) {
+      const months = calculateMonthsToExpiry(value);
+      if (months !== null && months < 6) {
+        setWarnings((prev) => ({
+          ...prev,
+          hanSuDung: `⚠️ Hạn sử dụng quá ngắn (${months} tháng). Vui lòng xác nhận lại!`,
+        }));
+      } else {
+        setWarnings((prev) => ({ ...prev, hanSuDung: null }));
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -51,6 +68,16 @@ const SupplierProposeProductPage = () => {
       setError('Vui lòng nhập tên nhà cung cấp và tên sản phẩm');
       return;
     }
+
+    // Kiểm tra HSD không được trong quá khứ
+    if (formData.hanSuDung) {
+      const selectedDate = new Date(formData.hanSuDung);
+      const today = new Date();
+      if (selectedDate < today) {
+        setError('Hạn sử dụng không được là ngày trong quá khứ');
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const payload = {
@@ -59,20 +86,25 @@ const SupplierProposeProductPage = () => {
         soLuongCoTheCungCap: formData.soLuongCoTheCungCap ? Number(formData.soLuongCoTheCungCap) : null,
         dungTichMl: formData.dungTichMl ? Number(formData.dungTichMl) : null,
         nongDo: formData.nongDo ? Number(formData.nongDo) : null,
+        hanSuDung: formData.hanSuDung || null,
+        soLo: formData.soLo || null,
       };
       await procurementApi.submitIndependentProposal(payload);
       setSuccess(true);
-      setFormData((prev) => ({
-        ...prev,
-        tenSanPham: '',
-        moTa: '',
-        urlHinhAnh: '',
-        giaDeXuat: '',
-        soLuongCoTheCungCap: '',
-        dungTichMl: '',
-        nongDo: '',
-        ghiChu: '',
-      }));
+       setFormData((prev) => ({
+         ...prev,
+         tenSanPham: '',
+         moTa: '',
+         urlHinhAnh: '',
+         giaDeXuat: '',
+         soLuongCoTheCungCap: '',
+         dungTichMl: '',
+         nongDo: '',
+         hanSuDung: '',
+         soLo: '',
+         ghiChu: '',
+       }));
+       setWarnings({});
     } catch (err) {
       setError(err.message || 'Có lỗi xảy ra, vui lòng thử lại');
     } finally {
@@ -214,11 +246,43 @@ const SupplierProposeProductPage = () => {
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                      Giá đề xuất (₫)
-                    </label>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div>
+                     <label className="block text-sm font-medium text-gray-600 mb-1">
+                       Hạn sử dụng <span className="text-red-500">*</span>
+                     </label>
+                     <input
+                       type="date"
+                       name="hanSuDung"
+                       value={formData.hanSuDung}
+                       onChange={handleChange}
+                       min={new Date().toISOString().split('T')[0]}
+                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                     />
+                     {warnings.hanSuDung && (
+                       <p className="text-xs text-red-600 font-semibold mt-1">{warnings.hanSuDung}</p>
+                     )}
+                   </div>
+                   <div>
+                     <label className="block text-sm font-medium text-gray-600 mb-1">
+                       Số lô
+                     </label>
+                     <input
+                       type="text"
+                       name="soLo"
+                       value={formData.soLo}
+                       onChange={handleChange}
+                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                       placeholder="VD: LOT-001, BATCH-2024"
+                     />
+                   </div>
+                 </div>
+
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div>
+                     <label className="block text-sm font-medium text-gray-600 mb-1">
+                       Giá đề xuất (₫)
+                     </label>
                     <input
                       type="number"
                       name="giaDeXuat"

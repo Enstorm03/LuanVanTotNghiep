@@ -129,23 +129,26 @@ const api = {
   deleteCampaign: campaignApi.deleteCampaign.bind(campaignApi),
   setCampaignProducts: campaignApi.setCampaignProducts.bind(campaignApi),
 
-  // Kho methods
-  importPreview: khoApi.importPreview.bind(khoApi),
-  getPreview: khoApi.getPreview.bind(khoApi),
-  updateKhoRow: khoApi.updateRow.bind(khoApi),
-  deleteKhoRow: khoApi.deleteRow.bind(khoApi),
-  addKhoRow: khoApi.addRow.bind(khoApi),
-  confirmImport: khoApi.confirmImport.bind(khoApi),
-  listPhieuNhap: khoApi.listPhieuNhap.bind(khoApi),
-  getPhieuNhap: khoApi.getPhieuNhap.bind(khoApi),
-  getBienDong: khoApi.getBienDong.bind(khoApi),
-  getBanCham: khoApi.getBanCham.bind(khoApi),
+   // Kho methods
+   importPreview: khoApi.importPreview.bind(khoApi),
+   getPreview: khoApi.getPreview.bind(khoApi),
+   updateKhoRow: khoApi.updateRow.bind(khoApi),
+   deleteKhoRow: khoApi.deleteRow.bind(khoApi),
+   addKhoRow: khoApi.addRow.bind(khoApi),
+   confirmImport: khoApi.confirmImport.bind(khoApi),
+   listPhieuNhap: khoApi.listPhieuNhap.bind(khoApi),
+   getPhieuNhap: khoApi.getPhieuNhap.bind(khoApi),
+   getBienDong: khoApi.getBienDong.bind(khoApi),
+   getBanCham: khoApi.getBanCham.bind(khoApi),
+   getNearExpiryProducts: khoApi.getNearExpiryProducts.bind(khoApi),
   // PO Workflow
   khoGetPoChoKiemTra: khoApi.getPoChoKiemTra.bind(khoApi),
   khoGetPoChoAdminDuyet: khoApi.getPoChoAdminDuyet.bind(khoApi),
   khoXacNhan: khoApi.khoXacNhan.bind(khoApi),
   khoAdminDuyetCuoi: khoApi.adminDuyetCuoi.bind(khoApi),
   khoAdminTuChoi: khoApi.adminTuChoi.bind(khoApi),
+  khoValidateHSD: khoApi.validateHSD.bind(khoApi),
+  khoGetLoHang: khoApi.getLoHang.bind(khoApi),
 
   // Procurement (Đấu thầu) methods
   procurementGetOpen: procurementApi.getOpenRequests.bind(procurementApi),

@@ -3,6 +3,7 @@ package com.example.perfumeshop.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -38,6 +39,14 @@ public class PhieuNhapTam {
 
     @Column(name = "ghi_chu")
     private String ghiChu;
+
+    /** Hạn sử dụng của lô hàng */
+    @Column(name = "han_su_dung")
+    private LocalDate hanSuDung;
+
+    /** Số lô hàng */
+    @Column(name = "so_lo", length = 100)
+    private String soLo;
 
     /**
      * OK       = dòng hợp lệ, sẵn sàng duyệt

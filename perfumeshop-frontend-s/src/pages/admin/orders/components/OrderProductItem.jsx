@@ -1,6 +1,7 @@
 import React from 'react';
+import PickListDisplay from './PickListDisplay';
 
-const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent = 0 }) => {
+const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent = 0, pickListData = [] }) => {
   // Extract product info based on data structure
   let productInfo = {};
   let quantity = 0;
@@ -45,7 +46,7 @@ const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent 
   }
 
   return (
-    
+    <div className="space-y-3">
     <div className="flex justify-between items-center p-4 border border-border-light dark:border-border-dark rounded-lg">
       <div className="flex items-center gap-4">
          
@@ -104,6 +105,12 @@ const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent 
           </>
         )}
       </div>
+    </div>
+    {pickListData && pickListData.length > 0 && (
+      <div className="ml-4">
+        <PickListDisplay pickList={pickListData} />
+      </div>
+    )}
     </div>
   );
 };

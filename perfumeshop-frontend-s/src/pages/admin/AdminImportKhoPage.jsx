@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import api from '../../services/api';
+import { generateCSVTemplate, calculateMonthsToExpiry } from '../../utils/csvFormatUtils';
 
 /* ── Constants ── */
 const STATUS_STYLE = {
@@ -11,8 +12,14 @@ const STATUS_LABEL = { OK: '✓ OK', CHUA_MAP: '⚠ Chưa map', LOI: '✗ Lỗi'
 
 const fmt = (n) => n != null && n !== '' ? Number(n).toLocaleString('vi-VN') + '₫' : '—';
 
+/* ── Utility: Get min date (today) for date picker ── */
+const getTodayISOString = () => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
 /* ── Inline editable cell ── */
-const EditCell = ({ value, type = 'text', onSave, className = '' }) => {
+const EditCell = ({ value, type = 'text', onSave, className = '', warning = null, error = null }) => {
   const [editing, setEditing] = useState(false);
   const [val,     setVal]     = useState(value ?? '');
 
@@ -21,25 +28,32 @@ const EditCell = ({ value, type = 'text', onSave, className = '' }) => {
     if (String(val) !== String(value ?? '')) onSave(val);
   };
 
-  if (editing) return (
-    <input
-      autoFocus
-      type={type}
-      value={val}
-      onChange={e => setVal(e.target.value)}
-      onBlur={commit}
-      onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setVal(value ?? ''); setEditing(false); } }}
-      className={`w-full border border-primary rounded px-1.5 py-0.5 text-sm focus:outline-none ${className}`}
-    />
-  );
+  if (editing) {
+    const inputProps = {
+      autoFocus: true,
+      type,
+      value: val,
+      onChange: e => setVal(e.target.value),
+      onBlur: commit,
+      onKeyDown: e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setVal(value ?? ''); setEditing(false); } },
+      className: `w-full border rounded px-1.5 py-0.5 text-sm focus:outline-none ${error ? 'border-red-500' : 'border-primary'} ${className}`
+    };
+    if (type === 'date') inputProps.min = getTodayISOString();
+    
+    return <input {...inputProps} />;
+  }
 
   return (
-    <div
-      onClick={() => { setVal(value ?? ''); setEditing(true); }}
-      className={`cursor-pointer hover:bg-primary/5 rounded px-1 py-0.5 min-h-[24px] text-sm group ${className}`}
-      title="Click để chỉnh sửa"
-    >
-      {value != null && value !== '' ? value : <span className="text-gray-300 italic text-xs group-hover:text-gray-400">nhấp để nhập</span>}
+    <div className="flex flex-col gap-0.5">
+      <div
+        onClick={() => { setVal(value ?? ''); setEditing(true); }}
+        className={`cursor-pointer hover:bg-primary/5 rounded px-1 py-0.5 min-h-[24px] text-sm group ${className}`}
+        title="Click để chỉnh sửa"
+      >
+        {value != null && value !== '' ? value : <span className="text-gray-300 italic text-xs group-hover:text-gray-400">nhấp để nhập</span>}
+      </div>
+      {warning && <p className="text-xs text-orange-600 font-semibold px-1">⚠ {warning}</p>}
+      {error && <p className="text-xs text-red-600 font-semibold px-1">✗ {error}</p>}
     </div>
   );
 };
@@ -64,6 +78,27 @@ const AdminImportKhoPage = () => {
     loi:     rows.filter(r => r.trangThai === 'LOI').length,
   };
 
+  /* ── Parse HSD and SoLo from ghiChu (legacy) hoặc từ field riêng ── */
+  const parseExtraFields = (row) => {
+    // Nếu backend đã trả về field riêng thì dùng luôn
+    if (row.hanSuDung || row.soLo) return row;
+    // Fallback: parse từ ghiChu (data cũ)
+    const parsed = { ...row };
+    if (row.ghiChu) {
+      const hsdMatch = row.ghiChu.match(/HSD:(\d{4}-\d{2}-\d{2})/);
+      if (hsdMatch) {
+        parsed.hanSuDung = hsdMatch[1];
+        parsed.ghiChu = row.ghiChu.replace(/\s*\|\s*HSD:[^|]+/, '').replace(/HSD:[^|]+\s*\|\s*/, '').trim();
+      }
+      const loMatch = row.ghiChu.match(/Lô:([^|]+)/);
+      if (loMatch) {
+        parsed.soLo = loMatch[1].trim();
+        parsed.ghiChu = parsed.ghiChu.replace(/\s*\|\s*Lô:[^|]+/, '').replace(/Lô:[^|]+\s*\|\s*/, '').trim();
+      }
+    }
+    return parsed;
+  };
+
   /* ── Upload ── */
   const handleUpload = async (e) => {
     const file = e.target.files[0];
@@ -73,7 +108,9 @@ const AdminImportKhoPage = () => {
       setDone(null);
       const res = await api.importPreview(file);
       setSession(res.sessionId);
-      setRows(res.rows || []);
+      // Parse HSD and soLo from ghiChu
+      const parsedRows = (res.rows || []).map(parseExtraFields);
+      setRows(parsedRows);
     } catch (err) {
       alert('Lỗi upload: ' + err.message);
     } finally {
@@ -86,6 +123,7 @@ const AdminImportKhoPage = () => {
   const saveCell = useCallback(async (rowId, field, newValue) => {
     try {
       const updated = await api.updateKhoRow(rowId, { [field]: newValue === '' ? null : newValue });
+      // Merge lại, ưu tiên field riêng hanSuDung/soLo từ response
       setRows(prev => prev.map(r => r.id === rowId ? { ...r, ...updated } : r));
     } catch (err) {
       alert('Lỗi lưu: ' + err.message);
@@ -129,15 +167,17 @@ const AdminImportKhoPage = () => {
     }
   };
 
-  /* ── Download template ── */
-  const downloadTemplate = () => {
-    const csv = 'id_san_pham,ten_san_pham,so_luong,gia_nhap,ghi_chu\n1,,10,800000,Lo thang 6\n,Chanel No.5 100ml,5,650000,\n';
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(new Blob([csv], { type: 'text/csv' })),
-      download: 'template_nhap_kho.csv'
-    });
-    a.click();
-  };
+   /* ── Download template (sử dụng csvFormatUtils chuẩn) ── */
+   const downloadTemplate = () => {
+     const csvContent = generateCSVTemplate();
+     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+     const url = URL.createObjectURL(blob);
+     const a = document.createElement('a');
+     a.href = url;
+     a.download = 'template_nhap_kho.csv';
+     a.click();
+     URL.revokeObjectURL(url);
+   };
 
   /* ── Reset ── */
   const reset = () => { setSession(null); setRows([]); setDone(null); };
@@ -225,19 +265,21 @@ const AdminImportKhoPage = () => {
 
           {/* Table */}
           <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow overflow-x-auto">
-            <table className="w-full text-sm min-w-[700px]">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                  <th className="text-center px-3 py-3 font-semibold text-gray-500 w-10">#</th>
-                  <th className="text-left px-3 py-3 font-semibold text-gray-600 dark:text-gray-300">Tên SP (từ file)</th>
-                  <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-24">ID SP</th>
-                  <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-20">SL</th>
-                  <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-28">Giá nhập</th>
-                  <th className="text-left px-3 py-3 font-semibold text-gray-600 dark:text-gray-300">Ghi chú</th>
-                  <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-24">Trạng thái</th>
-                  <th className="w-10 px-3 py-3" />
-                </tr>
-              </thead>
+             <table className="w-full text-sm min-w-[900px]">
+               <thead className="bg-gray-50 dark:bg-gray-700/50">
+                 <tr>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-500 w-10">#</th>
+                   <th className="text-left px-3 py-3 font-semibold text-gray-600 dark:text-gray-300">Tên SP (từ file)</th>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-24">ID SP</th>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-20">SL</th>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-28">Giá nhập</th>
+                   <th className="text-left px-3 py-3 font-semibold text-gray-600 dark:text-gray-300">Ghi chú</th>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-32">HSD</th>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-28">Số lô</th>
+                   <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 w-24">Trạng thái</th>
+                   <th className="w-10 px-3 py-3" />
+                 </tr>
+               </thead>
               <tbody className="divide-y divide-border-light dark:divide-border-dark">
                 {rows.map(row => (
                   <tr key={row.id}
@@ -284,43 +326,64 @@ const AdminImportKhoPage = () => {
                       />
                     </td>
 
-                    {/* Ghi chú — editable */}
-                    <td className="px-3 py-2 max-w-[150px]">
-                      <EditCell
-                        value={row.ghiChu}
-                        onSave={v => saveCell(row.id, 'ghiChu', v)}
-                        className="text-gray-500 text-xs"
-                      />
-                    </td>
+                     {/* Ghi chú — editable */}
+                     <td className="px-3 py-2 max-w-[150px]">
+                       <EditCell
+                         value={row.ghiChu}
+                         onSave={v => saveCell(row.id, 'ghiChu', v)}
+                         className="text-gray-500 text-xs"
+                       />
+                     </td>
 
-                    {/* Status */}
-                    <td className="px-3 py-2 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${STATUS_STYLE[row.trangThai] || 'bg-gray-100 text-gray-500'}`}>
-                        {STATUS_LABEL[row.trangThai] || row.trangThai}
-                      </span>
-                    </td>
+                     {/* Hạn sử dụng — editable date */}
+                     <td className="px-3 py-2">
+                       <EditCell
+                         value={row.hanSuDung}
+                         type="date"
+                         onSave={v => saveCell(row.id, 'hanSuDung', v)}
+                         className="text-center text-sm"
+                         warning={row.hanSuDung && calculateMonthsToExpiry(row.hanSuDung) < 6 ? `HSD < 6 tháng (${calculateMonthsToExpiry(row.hanSuDung)} tháng)` : null}
+                         error={row.hanSuDung && new Date(row.hanSuDung) < new Date() ? 'HSD đã quá hạn' : null}
+                       />
+                     </td>
 
-                    {/* Xóa dòng */}
-                    <td className="px-2 py-2 text-center">
-                      <button onClick={() => deleteRow(row.id)}
-                        className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-300 hover:text-red-500 transition-colors"
-                        title="Xóa dòng này">
-                        <span className="material-symbols-outlined text-base">delete</span>
-                      </button>
-                    </td>
+                     {/* Số lô — editable */}
+                     <td className="px-3 py-2">
+                       <EditCell
+                         value={row.soLo}
+                         onSave={v => saveCell(row.id, 'soLo', v)}
+                         className="text-center text-sm"
+                       />
+                     </td>
+
+                     {/* Status */}
+                     <td className="px-3 py-2 text-center">
+                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${STATUS_STYLE[row.trangThai] || 'bg-gray-100 text-gray-500'}`}>
+                         {STATUS_LABEL[row.trangThai] || row.trangThai}
+                       </span>
+                     </td>
+
+                     {/* Xóa dòng */}
+                     <td className="px-2 py-2 text-center">
+                       <button onClick={() => deleteRow(row.id)}
+                         className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-300 hover:text-red-500 transition-colors"
+                         title="Xóa dòng này">
+                         <span className="material-symbols-outlined text-base">delete</span>
+                       </button>
+                     </td>
                   </tr>
                 ))}
 
-                {/* Thêm dòng mới */}
-                <tr className="bg-gray-50/50 dark:bg-gray-700/20">
-                  <td colSpan={8} className="px-3 py-2">
-                    <button onClick={addRow}
-                      className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
-                      <span className="material-symbols-outlined text-base">add_circle</span>
-                      Thêm dòng mới
-                    </button>
-                  </td>
-                </tr>
+                 {/* Thêm dòng mới */}
+                 <tr className="bg-gray-50/50 dark:bg-gray-700/20">
+                   <td colSpan={10} className="px-3 py-2">
+                     <button onClick={addRow}
+                       className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
+                       <span className="material-symbols-outlined text-base">add_circle</span>
+                       Thêm dòng mới
+                     </button>
+                   </td>
+                 </tr>
               </tbody>
             </table>
           </div>

@@ -503,6 +503,21 @@ public class ProcurementService {
         ct.setSoLuong(slNhap);
         ct.setGiaNhap(dx.getGiaDeXuat());
         ct.setSoLuongLoi(0);
+
+        // Parse HSD và số lô từ ghiChu của đề xuất NCC (dạng "... | HSD:2027-12-31 | Lô:LOT001")
+        if (dx.getGhiChu() != null) {
+            for (String part : dx.getGhiChu().split("\\|")) {
+                String p = part.trim();
+                if (p.startsWith("HSD:")) {
+                    try {
+                        ct.setHanSuDung(java.time.LocalDate.parse(p.substring(4).trim()));
+                    } catch (Exception ignored) {}
+                } else if (p.startsWith("Lô:")) {
+                    ct.setSoLo(p.substring(3).trim());
+                }
+            }
+        }
+
         po.setChiTiet(List.of(ct));
         phieuNhapKhoRepository.save(po);
 
@@ -672,6 +687,17 @@ public class ProcurementService {
             dx.setNongDo(row.get("nongDo") != null
                 ? Integer.parseInt(row.get("nongDo").toString()) : null);
             dx.setGhiChu(row.getOrDefault("ghiChu", "").toString());
+            // Gộp hanSuDung + soLo vào ghiChu nếu có (sẽ được kho điền lại khi kiểm hàng thực tế)
+            StringBuilder ghiChuBuilder = new StringBuilder(dx.getGhiChu() != null ? dx.getGhiChu() : "");
+            if (row.get("hanSuDung") != null && !row.get("hanSuDung").toString().isBlank()) {
+                if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
+                ghiChuBuilder.append("HSD:").append(row.get("hanSuDung"));
+            }
+            if (row.get("soLo") != null && !row.get("soLo").toString().isBlank()) {
+                if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
+                ghiChuBuilder.append("Lô:").append(row.get("soLo"));
+            }
+            dx.setGhiChu(ghiChuBuilder.toString());
             dx.setTrangThai("PENDING");
             dx.setNgayTao(LocalDateTime.now());
             created.add(sanPhamDeXuatRepo.save(dx));
@@ -707,7 +733,9 @@ public class ProcurementService {
                     cellStr(row, colMap.getOrDefault("dung_tich_ml", 4)),
                     cellStr(row, colMap.getOrDefault("nong_do", 5)),
                     cellStr(row, colMap.getOrDefault("url_hinh_anh", 6)),
-                    cellStr(row, colMap.getOrDefault("ghi_chu", 7))));
+                    cellStr(row, colMap.getOrDefault("ghi_chu", 7)),
+                    cellStr(row, colMap.getOrDefault("han_su_dung", colMap.getOrDefault("hansuDung", colMap.getOrDefault("hanSuDung", 8)))),
+                    cellStr(row, colMap.getOrDefault("so_lo", colMap.getOrDefault("soLo", 9)))));
             }
         }
         return rows;
@@ -715,7 +743,14 @@ public class ProcurementService {
 
     private List<Map<String, Object>> parseBulkCsv(MultipartFile file, String tenNCC, String lienHeNCC) throws IOException {
         List<Map<String, Object>> rows = new ArrayList<>();
-        try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
+        // Đọc raw bytes để strip BOM nếu có
+        byte[] bytes = file.getInputStream().readAllBytes();
+        String content = new String(bytes, StandardCharsets.UTF_8);
+        // Strip UTF-8 BOM (\uFEFF) nếu có
+        if (content.startsWith("\uFEFF")) {
+            content = content.substring(1);
+        }
+        try (Reader reader = new java.io.StringReader(content);
              CSVParser parser = CSVFormat.DEFAULT.builder()
                  .setHeader().setSkipHeaderRecord(true).setTrim(true).build().parse(reader)) {
             int dong = 1;
@@ -729,7 +764,9 @@ public class ProcurementService {
                     safeGet(record, "dung_tich_ml"),
                     safeGet(record, "nong_do"),
                     safeGet(record, "url_hinh_anh"),
-                    safeGet(record, "ghi_chu")));
+                    safeGet(record, "ghi_chu"),
+                    safeGet(record, "han_su_dung") != null ? safeGet(record, "han_su_dung") : safeGet(record, "hanSuDung"),
+                    safeGet(record, "so_lo") != null ? safeGet(record, "so_lo") : safeGet(record, "soLo")));
             }
         }
         return rows;
@@ -737,7 +774,8 @@ public class ProcurementService {
 
     private Map<String, Object> buildBulkRow(int dong, String tenNCC, String lienHeNCC,
             String tenSanPham, String moTa, String giaStr, String slStr,
-            String dungTich, String nongDo, String urlHinhAnh, String ghiChu) {
+            String dungTich, String nongDo, String urlHinhAnh, String ghiChu,
+            String hanSuDung, String soLo) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("dongSo", dong);
         row.put("tenNCC", tenNCC);
@@ -786,6 +824,14 @@ public class ProcurementService {
             try { row.put("nongDo", (int) Double.parseDouble(nongDo.trim())); } catch (Exception ignored) {}
         }
 
+        // Optional: han_su_dung, so_lo
+        if (hanSuDung != null && !hanSuDung.isBlank()) {
+            row.put("hanSuDung", hanSuDung.trim());
+        }
+        if (soLo != null && !soLo.isBlank()) {
+            row.put("soLo", soLo.trim());
+        }
+
         row.put("trangThai", "OK");
         return row;
     }
@@ -799,7 +845,14 @@ public class ProcurementService {
         Cell cell = row.getCell(colIdx);
         if (cell == null) return null;
         return switch (cell.getCellType()) {
-            case NUMERIC -> String.valueOf((long) cell.getNumericCellValue());
+            case NUMERIC -> {
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    // Cell là ngày → format về YYYY-MM-DD
+                    java.util.Date d = cell.getDateCellValue();
+                    yield new java.text.SimpleDateFormat("yyyy-MM-dd").format(d);
+                }
+                yield String.valueOf((long) cell.getNumericCellValue());
+            }
             case STRING  -> cell.getStringCellValue();
             default      -> null;
         };

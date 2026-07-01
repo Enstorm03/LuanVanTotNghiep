@@ -39,15 +39,22 @@ const OrderProductsList = ({ order, productDetails, brandDetails }) => {
   
 
         {itemsToDisplay.length > 0 ? (
-          itemsToDisplay.map((item, index) => (
-            <OrderProductItem
-              key={`order-item-${index}`}
-              item={item}
-              productDetails={productDetails}
-              brandDetails={brandDetails}
-              discountPercent={order.giamGiaHangLoat || 0}
-            />
-          ))
+          itemsToDisplay.map((item, index) => {
+            const pickListForItem = order.pickListData && order.pickListData.length > 0
+              ? [order.pickListData[index]].filter(Boolean)
+              : [];
+            
+            return (
+              <OrderProductItem
+                key={`order-item-${index}`}
+                item={item}
+                productDetails={productDetails}
+                brandDetails={brandDetails}
+                discountPercent={order.giamGiaHangLoat || 0}
+                pickListData={pickListForItem}
+              />
+            );
+          })
         ) : (
           <div className="text-center py-8">
             <span className="material-symbols-outlined text-4xl text-gray-300 mb-2 block">inventory_2</span>

@@ -1,6 +1,7 @@
 package com.example.perfumeshop.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -61,9 +62,11 @@ public class ChiTietPhieuNhap {
 
     /** Ngày hết hạn của lô hàng */
     @Column(name = "han_su_dung")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private java.time.LocalDate hanSuDung;
 
-    /** ID của phiếu nhập kho (FEFO batch reference) */
-    @Column(name = "id_phieu_nhap")
-    private Integer idPhieuNhap;
+    /** Số lô hàng (Batch number) */
+    @Column(name = "so_lo", length = 100)
+    private String soLo;
+
 }

@@ -342,6 +342,37 @@ const AdminProcurementPage = () => {
   const PROP_STYLE = { PENDING: 'bg-yellow-100 text-yellow-800', APPROVED: 'bg-green-100 text-green-800', REJECTED: 'bg-red-100 text-red-800' };
   const PROP_LABEL = { PENDING: '⏳ Chờ duyệt', APPROVED: '✓ Đã duyệt', REJECTED: '✗ Từ chối' };
 
+  /** Parse HSD và số lô từ ghiChu dạng "HSD:2027-12-31 | Lô:LOT001 | ghi chú khác" */
+  const parseGhiChu = (ghiChu) => {
+    if (!ghiChu) return { hanSuDung: null, soLo: null, ghiChuClean: '' };
+    let hanSuDung = null, soLo = null;
+    const parts = ghiChu.split('|').map(s => s.trim());
+    const remaining = [];
+    for (const part of parts) {
+      if (part.startsWith('HSD:')) hanSuDung = part.replace('HSD:', '').trim();
+      else if (part.startsWith('Lô:')) soLo = part.replace('Lô:', '').trim();
+      else if (part) remaining.push(part);
+    }
+    return { hanSuDung, soLo, ghiChuClean: remaining.join(' | ') };
+  };
+
+  /** Format ngày YYYY-MM-DD an toàn, tránh timezone shift */
+  const fmtHSD = (dateStr) => {
+    if (!dateStr) return null;
+    const clean = String(dateStr).trim();
+    // Nếu đúng format YYYY-MM-DD thì parse thủ công
+    const m = clean.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+    // Nếu là số thuần (Excel serial) → bỏ qua
+    if (/^\d+$/.test(clean)) return null;
+    // Fallback
+    const d = new Date(clean);
+    if (isNaN(d.getTime())) return clean;
+    const yr = d.getFullYear();
+    if (yr < 1900 || yr > 9999) return null; // bảo vệ khỏi timestamp sai
+    return d.toLocaleDateString('vi-VN');
+  };
+
   // Nhóm proposals theo NCC
   const groupedBySupplier = () => {
     const groups = {};
@@ -447,12 +478,16 @@ const AdminProcurementPage = () => {
                     <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Sản phẩm</th>
                     <th className="text-right px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Giá đề xuất</th>
                     <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">SL</th>
+                    <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden lg:table-cell">Số lô</th>
+                    <th className="text-center px-3 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden lg:table-cell">HSD</th>
                     <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Trạng thái</th>
                     <th className="px-4 py-3 w-32 text-center" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                  {selectedSupplier.proposals.map(p => (
+                  {selectedSupplier.proposals.map(p => {
+                    const { hanSuDung, soLo } = parseGhiChu(p.ghiChu);
+                    return (
                     <tr key={p.idSanPhamDeXuat} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -476,6 +511,18 @@ const AdminProcurementPage = () => {
                       </td>
                       <td className="px-4 py-3 text-right font-semibold text-green-600">{fmt(p.giaDeXuat)}</td>
                       <td className="px-4 py-3 text-center text-gray-600">{p.soLuongCoTheCungCap || '—'}</td>
+                      <td className="px-3 py-3 text-center hidden lg:table-cell">
+                        {soLo
+                          ? <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded font-mono text-xs border border-indigo-200 dark:border-indigo-800">{soLo}</span>
+                          : <span className="text-gray-300 text-xs">—</span>}
+                      </td>
+                      <td className="px-3 py-3 text-center hidden lg:table-cell">
+                        {hanSuDung
+                          ? <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 rounded text-xs border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
+                              {fmtHSD(hanSuDung)}
+                            </span>
+                          : <span className="text-gray-300 text-xs">—</span>}
+                      </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${PROP_STYLE[p.trangThai] || 'bg-gray-100 text-gray-500'}`}>
                           {PROP_LABEL[p.trangThai] || p.trangThai}
@@ -499,7 +546,8 @@ const AdminProcurementPage = () => {
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

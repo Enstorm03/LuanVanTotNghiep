@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -153,7 +153,7 @@ const TabPhieuNhap = () => {
     <div className="space-y-4">
       {detail && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
               <h3 className="font-bold text-lg">Phiếu nhập {detail.maPhieu}</h3>
               <button onClick={() => setDetail(null)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"><span className="material-symbols-outlined">close</span></button>
@@ -164,15 +164,36 @@ const TabPhieuNhap = () => {
               <p><span className="text-gray-400">Trạng thái:</span> <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${PO_STYLE[detail.trangThai] || 'bg-gray-100 text-gray-500'}`}>{PO_LABEL[detail.trangThai] || detail.trangThai}</span></p>
               <p><span className="text-gray-400">Ghi chú:</span> {detail.ghiChu || '—'}</p>
               <table className="w-full mt-3 text-xs border-collapse">
-                <thead><tr className="bg-gray-50 dark:bg-gray-700"><th className="text-left px-3 py-2">Sản phẩm</th><th className="text-center px-3 py-2">SL đặt</th><th className="text-center px-3 py-2">SL thực nhận</th><th className="text-right px-3 py-2">Giá nhập</th></tr></thead>
-                <tbody>{(detail.chiTiet || []).map(ct => (
+                <thead><tr className="bg-gray-50 dark:bg-gray-700">
+                  <th className="text-left px-3 py-2">Sản phẩm</th>
+                  <th className="text-center px-3 py-2">SL đặt</th>
+                  <th className="text-center px-3 py-2">SL thực nhận</th>
+                  <th className="text-center px-3 py-2">Số lô</th>
+                  <th className="text-center px-3 py-2">HSD</th>
+                  <th className="text-right px-3 py-2">Giá nhập</th>
+                </tr></thead>
+                <tbody>{(detail.chiTiet || []).map(ct => {
+                  const hsdStr = ct.hanSuDung ? String(ct.hanSuDung).substring(0, 10) : null;
+                  const hsdFmt = hsdStr ? (m => m ? `${m[3]}/${m[2]}/${m[1]}` : hsdStr)(hsdStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)) : null;
+                  return (
                   <tr key={ct.id} className="border-t border-gray-100 dark:border-gray-700">
-                    <td className="px-3 py-2">{ct.tenSanPhamSnapshot} (#{ct.idSanPham})</td>
+                    <td className="px-3 py-2 font-medium">{ct.tenSanPhamSnapshot} <span className="text-gray-400 font-normal">(#{ct.idSanPham})</span></td>
                     <td className="px-3 py-2 text-center font-semibold">{ct.soLuong}</td>
                     <td className="px-3 py-2 text-center font-semibold text-green-600">{ct.soLuongThucNhan ?? '—'}</td>
+                    <td className="px-3 py-2 text-center">
+                      {ct.soLo
+                        ? <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded font-mono">{ct.soLo}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-3 py-2 text-center whitespace-nowrap">
+                      {hsdFmt
+                        ? <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded">{hsdFmt}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
                     <td className="px-3 py-2 text-right">{fmt(ct.giaNhap)}</td>
                   </tr>
-                ))}</tbody>
+                  );
+                })}</tbody>
               </table>
             </div>
           </div>
@@ -218,8 +239,11 @@ const KiemHangModal = ({ po, onClose, onDone, nhanVienId }) => {
       soLuong: ct.soLuong,
       soLuongThucNhan: ct.soLuong ?? '',
       soLuongLoi: 0,
+      hanSuDung: ct.hanSuDung ? String(ct.hanSuDung).substring(0, 10) : '',
+      soLo: ct.soLo || '',
       urlHinhAnhMoi: '',
       ghiChuKho: '',
+      _hsdStatus: null, // null | { valid, warning, message }
     }))
   );
   const [saving, setSaving] = useState(false);
@@ -227,10 +251,22 @@ const KiemHangModal = ({ po, onClose, onDone, nhanVienId }) => {
 
   const update = (idx, key, val) => setRows(prev => prev.map((r, i) => i === idx ? { ...r, [key]: val } : r));
 
+  /* Validate HSD khi blur field ngày */
+  const handleHsdBlur = async (idx, val) => {
+    if (!val) { update(idx, '_hsdStatus', null); return; }
+    try {
+      const res = await api.khoValidateHSD(val);
+      update(idx, '_hsdStatus', res);
+    } catch {
+      update(idx, '_hsdStatus', { valid: false, message: 'Không thể kiểm tra HSD' });
+    }
+  };
+
   const handleSubmit = async () => {
     for (const r of rows) {
       if (r.soLuongThucNhan === '' || Number(r.soLuongThucNhan) < 0) { setErr('Số lượng thực nhận không được để trống hoặc âm'); return; }
       if (Number(r.soLuongLoi) > Number(r.soLuongThucNhan)) { setErr('Số lượng lỗi không được lớn hơn số lượng thực nhận'); return; }
+      if (r.hanSuDung && r._hsdStatus && !r._hsdStatus.valid) { setErr(`HSD của "${r.tenSanPhamSnapshot}" không hợp lệ`); return; }
     }
     try {
       setSaving(true); setErr('');
@@ -238,6 +274,8 @@ const KiemHangModal = ({ po, onClose, onDone, nhanVienId }) => {
         idChiTiet: r.idChiTiet,
         soLuongThucNhan: Number(r.soLuongThucNhan),
         soLuongLoi: Number(r.soLuongLoi),
+        hanSuDung: r.hanSuDung || null,
+        soLo: r.soLo.trim() || null,
         urlHinhAnhMoi: r.urlHinhAnhMoi || null,
         ghiChuKho: r.ghiChuKho || null,
       })));
@@ -270,6 +308,70 @@ const KiemHangModal = ({ po, onClose, onDone, nhanVienId }) => {
                     className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </div>
               </div>
+
+              {/* ── HSD & Số lô ── */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Hạn sử dụng (HSD)
+                    {r._hsdStatus?.warning && (
+                      <span className="ml-1 text-orange-500">⚠</span>
+                    )}
+                  </label>
+                  <input
+                    type="date"
+                    value={r.hanSuDung}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={e => { update(idx, 'hanSuDung', e.target.value); update(idx, '_hsdStatus', null); }}
+                    onBlur={e => handleHsdBlur(idx, e.target.value)}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary
+                      ${r._hsdStatus && !r._hsdStatus.valid ? 'border-red-400 bg-red-50' : r._hsdStatus?.warning ? 'border-orange-400 bg-orange-50' : 'border-gray-300 dark:border-gray-600'}`}
+                  />
+                  {r._hsdStatus?.message && (
+                    <p className={`text-xs mt-1 font-medium ${r._hsdStatus.valid ? (r._hsdStatus.warning ? 'text-orange-600' : 'text-green-600') : 'text-red-500'}`}>
+                      {r._hsdStatus.message}
+                    </p>
+                  )}
+                  {r.hanSuDung && !r._hsdStatus && (
+                    <p className="text-xs mt-1 text-gray-400">Tab ra để kiểm tra HSD...</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Số lô (Batch No.)</label>
+                  <input
+                    type="text"
+                    value={r.soLo}
+                    onChange={e => update(idx, 'soLo', e.target.value)}
+                    placeholder="VD: LOT-2024-001"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              {/* Preview badge HSD + Số lô */}
+              {(r.hanSuDung || r.soLo) && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {r.soLo && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-full text-xs font-semibold">
+                      <span className="material-symbols-outlined text-xs" style={{fontSize:'13px'}}>tag</span>
+                      Lô: {r.soLo}
+                    </span>
+                  )}
+                  {r.hanSuDung && (
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border
+                      ${r._hsdStatus && !r._hsdStatus.valid ? 'bg-red-50 border-red-200 text-red-700'
+                        : r._hsdStatus?.warning ? 'bg-orange-50 border-orange-200 text-orange-700'
+                        : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+                      <span className="material-symbols-outlined" style={{fontSize:'13px'}}>event</span>
+                      HSD: {new Date(r.hanSuDung).toLocaleDateString('vi-VN')}
+                      {r._hsdStatus?.warningDays != null && (
+                        <span className="ml-1 font-normal opacity-80">({r._hsdStatus.warningDays} ngày)</span>
+                      )}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">URL ảnh thực tế (nếu SP mới)</label>
                 <input type="text" value={r.urlHinhAnhMoi} onChange={e => update(idx, 'urlHinhAnhMoi', e.target.value)} placeholder="https://..."
@@ -517,10 +619,15 @@ const TabPoChoAdminDuyet = ({ nhanVienId }) => {
                   <th className="text-center px-3 py-2">SL đặt</th>
                   <th className="text-center px-3 py-2">SL thực nhận</th>
                   <th className="text-center px-3 py-2">SL lỗi</th>
+                  <th className="text-center px-3 py-2">Số lô</th>
+                  <th className="text-center px-3 py-2">HSD</th>
                   <th className="text-left px-3 py-2">Ghi chú kho</th>
                 </tr></thead>
                 <tbody>
-                  {(detail.chiTiet || []).map(ct => (
+                  {(detail.chiTiet || []).map(ct => {
+                    const hsdStr = ct.hanSuDung ? String(ct.hanSuDung).substring(0, 10) : null;
+                    const hsdFmt = hsdStr ? (m => m ? `${m[3]}/${m[2]}/${m[1]}` : hsdStr)(hsdStr.match(/^(\d{4})-(\d{2})-(\d{2})$/)) : null;
+                    return (
                     <tr key={ct.id} className="border-t border-gray-100 dark:border-gray-700">
                       <td className="px-3 py-2">
                         <p>{ct.tenSanPhamSnapshot}</p>
@@ -529,9 +636,20 @@ const TabPoChoAdminDuyet = ({ nhanVienId }) => {
                       <td className="px-3 py-2 text-center">{ct.soLuong}</td>
                       <td className="px-3 py-2 text-center font-semibold text-green-600">{ct.soLuongThucNhan ?? '—'}</td>
                       <td className="px-3 py-2 text-center">{ct.soLuongLoi > 0 ? <span className="text-red-500 font-semibold">{ct.soLuongLoi}</span> : '—'}</td>
+                      <td className="px-3 py-2 text-center">
+                        {ct.soLo
+                          ? <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded font-mono">{ct.soLo}</span>
+                          : <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-3 py-2 text-center whitespace-nowrap">
+                        {hsdFmt
+                          ? <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded">{hsdFmt}</span>
+                          : <span className="text-gray-300">—</span>}
+                      </td>
                       <td className="px-3 py-2 text-gray-500">{ct.ghiChuKho || '—'}</td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               <div className="flex gap-3 pt-3">
@@ -612,6 +730,191 @@ const TabPoChoAdminDuyet = ({ nhanVienId }) => {
   );
 };
 
+/* ── Tab: Quản lý lô hàng ── */
+const fmtHSD = (dateStr) => {
+  if (!dateStr) return null;
+  const m = String(dateStr).substring(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : String(dateStr).substring(0, 10);
+};
+
+const HSD_STYLE = {
+  HET_HAN:    { row: 'bg-red-50/60',    badge: 'bg-red-100 text-red-700 border-red-300',       icon: '💀' },
+  SAP_HET_DO: { row: 'bg-red-50/30',    badge: 'bg-red-100 text-red-600 border-red-200',        icon: '🔴' },
+  SAP_HET_CAM:{ row: 'bg-orange-50/30', badge: 'bg-orange-100 text-orange-600 border-orange-200',icon: '🟠' },
+  CON_HAN:    { row: '',                badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: '✅' },
+  KHONG_CO:   { row: '',                badge: 'bg-gray-100 text-gray-500 border-gray-200',     icon: '—' },
+};
+
+const TabLoHang = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState(''); // '' | HET_HAN | SAP_HET_DO | SAP_HET_CAM | CON_HAN
+  const [conHangOnly, setConHangOnly] = useState(false);
+  const [expanded, setExpanded] = useState({}); // idSanPham → bool
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api.khoGetLoHang(null, conHangOnly)
+      .then(d => setData(Array.isArray(d) ? d : []))
+      .finally(() => setLoading(false));
+  }, [conHangOnly]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Group by sản phẩm
+  const grouped = useMemo(() => {
+    const map = {};
+    data.forEach(lo => {
+      const key = lo.idSanPham;
+      if (!map[key]) map[key] = { idSanPham: lo.idSanPham, tenSanPham: lo.tenSanPham, urlHinhAnh: lo.urlHinhAnh, lots: [] };
+      map[key].lots.push(lo);
+    });
+    return Object.values(map).filter(sp => {
+      if (!search) return true;
+      return sp.tenSanPham?.toLowerCase().includes(search.toLowerCase()) ||
+             sp.lots.some(l => l.soLo?.toLowerCase().includes(search.toLowerCase()));
+    }).filter(sp => {
+      if (!filterStatus) return true;
+      return sp.lots.some(l => l.hsdStatus === filterStatus);
+    });
+  }, [data, search, filterStatus]);
+
+  const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+
+  if (loading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" /></div>;
+
+  return (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Tìm sản phẩm, số lô..."
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="">Tất cả trạng thái HSD</option>
+          <option value="HET_HAN">💀 Đã hết hạn</option>
+          <option value="SAP_HET_DO">🔴 Còn &lt; 30 ngày</option>
+          <option value="SAP_HET_CAM">🟠 Còn &lt; 90 ngày</option>
+          <option value="CON_HAN">✅ Còn hạn</option>
+          <option value="KHONG_CO">— Không có HSD</option>
+        </select>
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+          <input type="checkbox" checked={conHangOnly} onChange={e => setConHangOnly(e.target.checked)}
+            className="w-4 h-4 accent-primary" />
+          Chỉ lô còn hàng
+        </label>
+        <span className="text-xs text-gray-400">{grouped.length} sản phẩm · {data.length} lô</span>
+      </div>
+
+      {grouped.length === 0 ? (
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl p-12 text-center">
+          <span className="material-symbols-outlined text-4xl text-gray-300 block mb-3">inventory</span>
+          <p className="text-gray-500">Không có lô hàng nào</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {grouped.map(sp => {
+            const isOpen = expanded[sp.idSanPham] !== false; // mặc định mở
+            const totalConLai = sp.lots.reduce((s, l) => s + (l.soLuongConLai || 0), 0);
+            const hasWarning = sp.lots.some(l => l.hsdStatus === 'HET_HAN' || l.hsdStatus === 'SAP_HET_DO');
+            const hasAlert = sp.lots.some(l => l.hsdStatus === 'SAP_HET_CAM');
+
+            return (
+              <div key={sp.idSanPham} className={`rounded-xl border overflow-hidden shadow-sm ${hasWarning ? 'border-red-200 dark:border-red-800' : hasAlert ? 'border-orange-200 dark:border-orange-800' : 'border-border-light dark:border-border-dark'}`}>
+                {/* Header sản phẩm */}
+                <button onClick={() => toggleExpand(sp.idSanPham)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${hasWarning ? 'bg-red-50 dark:bg-red-900/20' : hasAlert ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-gray-50 dark:bg-gray-700/40'}`}>
+                  {sp.urlHinhAnh && (
+                    <img src={sp.urlHinhAnh.startsWith('http') ? sp.urlHinhAnh : `http://localhost:8080${sp.urlHinhAnh}`}
+                      alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-200 shrink-0"
+                      onError={e => { e.target.style.display = 'none'; }} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 dark:text-gray-200 truncate">{sp.tenSanPham}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      #{sp.idSanPham} · <strong>{sp.lots.length}</strong> lô ·
+                      Tổng còn lại: <strong className={totalConLai === 0 ? 'text-red-500' : 'text-primary'}>{totalConLai}</strong>
+                      {hasWarning && <span className="ml-2 text-red-600 font-semibold">⚠ Có lô hết hạn</span>}
+                    </p>
+                  </div>
+                  <span className="material-symbols-outlined text-gray-400 shrink-0 transition-transform" style={{ transform: isOpen ? 'rotate(180deg)' : '' }}>
+                    expand_more
+                  </span>
+                </button>
+
+                {/* Bảng lô hàng */}
+                {isOpen && (
+                  <table className="w-full text-xs">
+                    <thead className="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+                      <tr>
+                        <th className="text-left px-4 py-2 font-semibold text-gray-500">Số lô</th>
+                        <th className="text-center px-3 py-2 font-semibold text-gray-500">HSD</th>
+                        <th className="text-center px-3 py-2 font-semibold text-gray-500">Còn lại</th>
+                        <th className="text-center px-3 py-2 font-semibold text-gray-500">Đã nhập</th>
+                        <th className="text-center px-3 py-2 font-semibold text-gray-500 hidden md:table-cell">Lỗi</th>
+                        <th className="text-left px-3 py-2 font-semibold text-gray-500 hidden md:table-cell">NCC</th>
+                        <th className="text-left px-3 py-2 font-semibold text-gray-500 hidden lg:table-cell">Mã PO</th>
+                        <th className="text-right px-4 py-2 font-semibold text-gray-500 hidden lg:table-cell">Giá nhập</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
+                      {sp.lots.filter(l => !filterStatus || l.hsdStatus === filterStatus).map(lo => {
+                        const style = HSD_STYLE[lo.hsdStatus] || HSD_STYLE.KHONG_CO;
+                        return (
+                          <tr key={lo.idChiTiet} className={`${style.row} hover:bg-gray-50/80 dark:hover:bg-gray-700/20 transition-colors`}>
+                            <td className="px-4 py-2.5">
+                              {lo.soLo
+                                ? <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded font-mono">{lo.soLo}</span>
+                                : <span className="text-gray-300 italic">Không có</span>}
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              {lo.hanSuDung ? (
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <span className={`px-2 py-0.5 rounded border text-xs font-semibold ${style.badge}`}>
+                                    {style.icon} {fmtHSD(lo.hanSuDung)}
+                                  </span>
+                                  {lo.daysRemaining !== null && (
+                                    <span className="text-gray-400 text-xs">
+                                      {lo.daysRemaining < 0 ? `quá ${Math.abs(lo.daysRemaining)} ngày` : `còn ${lo.daysRemaining} ngày`}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : <span className="text-gray-300">—</span>}
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              <span className={`font-bold text-sm ${lo.soLuongConLai === 0 ? 'text-red-400' : 'text-primary'}`}>
+                                {lo.soLuongConLai}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-center text-gray-600">{lo.soLuongNhap}</td>
+                            <td className="px-3 py-2.5 text-center hidden md:table-cell">
+                              {lo.soLuongLoi > 0
+                                ? <span className="px-1.5 py-0.5 bg-red-100 text-red-600 rounded font-semibold">{lo.soLuongLoi}</span>
+                                : <span className="text-gray-300">—</span>}
+                            </td>
+                            <td className="px-3 py-2.5 text-gray-600 hidden md:table-cell">{lo.nhaCungCap || '—'}</td>
+                            <td className="px-3 py-2.5 font-mono text-primary hidden lg:table-cell">{lo.maPO}</td>
+                            <td className="px-4 py-2.5 text-right text-gray-600 hidden lg:table-cell">{fmt(lo.giaNhap)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ── Trang chính ── */
 const AdminKhoPage = () => {
   const { user } = useAuth();
@@ -621,6 +924,7 @@ const AdminKhoPage = () => {
   const tabs = [
     { id: 'po-kiem-tra',    label: 'PO chờ kiểm tra',    icon: 'inventory_2',   badge: true },
     { id: 'po-admin-duyet', label: 'Chờ admin duyệt',    icon: 'fact_check',    badge: true },
+    { id: 'lo-hang',        label: 'Quản lý lô hàng',    icon: 'layers'        },
     { id: 'bien-dong',      label: 'Biến động kho',       icon: 'history'       },
     // { id: 'ban-cham',       label: 'Bán chậm',            icon: 'trending_down' },
     { id: 'phieu-nhap',     label: 'Lịch sử nhập kho',   icon: 'receipt'       },
@@ -633,11 +937,11 @@ const AdminKhoPage = () => {
           <h1 className="font-semibold text-lg md:text-2xl text-text-light dark:text-text-dark">Quản lý Kho</h1>
           <p className="text-sm text-gray-500 mt-0.5">Kiểm tra hàng nhập · Duyệt PO · Lịch sử biến động</p>
         </div>
-        <a href="/admin/import-kho"
+        {/* <a href="/admin/import-kho"
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors">
           <span className="material-symbols-outlined text-base">upload_file</span>
           Nhập kho CSV/Excel
-        </a>
+        </a> */}
       </div>
 
       {/* Tab bar */}
@@ -657,6 +961,7 @@ const AdminKhoPage = () => {
 
       {tab === 'po-kiem-tra'    && <TabPoChoKiemTra nhanVienId={nhanVienId} />}
       {tab === 'po-admin-duyet' && <TabPoChoAdminDuyet nhanVienId={nhanVienId} />}
+      {tab === 'lo-hang'        && <TabLoHang />}
       {tab === 'bien-dong'      && <TabBienDong />}
       {tab === 'ban-cham'       && <TabBanCham />}
       {tab === 'phieu-nhap'     && <TabPhieuNhap />}

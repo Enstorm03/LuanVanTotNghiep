@@ -42,6 +42,7 @@ import AdminDefectivePage from './pages/admin/AdminDefectivePage';
 import AdminCampaignsPage from './pages/admin/AdminCampaignsPage';
 import AdminKhoPage from './pages/admin/AdminKhoPage';
 import AdminImportKhoPage from './pages/admin/AdminImportKhoPage';
+import AdminNearExpiryProductsPage from './pages/admin/AdminNearExpiryProductsPage';
 import AdminProcurementPage from './pages/admin/AdminProcurementPage';
 import AdminProcurementDetailPage from './pages/admin/AdminProcurementDetailPage';
 import AdminSuppliersPage from './pages/admin/AdminSuppliersPage';
@@ -144,9 +145,10 @@ function App() {
           <Route path="reviews" element={<AdminReviewsPage />} />
           <Route path="defective" element={<AdminDefectivePage />} />
           <Route path="campaigns" element={<AdminCampaignsPage />} />
-          <Route path="kho" element={<AdminKhoPage />} />
-          <Route path="import-kho" element={<AdminImportKhoPage />} />
-          <Route path="procurement" element={<AdminProcurementPage />} />
+           <Route path="kho" element={<AdminKhoPage />} />
+           <Route path="import-kho" element={<AdminImportKhoPage />} />
+           <Route path="near-expiry" element={<AdminNearExpiryProductsPage />} />
+           <Route path="procurement" element={<AdminProcurementPage />} />
           <Route path="procurement/:id" element={<AdminProcurementDetailPage />} />
           <Route path="suppliers" element={<AdminSuppliersPage />} />
         </Route>

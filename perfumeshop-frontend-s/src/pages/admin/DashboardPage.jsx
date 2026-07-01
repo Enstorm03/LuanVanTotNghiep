@@ -6,6 +6,7 @@ import QuickActions from './dashboard/components/QuickActions';
 import RecentOrders from './dashboard/components/RecentOrders';
 import OrderStatusOverview from './dashboard/components/OrderStatusOverview';
 import ProductInsights from './dashboard/components/ProductInsights';
+import NearExpiryWidget from './dashboard/components/NearExpiryWidget';
 
 const DashboardPage = () => {
   const { stats, recentOrders, loading, error, fetchDashboardData } = useDashboard();
@@ -44,6 +45,8 @@ const DashboardPage = () => {
       <QuickActions />
 
       <ProductInsights />
+
+      <NearExpiryWidget />
 
       <RecentOrders recentOrders={recentOrders} />
 
