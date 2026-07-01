@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -28,5 +29,8 @@ public class PlaceOrderRequest {
     @NotEmpty
     private List<PlaceOrderItemRequest> items;
     private Boolean allowBackorder;
+
+    private Integer idSuKien; // Campaign ID
+    private BigDecimal giamGiaHangLoat; // Discount amount
 
 }

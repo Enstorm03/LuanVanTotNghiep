@@ -16,27 +16,29 @@ const CampaignFormModal = ({ campaign, onClose, onSave, saving }) => {
   const isEdit = !!campaign?.idSuKien;
   const toInput = (dt) => dt ? dt.slice(0, 16) : '';
 
-  const [form, setForm] = useState({
-    tenSuKien:      campaign?.tenSuKien      || '',
-    bannerUrl:      campaign?.bannerUrl      || '',
-    ngayBatDau:     toInput(campaign?.ngayBatDau),
-    ngayKetThuc:    toInput(campaign?.ngayKetThuc),
-    trangThaiActive: campaign?.trangThaiActive !== false,
-  });
+   const [form, setForm] = useState({
+     tenSuKien:      campaign?.tenSuKien      || '',
+     bannerUrl:      campaign?.bannerUrl      || '',
+     ngayBatDau:     toInput(campaign?.ngayBatDau),
+     ngayKetThuc:    toInput(campaign?.ngayKetThuc),
+     giamGiaHangLoat: campaign?.giamGiaHangLoat || 0,
+     trangThaiActive: campaign?.trangThaiActive !== false,
+   });
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.tenSuKien.trim()) return;
-    onSave({
-      tenSuKien:       form.tenSuKien.trim(),
-      bannerUrl:       form.bannerUrl.trim() || null,
-      ngayBatDau:      form.ngayBatDau  || null,
-      ngayKetThuc:     form.ngayKetThuc || null,
-      trangThaiActive: form.trangThaiActive,
-    });
-  };
+   const handleSubmit = (e) => {
+     e.preventDefault();
+     if (!form.tenSuKien.trim()) return;
+     onSave({
+       tenSuKien:       form.tenSuKien.trim(),
+       bannerUrl:       form.bannerUrl.trim() || null,
+       ngayBatDau:      form.ngayBatDau  || null,
+       ngayKetThuc:     form.ngayKetThuc || null,
+       giamGiaHangLoat: parseFloat(form.giamGiaHangLoat) || 0,
+       trangThaiActive: form.trangThaiActive,
+     });
+   };
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
@@ -60,18 +62,24 @@ const CampaignFormModal = ({ campaign, onClose, onSave, saving }) => {
               placeholder="https://... hoặc để trống dùng banner mặc định"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">Ngày bắt đầu</label>
-              <input type="datetime-local" value={form.ngayBatDau} onChange={e => set('ngayBatDau', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Ngày kết thúc</label>
-              <input type="datetime-local" value={form.ngayKetThuc} onChange={e => set('ngayKetThuc', e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
-            </div>
-          </div>
+           <div className="grid grid-cols-2 gap-3">
+             <div>
+               <label className="block text-sm font-medium mb-1">Ngày bắt đầu</label>
+               <input type="datetime-local" value={form.ngayBatDau} onChange={e => set('ngayBatDau', e.target.value)}
+                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
+             </div>
+             <div>
+               <label className="block text-sm font-medium mb-1">Ngày kết thúc</label>
+               <input type="datetime-local" value={form.ngayKetThuc} onChange={e => set('ngayKetThuc', e.target.value)}
+                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
+             </div>
+           </div>
+           <div>
+             <label className="block text-sm font-medium mb-1">Giảm giá hàng loạt (%) <span className="text-gray-400 text-xs">- áp dụng cho tất cả sản phẩm</span></label>
+             <input type="number" min="0" max="100" step="0.01" value={form.giamGiaHangLoat} onChange={e => set('giamGiaHangLoat', e.target.value)}
+               placeholder="VD: 15 (15%)"
+               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
+           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.trangThaiActive} onChange={e => set('trangThaiActive', e.target.checked)}
               className="w-4 h-4 rounded accent-primary" />
@@ -288,6 +296,7 @@ const AdminCampaignsPage = () => {
                   <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Tên chiến dịch</th>
                   <th className="text-left px-4 py-3 font-semibold text-gray-600 dark:text-gray-300 hidden md:table-cell">Thời gian</th>
                   <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">SP</th>
+                  <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Giảm giá</th>
                   <th className="text-center px-4 py-3 font-semibold text-gray-600 dark:text-gray-300">Trạng thái</th>
                   <th className="px-4 py-3 text-center font-semibold text-gray-600 dark:text-gray-300">Thao tác</th>
                 </tr>
@@ -307,6 +316,15 @@ const AdminCampaignsPage = () => {
                       <span className="inline-flex items-center justify-center px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
                         {c.soLuongSanPham || 0}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {c.giamGiaHangLoat && c.giamGiaHangLoat > 0 ? (
+                        <span className="inline-flex items-center justify-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
+                          -{c.giamGiaHangLoat}%
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${STATUS_STYLE[c.trangThai] || 'bg-gray-100 text-gray-500'}`}>

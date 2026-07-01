@@ -1,6 +1,6 @@
 import React from 'react';
 
-const OrderProductItem = ({ item, productDetails, brandDetails }) => {
+const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent = 0 }) => {
   // Extract product info based on data structure
   let productInfo = {};
   let quantity = 0;
@@ -57,9 +57,7 @@ const OrderProductItem = ({ item, productDetails, brandDetails }) => {
         />
         <div className="flex-1">
           
-          <h1 className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
-            ten sp : 
-          </h1>
+          
           <h4 className="font-semibold text-text-light dark:text-text-dark">
             {productInfo.tenSanPham || 'Sản phẩm không xác định'}
           </h4>
@@ -83,13 +81,28 @@ const OrderProductItem = ({ item, productDetails, brandDetails }) => {
           </p>
       </div>
       <div className="text-right">
-        <p className="font-bold text-primary text-lg">
-          {((price || 0) * (quantity || 0)).toLocaleString('vi-VN')}₫
-        </p>
-        <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
-          Đơn giá: {(price || 0).toLocaleString('vi-VN')}₫
-        </p>
-         
+        {discountPercent > 0 ? (
+          <>
+            <p className="font-bold text-primary text-lg">
+              {(((price || 0) * (quantity || 0)) * (1 - discountPercent / 100)).toLocaleString('vi-VN')}₫
+            </p>
+            <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark line-through">
+              {((price || 0) * (quantity || 0)).toLocaleString('vi-VN')}₫
+            </p>
+            <p className="text-sm text-orange-600 font-semibold">
+              Giảm: -{discountPercent}%
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="font-bold text-primary text-lg">
+              {((price || 0) * (quantity || 0)).toLocaleString('vi-VN')}₫
+            </p>
+            <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark">
+              Đơn giá: {(price || 0).toLocaleString('vi-VN')}₫
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

@@ -56,6 +56,7 @@ public class SuKienService {
         existing.setBannerUrl(input.getBannerUrl());
         existing.setNgayBatDau(input.getNgayBatDau());
         existing.setNgayKetThuc(input.getNgayKetThuc());
+        existing.setGiamGiaHangLoat(input.getGiamGiaHangLoat() != null ? input.getGiamGiaHangLoat() : 0.0);
         existing.setTrangThaiActive(input.getTrangThaiActive() != null ? input.getTrangThaiActive() : true);
         return suKienRepository.save(existing);
     }

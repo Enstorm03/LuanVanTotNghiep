@@ -28,6 +28,9 @@ public class CheckoutService {
     @Autowired
     private DonHangRepository donHangRepository;
 
+    @Autowired
+    private FEFOService fefoService;
+
     // Đặt hàng: tạo đơn và lưu vào DB — KHÔNG trừ kho tại bước này.
     // Kho sẽ được trừ khi admin bấm "Xác nhận đơn hàng", áp dụng cho cả COD lẫn online (PayOS).
     @Transactional
@@ -44,6 +47,8 @@ public class CheckoutService {
         dh.setPhuongThucThanhToan(req.getPhuongThucThanhToan());
         dh.setGhiChu(req.getGhiChu());
         dh.setNgayDatHang(LocalDateTime.now());
+        dh.setIdSuKien(req.getIdSuKien());
+        dh.setGiamGiaHangLoat(req.getGiamGiaHangLoat());
 
         // Xác định trạng thái thanh toán dựa trên phương thức
         if ("COD".equalsIgnoreCase(req.getPhuongThucThanhToan())) {
@@ -71,12 +76,30 @@ public class CheckoutService {
             ct.setSoLuong(it.getSoLuong());
             // Dùng giá hiện tại (đã áp dụng giảm giá nếu đang sale)
             ct.setGiaTaiThoiDiemMua(sp.getGiaHienTai());
+            
+            // FEFO: Allocate from earliest expiring batch
+            try {
+                fefoService.allocateOrderItemFromBatch(ct, it.getSanPhamId(), it.getSoLuong());
+            } catch (BusinessException e) {
+                // If FEFO allocation fails, log but don't block order creation
+                // Batch allocation can fail if no suitable batches exist yet
+                System.out.println("⚠ FEFO allocation warning: " + e.getMessage());
+            }
+            
             ctList.add(ct);
 
             tong = tong.add(ct.getGiaTaiThoiDiemMua().multiply(BigDecimal.valueOf(it.getSoLuong())));
         }
 
-        dh.setTongTien(tong);
+        // Tính tổng tiền sau giảm giá (nếu có)
+        BigDecimal tongTienSauGiam = tong;
+        BigDecimal giamGiaPercent = req.getGiamGiaHangLoat();
+        if (giamGiaPercent != null && giamGiaPercent.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal discountAmount = tong.multiply(giamGiaPercent).divide(new BigDecimal(100), 2, java.math.RoundingMode.HALF_UP);
+            tongTienSauGiam = tong.subtract(discountAmount);
+        }
+        
+        dh.setTongTien(tongTienSauGiam);
         dh.setChiTietDonHangs(ctList);
 
         // Tự động tạo mã vận đơn

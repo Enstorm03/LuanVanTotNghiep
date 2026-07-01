@@ -9,19 +9,45 @@ const useSubmitOrder = () => {
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
 
-  const submitOrder = async (checkoutData, shippingInfo, paymentMethod) => {
+  const submitOrder = async (checkoutData, shippingInfo, paymentMethod, campaign) => {
     if (!validateShippingForm(shippingInfo)) return;
+    
+    // Validate user đã đăng nhập
+    if (!user || !user.id_nguoi_dung) {
+      alert('Vui lòng đăng nhập để đặt hàng');
+      return;
+    }
 
     try {
       setProcessing(true);
 
+      // Chuyển đổi items thành định dạng API mong đợi
+      // checkoutData come from cart.chiTiet which uses camelCase: sanPhamId, soLuong
+      const items = (Array.isArray(checkoutData) ? checkoutData : []).map(item => ({
+        sanPhamId: item.sanPhamId || item.id_san_pham,
+        soLuong: item.soLuong || item.so_luong
+      }));
+      
+      console.log('Debug - checkoutData:', checkoutData);
+      console.log('Debug - items after mapping:', items);
+      
+      // Validate items không rỗng
+      if (!items || items.length === 0) {
+        alert('Giỏ hàng rỗng, vui lòng thêm sản phẩm');
+        setProcessing(false);
+        return;
+      }
+
       const orderData = {
-        userId: user?.id_nguoi_dung,
+        idNguoiDung: user.id_nguoi_dung,
         tenNguoiNhan: shippingInfo.tenNguoiNhan.trim(),
         diaChiGiaoHang: shippingInfo.diaChiGiaoHang.trim(),
         soDienThoai: shippingInfo.soDienThoai.trim(),
         ghiChu: shippingInfo.ghiChu.trim(),
         phuongThucThanhToan: paymentMethod,
+        items: items,
+        idSuKien: campaign?.idSuKien || null,
+        giamGiaHangLoat: campaign?.giamGiaHangLoat || 0,
       };
 
       // Bước 1: Tạo đơn hàng

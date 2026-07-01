@@ -39,6 +39,7 @@ public class CampaignController {
         res.put("bannerUrl", sk.getBannerUrl());
         res.put("ngayBatDau", sk.getNgayBatDau());
         res.put("ngayKetThuc", sk.getNgayKetThuc());
+        res.put("giamGiaHangLoat", sk.getGiamGiaHangLoat());
         res.put("danhSachSanPham", sk.getDanhSachSanPham());
         return ResponseEntity.ok(res);
     }
@@ -55,6 +56,7 @@ public class CampaignController {
             m.put("bannerUrl",      sk.getBannerUrl());
             m.put("ngayBatDau",     sk.getNgayBatDau());
             m.put("ngayKetThuc",    sk.getNgayKetThuc());
+            m.put("giamGiaHangLoat",sk.getGiamGiaHangLoat());
             m.put("trangThaiActive",sk.getTrangThaiActive());
             m.put("trangThai",      suKienService.computeStatus(sk));
             m.put("soLuongSanPham", sk.getDanhSachSanPham() != null ? sk.getDanhSachSanPham().size() : 0);

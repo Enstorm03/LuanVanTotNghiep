@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import useChiTietSanPham from '../../hooks/useChiTietSanPham';
+import api from '../../services/api';
 import Breadcrumbs from './product-detail/components/Breadcrumbs';
 import ProductImage from './product-detail/components/ProductImage';
 import ProductInfo from './product-detail/components/ProductInfo';
@@ -13,6 +14,7 @@ import { formatPrice } from '../../utils/productUtils';
 
 const ChiTietSanPham = () => {
   const { id } = useParams();
+  const [campaign, setCampaign] = useState(null);
 
   const {
     product,
@@ -28,6 +30,23 @@ const ChiTietSanPham = () => {
     getStockStatus,
     getBrandName
   } = useChiTietSanPham(id);
+
+  // Fetch active campaign for campaign-wide discount
+  useEffect(() => {
+    const loadCampaign = async () => {
+      try {
+        const campaignData = await api.getActiveCampaign();
+        console.log('Campaign data loaded:', campaignData);
+        if (campaignData && campaignData.active) {
+          console.log('Campaign product list:', campaignData.danhSachSanPham);
+          setCampaign(campaignData);
+        }
+      } catch (err) {
+        console.log('No active campaign');
+      }
+    };
+    loadCampaign();
+  }, []);
 
   if (loading) {
     return (
@@ -70,31 +89,60 @@ const ChiTietSanPham = () => {
           <div className="flex flex-col gap-6 py-4">
             <ProductInfo product={product} brandName={brandName} />
 
-            {/* Hiển thị giá — có hoặc không có sale */}
-            {product.ang_giam_gia ? (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3">
-                  <p className="text-3xl font-bold text-primary">
-                    {Number(product.gia_hien_tai).toLocaleString('vi-VN')}₫
-                  </p>
-                  <span className="bg-red-500 text-white text-sm font-bold px-2 py-1 rounded-full">
-                    -{product.phan_tram_giam}%
-                  </span>
-                </div>
-                <p className="text-gray-400 text-base line-through">
-                  {Number(product.gia_ban).toLocaleString('vi-VN')}₫
-                </p>
-                {product.ngay_ket_thuc_giam && (
-                  <p className="text-orange-500 text-sm">
-                    Ưu đãi đến: {new Date(product.ngay_ket_thuc_giam).toLocaleDateString('vi-VN')}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-3xl font-bold text-primary">
-                {formatPrice(product.gia_ban)}
-              </p>
-            )}
+             {/* Hiển thị giá — có hoặc không có sale */}
+             {product.ang_giam_gia ? (
+               <div className="flex flex-col gap-1">
+                 <div className="flex items-center gap-3">
+                   <p className="text-3xl font-bold text-primary">
+                     {Number(product.gia_hien_tai).toLocaleString('vi-VN')}₫
+                   </p>
+                   <span className="bg-red-500 text-white text-sm font-bold px-2 py-1 rounded-full">
+                     -{product.phan_tram_giam}%
+                   </span>
+                 </div>
+                 <p className="text-gray-400 text-base line-through">
+                   {Number(product.gia_ban).toLocaleString('vi-VN')}₫
+                 </p>
+                 {product.ngay_ket_thuc_giam && (
+                   <p className="text-orange-500 text-sm">
+                     Ưu đãi đến: {new Date(product.ngay_ket_thuc_giam).toLocaleDateString('vi-VN')}
+                   </p>
+                 )}
+               </div>
+             ) : (
+               <p className="text-3xl font-bold text-primary">
+                 {formatPrice(product.gia_ban)}
+               </p>
+             )}
+
+             {/* Campaign-wide discount banner — only show if product is in campaign */}
+             {campaign && campaign.giamGiaHangLoat > 0 && (
+               (() => {
+                 const productId = parseInt(id);
+                 console.log('Campaign:', campaign);
+                 console.log('Product list:', campaign.danhSachSanPham);
+                 const isInCampaign = campaign.danhSachSanPham && 
+                   Array.isArray(campaign.danhSachSanPham) &&
+                   campaign.danhSachSanPham.some(p => {
+                     console.log('Checking product ID:', p.idSanPham, 'vs current:', productId, 'Match:', p.idSanPham === productId);
+                     return p.idSanPham === productId;
+                   });
+                 console.log('Is product in campaign?', isInCampaign);
+                 return isInCampaign;
+               })()
+             ) && (
+               <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-lg">
+                 <div className="flex items-center justify-between">
+                   <div>
+                     <p className="text-sm font-medium">Khuyến mãi từ chiến dịch</p>
+                     <p className="text-lg font-bold">{campaign.tenSuKien}</p>
+                   </div>
+                   <div className="text-right">
+                     <p className="text-2xl font-bold">-{campaign.giamGiaHangLoat}%</p>
+                   </div>
+                 </div>
+               </div>
+             )}
 
             {/* Quantity Selector */}
             {!isOutOfStock && (
@@ -133,7 +181,7 @@ const ChiTietSanPham = () => {
         </div>
 
         {/* Related Products */}
-        <RelatedProducts relatedProducts={relatedProducts} />
+        <RelatedProducts relatedProducts={relatedProducts} campaign={campaign} />
       </div>
     </main>
   );

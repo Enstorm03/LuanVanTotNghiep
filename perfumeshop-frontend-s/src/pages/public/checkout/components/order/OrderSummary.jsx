@@ -4,11 +4,15 @@ import { calculateCartTotal, formatCurrency } from '../../../../../utils/checkou
 
 const OrderSummary = ({
   items,
+  campaign,
   paymentMethod,
   processing,
   onSubmitOrder,
 }) => {
   const totalAmount = calculateCartTotal({ chiTiet: items });
+  const discountPercent = campaign?.giamGiaHangLoat || 0;
+  const discountAmount = totalAmount * (discountPercent / 100);
+  const finalTotal = totalAmount - discountAmount;
 
   return (
     <div className="bg-white dark:bg-content-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -18,6 +22,12 @@ const OrderSummary = ({
           <span>Tạm tính ({items.length} sản phẩm):</span>
           <span className="font-medium">{formatCurrency(totalAmount)}</span>
         </div>
+        {discountPercent > 0 && (
+          <div className="flex justify-between text-green-600 dark:text-green-400">
+            <span>Giảm giá ({discountPercent}%):</span>
+            <span className="font-medium">-{formatCurrency(discountAmount)}</span>
+          </div>
+        )}
         <div className="flex justify-between">
           <span>Phí vận chuyển:</span>
           <span className="font-medium text-green-600">Miễn phí</span>
@@ -25,7 +35,7 @@ const OrderSummary = ({
         <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
           <div className="flex justify-between text-xl font-bold">
             <span>Tổng cộng:</span>
-            <span className="text-primary">{formatCurrency(totalAmount)}</span>
+            <span className="text-primary">{formatCurrency(finalTotal)}</span>
           </div>
         </div>
       </div>

@@ -63,7 +63,13 @@ public class DonHang {
     @Column(name = "ngay_hoan_thanh")
     private LocalDateTime ngayHoanThanh;
 
-    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Column(name = "id_su_kien")
+    private Integer idSuKien; // Campaign/Event ID
+
+    @Column(name = "giam_gia_hang_loat", precision = 15, scale = 2)
+    private BigDecimal giamGiaHangLoat; // Bulk discount amount
+
+    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ChiTietDonHang> chiTietDonHangs;
 }

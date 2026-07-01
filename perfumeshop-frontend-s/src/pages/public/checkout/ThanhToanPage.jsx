@@ -12,6 +12,7 @@ import OrderSummary from './components/order/OrderSummary';
 const ThanhToanPage = () => {
   const {
     cart,
+    campaign,
     loading,
     error,
     user,
@@ -25,7 +26,7 @@ const ThanhToanPage = () => {
   const { submitOrder, processing } = useSubmitOrder();
 
   const handleSubmitOrder = () => {
-    submitOrder({ cart }, shippingInfo, paymentMethod);
+    submitOrder(items, shippingInfo, paymentMethod, campaign);
   };
 
   if (!user) {
@@ -107,6 +108,7 @@ const ThanhToanPage = () => {
 
             <OrderSummary
               items={items}
+              campaign={campaign}
               paymentMethod={paymentMethod}
               processing={processing}
               onSubmitOrder={handleSubmitOrder}

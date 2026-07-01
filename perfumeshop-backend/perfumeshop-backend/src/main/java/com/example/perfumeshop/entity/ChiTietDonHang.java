@@ -36,6 +36,9 @@ public class ChiTietDonHang {
     @Column(name = "gia_tai_thoi_diem_mua", precision = 15, scale = 2, nullable = false)
     private BigDecimal giaTaiThoiDiemMua;
 
+    @Column(name = "id_phieu", nullable = true)
+    private Integer idPhieuNhap; // Traceability: link to import batch
+
     @Transient
     @JsonProperty("tenSanPham")
     public String getTenSanPhamSnapshot() {

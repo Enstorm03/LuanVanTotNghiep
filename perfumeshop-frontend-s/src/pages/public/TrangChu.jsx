@@ -105,12 +105,19 @@ const HomePage = () => {
               })`
             }}
           >
-            {/* Badge sự kiện */}
-            {campaign && (
-              <span className="z-10 inline-flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full shadow animate-pulse">
-                 {campaign.tenSuKien}
-              </span>
-            )}
+             {/* Badge sự kiện */}
+             {campaign && (
+               <div className="z-10 flex flex-col gap-2 items-center">
+                 <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-yellow-400 text-yellow-900 text-sm font-bold rounded-full shadow animate-pulse">
+                    {campaign.tenSuKien}
+                 </span>
+                 {campaign.giamGiaHangLoat > 0 && (
+                   <span className="inline-flex items-center gap-1.5 px-6 py-2 bg-red-500 text-white text-lg font-black rounded-full shadow-lg animate-bounce">
+                      GIẢM GIÁ {campaign.giamGiaHangLoat}%
+                   </span>
+                 )}
+               </div>
+             )}
             <div className="flex flex-col gap-4 max-w-3xl z-10">
               <h1 className="text-white text-4xl font-black tracking-tight md:text-6xl">
                 {campaign ? campaign.tenSuKien : 'Bộ Sưu Tập Enstorm 2026'}

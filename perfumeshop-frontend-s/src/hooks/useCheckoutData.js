@@ -8,6 +8,7 @@ const useCheckoutData = () => {
   const navigate = useNavigate();
 
   const [cart, setCart] = useState(null);
+  const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -23,6 +24,18 @@ const useCheckoutData = () => {
 
         if (cartData && cartData.chiTiet && cartData.chiTiet.length > 0) {
           setCart(cartData);
+        }
+
+        // Fetch active campaign for discount
+        try {
+          const campaignData = await api.getActiveCampaign();
+          console.log('Campaign data fetched:', campaignData);
+          if (campaignData && campaignData.active) {
+            setCampaign(campaignData);
+            console.log('Campaign set:', campaignData);
+          }
+        } catch (campaignErr) {
+          console.log('Không có chiến dịch nào đang chạy:', campaignErr);
         }
       } catch (err) {
         console.error('Lỗi tải dữ liệu thanh toán:', err);
@@ -60,6 +73,7 @@ const useCheckoutData = () => {
 
   return {
     cart,
+    campaign,
     loading,
     error,
     user,

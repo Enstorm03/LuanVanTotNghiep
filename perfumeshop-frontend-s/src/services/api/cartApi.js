@@ -92,18 +92,16 @@ class CartApi extends BaseApi {
   // Thanh toán giỏ hàng
   async checkoutCart(request) {
     try {
-      const cartData = await this.getCart(request.userId);
-      if (!cartData?.chiTiet?.length) throw new Error('Giỏ hàng trống');
-
       const orderData = {
-        idNguoiDung: request.userId,
+        idNguoiDung: request.idNguoiDung,
         tenNguoiNhan: request.tenNguoiNhan,
         diaChiGiaoHang: request.diaChiGiaoHang,
         soDienThoai: request.soDienThoai || '',
         ghiChu: request.ghiChu || '',
         phuongThucThanhToan: request.phuongThucThanhToan || 'cod',
-        items: cartData.chiTiet.map(({ sanPhamId, soLuong, giaTaiThoiDiemMua }) =>
-          ({ sanPhamId, soLuong, giaTaiThoiDiemMua }))
+        items: request.items || [],
+        idSuKien: request.idSuKien || null,
+        giamGiaHangLoat: request.giamGiaHangLoat || 0,
       };
 
       return await this._fetch(`${API_BASE_URL}/dat-hang`, {

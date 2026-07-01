@@ -52,4 +52,18 @@ public class ChiTietPhieuNhap {
     /** Ghi chú riêng từ phía kho */
     @Column(name = "ghi_chu_kho", length = 1000)
     private String ghiChuKho;
+
+    // ── FEFO & Traceability fields ──────────────────────────────────────
+
+    /** Số lượng còn lại trong lô (FEFO: First Expired, First Out) */
+    @Column(name = "so_luong_con_lai", columnDefinition = "INT DEFAULT 0")
+    private Integer soLuongConLai = 0;
+
+    /** Ngày hết hạn của lô hàng */
+    @Column(name = "han_su_dung")
+    private java.time.LocalDate hanSuDung;
+
+    /** ID của phiếu nhập kho (FEFO batch reference) */
+    @Column(name = "id_phieu_nhap")
+    private Integer idPhieuNhap;
 }

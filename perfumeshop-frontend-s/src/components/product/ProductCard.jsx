@@ -30,6 +30,7 @@ const ProductCard = ({
   id_thuong_hieu,
   phan_tram_giam,
   ang_giam_gia,
+  campaign,
 }) => {
   const [brandName, setBrandName] = useState('');
 
@@ -40,9 +41,14 @@ const ProductCard = ({
     });
   }, [id_thuong_hieu]);
 
+  // Kiểm tra sản phẩm có trong campaign không
+  const isInCampaign = campaign?.danhSachSanPham?.some(p => p.idSanPham === id_san_pham);
+  const campaignDiscount = isInCampaign ? campaign?.giamGiaHangLoat : 0;
+  
   // Giá hiển thị: nếu đang sale thì dùng gia_hien_tai, không thì dùng gia_ban
   const displayPrice = ang_giam_gia && gia_hien_tai ? gia_hien_tai : gia_ban;
   const isOnSale = ang_giam_gia && phan_tram_giam > 0;
+  const hasCampaignDiscount = campaignDiscount > 0;
 
   return (
     <Link to={`/product/${id_san_pham}`} className="flex flex-col gap-4 group">
@@ -53,11 +59,16 @@ const ProductCard = ({
           src={url_hinh_anh}
           alt={ten_san_pham}
         />
-        {isOnSale && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-            -{phan_tram_giam}%
-          </span>
-        )}
+         {isOnSale && (
+           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+             -{phan_tram_giam}%
+           </span>
+         )}
+         {hasCampaignDiscount && !isOnSale && (
+           <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+             -{campaignDiscount}%
+           </span>
+         )}
       </div>
 
       {/* Thông tin sản phẩm */}

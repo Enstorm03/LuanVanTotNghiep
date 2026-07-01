@@ -10,9 +10,12 @@ import ProductGrid from './category/components/ProductGrid';
 import ProductGridSkeleton from './category/components/ProductGridSkeleton';
 import EmptyProductState from './category/components/EmptyProductState';
 import { getCategoryTitle } from '../../utils/categoryHelpers';
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
 
 const CategoryPage = () => {
   const [searchParams] = useSearchParams();
+  const [campaign, setCampaign] = useState(null);
   const categoryId = searchParams.get('category');
   const brandId = searchParams.get('brand');
   const searchQuery = searchParams.get('search');
@@ -35,6 +38,21 @@ const CategoryPage = () => {
   } = useCategoryProducts(categoryId, brandId, searchQuery);
 
   const categoryTitle = getCategoryTitle(categoryId, brandId, searchQuery, categories, brands);
+
+  // Lấy campaign active
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      try {
+        const campaignData = await api.getActiveCampaign();
+        if (campaignData?.active) {
+          setCampaign(campaignData);
+        }
+      } catch (err) {
+        console.log('No active campaign');
+      }
+    };
+    fetchCampaign();
+  }, []);
 
   return (
     <main className="container mx-auto px-4 py-8 min-h-screen bg-background-light dark:bg-background-dark">
@@ -83,7 +101,7 @@ const CategoryPage = () => {
             products.length === 0 ? (
               <EmptyProductState />
             ) : (
-              <ProductGrid products={products} />
+              <ProductGrid products={products} campaign={campaign} />
             )
           )}
 

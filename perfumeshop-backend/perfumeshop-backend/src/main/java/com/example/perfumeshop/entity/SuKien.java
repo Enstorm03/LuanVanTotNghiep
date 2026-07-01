@@ -34,6 +34,10 @@ public class SuKien {
     @Column(name = "trang_thai_active", nullable = false)
     private Boolean trangThaiActive = true;
 
+    /** Giảm giá hàng loạt cho tất cả sản phẩm trong chiến dịch (%) */
+    @Column(name = "giam_gia_hang_loat", columnDefinition = "DECIMAL(5, 2) DEFAULT 0")
+    private Double giamGiaHangLoat = 0.0;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "su_kien_san_pham",

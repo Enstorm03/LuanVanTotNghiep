@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import useCart from '../../hooks/useCart';
 import { isCartEmpty } from '../../utils/cartUtils';
+import api from '../../services/api';
 import CartHeader from './cart/components/CartHeader';
 import EmptyCart from './cart/components/EmptyCart';
 import CartItemList from './cart/components/cart-items/CartItemList';
@@ -20,6 +21,24 @@ const GioHangPage = () => {
     clearCart,
     fetchCart
   } = useCart();
+  
+  const [campaign, setCampaign] = useState(null);
+
+  useEffect(() => {
+    const loadCampaign = async () => {
+      try {
+        const campaignData = await api.getActiveCampaign();
+        if (campaignData && campaignData.active) {
+          setCampaign(campaignData);
+          console.log('Chiến dịch trang giỏ hàng:', campaignData);
+        }
+      } catch (err) {
+        console.log('Không có chiến dịch nào đang chạy:', err);
+      }
+    };
+    
+    loadCampaign();
+  }, []);
 
   if (!user) {
     return (
@@ -77,7 +96,7 @@ const GioHangPage = () => {
               onUpdateQuantity={updateItemQuantity}
               onRemoveItem={removeItem}
             />
-            <CartSummary cart={cart} />
+            <CartSummary cart={cart} campaign={campaign} />
           </div>
         )}
       </div>

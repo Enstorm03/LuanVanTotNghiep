@@ -32,17 +32,30 @@ const OrderInfoCard = ({ order }) => {
           <span>Thanh toán:</span>
           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
             order.trangThaiThanhToan === 'Đã thanh toán'   ? 'bg-green-100 text-green-800'  :
-            
+            order.trangThaiThanhToan === 'Đã hủy'          ? 'bg-red-100 text-red-800' :
             order.trangThaiThanhToan === 'Chờ thanh toán'  ? 'bg-yellow-100 text-yellow-800' :
                                                              'bg-gray-100 text-gray-800'
           }`}>
             {order.trangThaiThanhToan || 'N/A'}
           </span>
         </div>
-        <p className="flex justify-between text-base font-bold mt-4 pt-4 border-t border-border-light dark:border-border-dark">
-          <span>Tổng tiền:</span>
-          <span className="text-primary">{order.tongTien ? order.tongTien.toLocaleString('vi-VN') + '₫' : 'N/A'}</span>
-        </p>
+         {/* Display discount information if exists */}
+         {order.giamGiaHangLoat > 0 && (
+           <p className="flex justify-between text-sm text-orange-600 font-semibold mt-2">
+             <span>Giảm giá ({order.giamGiaHangLoat}%):</span>
+             <span>{order.giamGiaHangLoat > 0 ? ((order.tongTien || 0) * (order.giamGiaHangLoat / 100)).toLocaleString('vi-VN') + '₫' : '0₫'}</span>
+           </p>
+         )}
+         {order.phanTramGiam > 0 && (
+           <p className="flex justify-between text-sm text-red-600 font-semibold">
+             <span>Giảm giá khác ({order.phanTramGiam}%):</span>
+             <span>{order.phanTramGiam > 0 ? ((order.tongTien || 0) * (order.phanTramGiam / 100)).toLocaleString('vi-VN') + '₫' : '0₫'}</span>
+           </p>
+         )}
+         <p className="flex justify-between text-base font-bold mt-4 pt-4 border-t border-border-light dark:border-border-dark">
+           <span>Tổng tiền:</span>
+           <span className="text-primary">{order.tongTien ? order.tongTien.toLocaleString('vi-VN') + '₫' : '0₫'}</span>
+         </p>
         
         {/* Lý do hủy */}
         {order.trangThaiVanHanh === 'Đã hủy' && order.lyDoHuy && (

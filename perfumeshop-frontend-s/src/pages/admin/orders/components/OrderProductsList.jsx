@@ -13,7 +13,10 @@ const OrderProductsList = ({ order, productDetails, brandDetails }) => {
 
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">
-      <h3 className="text-lg font-bold mb-4">Các sản phẩm</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold">Các sản phẩm</h3>
+        
+      </div>
       
       <div className="space-y-4">
          
@@ -42,6 +45,7 @@ const OrderProductsList = ({ order, productDetails, brandDetails }) => {
               item={item}
               productDetails={productDetails}
               brandDetails={brandDetails}
+              discountPercent={order.giamGiaHangLoat || 0}
             />
           ))
         ) : (
