@@ -147,7 +147,7 @@ function App() {
           <Route path="campaigns" element={<AdminCampaignsPage />} />
            <Route path="kho" element={<AdminKhoPage />} />
            <Route path="import-kho" element={<AdminImportKhoPage />} />
-           <Route path="near-expiry" element={<AdminNearExpiryProductsPage />} />
+           <Route path="near-expiry-products" element={<AdminNearExpiryProductsPage />} />
            <Route path="procurement" element={<AdminProcurementPage />} />
           <Route path="procurement/:id" element={<AdminProcurementDetailPage />} />
           <Route path="suppliers" element={<AdminSuppliersPage />} />

@@ -36,6 +36,12 @@ const AdminNearExpiryProductsPage = () => {
     return 'bg-yellow-100 text-yellow-800 border-yellow-300';
   };
 
+  const fmtHSD = (dateStr) => {
+    if (!dateStr) return '—';
+    const m = String(dateStr).substring(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(dateStr).substring(0, 10);
+  };
+
   if (loading) {
     return (
       <div className="flex-1 p-6">
@@ -97,10 +103,10 @@ const AdminNearExpiryProductsPage = () => {
                         {batch.soLo || '—'}
                       </td>
                       <td className="px-6 py-3 text-center font-semibold text-text-light dark:text-text-dark">
-                        {batch.soLuong}
+                        {batch.soLuongConLai ?? batch.soLuong ?? '—'}
                       </td>
                       <td className="px-6 py-3 text-center text-gray-600 dark:text-gray-400">
-                        {new Date(batch.hanSuDung).toLocaleDateString('vi-VN')}
+                        {fmtHSD(batch.hanSuDung)}
                       </td>
                       <td className="px-6 py-3 text-center">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadge(days)}`}>

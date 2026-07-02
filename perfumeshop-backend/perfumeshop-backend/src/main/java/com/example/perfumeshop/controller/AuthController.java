@@ -95,7 +95,7 @@ public class AuthController {
                 emailVerificationService.sendVerificationEmail(user.getIdNguoiDung(), user.getEmail(), user.getHoTen());
             }
         } catch (Exception e) {
-            System.err.println("Lỗi gửi email xác thực: " + e.getMessage());
+            // Verification email failure should not block registration
         }
         
         return ResponseEntity.ok(created);
@@ -109,7 +109,6 @@ public class AuthController {
      public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam String token) {
          try {
              Map<String, Object> result = emailVerificationService.verifyEmailWithDetails(token);
-             System.out.println("Verification result: " + result);
              
              if ("success".equals(result.get("status"))) {
                  return ResponseEntity.ok(Map.of(
@@ -137,8 +136,6 @@ public class AuthController {
                  ));
              }
          } catch (Exception e) {
-             System.err.println("Verify email error: " + e.getMessage());
-             e.printStackTrace();
              return ResponseEntity.badRequest().body(Map.of(
                  "success", false,
                  "message", e.getMessage()

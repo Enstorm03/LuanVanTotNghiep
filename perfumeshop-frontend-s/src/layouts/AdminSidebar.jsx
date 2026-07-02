@@ -55,7 +55,7 @@ const AdminSidebar = () => {
               <span className="material-symbols-outlined">warehouse</span>
               Quản lý kho
             </NavLink>
-            <NavLink to="/admin/near-expiry" className={navLinkClasses}>
+            <NavLink to="/admin/near-expiry-products" className={navLinkClasses}>
               <span className="material-symbols-outlined">warning</span>
               Cảnh báo cận Date
             </NavLink>

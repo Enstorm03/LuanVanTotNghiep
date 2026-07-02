@@ -53,7 +53,7 @@ const CampaignFormModal = ({ campaign, onClose, onSave, saving }) => {
           <div>
             <label className="block text-sm font-medium mb-1">Tên chiến dịch *</label>
             <input value={form.tenSuKien} onChange={e => set('tenSuKien', e.target.value)}
-              placeholder="VD: Sale Black Friday 2025"
+              placeholder="VD: Sale Black Friday 2026"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
           <div>

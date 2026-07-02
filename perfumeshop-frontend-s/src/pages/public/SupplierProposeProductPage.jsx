@@ -273,7 +273,7 @@ const SupplierProposeProductPage = () => {
                        value={formData.soLo}
                        onChange={handleChange}
                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                       placeholder="VD: LOT-001, BATCH-2024"
+                       placeholder="VD: LOT-001, BATCH-2026"
                      />
                    </div>
                  </div>

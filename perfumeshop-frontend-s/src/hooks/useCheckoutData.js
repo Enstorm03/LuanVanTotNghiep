@@ -29,13 +29,11 @@ const useCheckoutData = () => {
         // Fetch active campaign for discount
         try {
           const campaignData = await api.getActiveCampaign();
-          console.log('Campaign data fetched:', campaignData);
           if (campaignData && campaignData.active) {
             setCampaign(campaignData);
-            console.log('Campaign set:', campaignData);
           }
         } catch (campaignErr) {
-          console.log('Không có chiến dịch nào đang chạy:', campaignErr);
+          // No active campaign available
         }
       } catch (err) {
         console.error('Lỗi tải dữ liệu thanh toán:', err);

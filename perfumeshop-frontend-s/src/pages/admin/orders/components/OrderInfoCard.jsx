@@ -42,8 +42,9 @@ const OrderInfoCard = ({ order }) => {
          {/* Display discount information if exists */}
          {order.giamGiaHangLoat > 0 && (
            <p className="flex justify-between text-sm text-orange-600 font-semibold mt-2">
-             <span>Giảm giá ({order.giamGiaHangLoat}%):</span>
-             <span>{order.giamGiaHangLoat > 0 ? ((order.tongTien || 0) * (order.giamGiaHangLoat / 100)).toLocaleString('vi-VN') + '₫' : '0₫'}</span>
+             <span>Giảm giá ({order.giamGiaHangLoat}%)</span>
+             {/* <span>{order.giamGiaHangLoat > 0 ? ((order.tongTien || 0) ).toLocaleString('vi-VN') + '₫' : '0₫'}</span> */}
+             
            </p>
          )}
          {order.phanTramGiam > 0 && (

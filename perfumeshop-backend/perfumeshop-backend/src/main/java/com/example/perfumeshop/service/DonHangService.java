@@ -110,6 +110,9 @@ public class DonHangService {
                 .orElseThrow(() -> new BusinessException("Đơn hàng không tồn tại"));
     }
 
+    @Autowired
+    private FEFOService fefoService;
+
     @Transactional
     public DonHang confirm(Integer id, Integer nhanVienId) {
         DonHang dh = getById(id);
@@ -129,11 +132,20 @@ public class DonHangService {
             for (ChiTietDonHang ct : items) {
                 SanPham sp = ct.getSanPham();
                 if (sp == null) continue;
+
+                // 1. Trừ soLuongTonKho bảng san_pham
                 int updated = sanPhamRepository.decrementStock(sp.getIdSanPham(), ct.getSoLuong());
                 if (updated == 0) {
                     throw new BusinessException(
                         "Sản phẩm '" + sp.getTenSanPham() + "' không đủ tồn kho để xác nhận đơn hàng."
                     );
+                }
+
+                // 2. Trừ soLuongConLai multi-batch FEFO — lô1 hết thì sang lô2
+                try {
+                    fefoService.deductFEFOOnConfirm(sp.getIdSanPham(), ct.getSoLuong());
+                } catch (Exception ignored) {
+                    // Không block xác nhận nếu batch không đủ (data cũ không có batch)
                 }
             }
         }
@@ -216,9 +228,18 @@ public class DonHangService {
         for (ChiTietDonHang item : items) {
             SanPham sp = item.getSanPham();
             if (sp == null) continue;
+            // Hoàn tồn kho bảng san_pham
             Integer soLuongTon = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
             sp.setSoLuongTonKho(soLuongTon + item.getSoLuong());
             sanPhamRepository.save(sp);
+            // Hoàn soLuongConLai bảng chi_tiet_phieu_nhap (FEFO batch)
+            if (item.getIdPhieuNhap() != null) {
+                try {
+                    fefoService.restoreBatchStock(item.getIdPhieuNhap(), item.getSoLuong());
+                } catch (Exception ignored) {
+                    // Không block hoàn kho chính nếu batch restore thất bại
+                }
+            }
         }
     }
 

@@ -20,7 +20,6 @@ const useShippingForm = (user) => {
           const userId = user.id_nguoi_dung || user.userId || user.id;
           
           if (!userId) {
-            console.warn('No userId found in user object:', user);
             // Use whatever info is available from auth
             setShippingInfo({
               tenNguoiNhan: user.ho_ten || user.hoTen || '',
@@ -33,11 +32,6 @@ const useShippingForm = (user) => {
 
           // Fetch full user profile to get complete address and phone
           const profile = await userApi.getProfile(userId);
-          console.log('✅ Auto-filled shipping info from profile:', {
-            name: profile.ho_ten,
-            hasAddress: !!profile.dia_chi,
-            hasPhone: !!profile.so_dien_thoai
-          });
           
           setShippingInfo({
             tenNguoiNhan: profile.ho_ten || user.ho_ten || user.hoTen || '',
@@ -46,7 +40,6 @@ const useShippingForm = (user) => {
             ghiChu: ''
           });
         } catch (error) {
-          console.error('❌ Lỗi tải thông tin cá nhân:', error);
           // Fallback to basic user info from auth
           setShippingInfo({
             tenNguoiNhan: user.ho_ten || user.hoTen || '',

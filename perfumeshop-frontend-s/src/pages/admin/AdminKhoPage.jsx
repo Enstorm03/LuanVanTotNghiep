@@ -342,7 +342,7 @@ const KiemHangModal = ({ po, onClose, onDone, nhanVienId }) => {
                     type="text"
                     value={r.soLo}
                     onChange={e => update(idx, 'soLo', e.target.value)}
-                    placeholder="VD: LOT-2024-001"
+                    placeholder="VD: LOT-2026-001"
                     className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>

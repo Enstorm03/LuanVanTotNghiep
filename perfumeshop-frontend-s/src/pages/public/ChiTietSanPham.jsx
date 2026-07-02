@@ -36,13 +36,11 @@ const ChiTietSanPham = () => {
     const loadCampaign = async () => {
       try {
         const campaignData = await api.getActiveCampaign();
-        console.log('Campaign data loaded:', campaignData);
         if (campaignData && campaignData.active) {
-          console.log('Campaign product list:', campaignData.danhSachSanPham);
           setCampaign(campaignData);
         }
       } catch (err) {
-        console.log('No active campaign');
+        // No active campaign available
       }
     };
     loadCampaign();
@@ -119,15 +117,11 @@ const ChiTietSanPham = () => {
              {campaign && campaign.giamGiaHangLoat > 0 && (
                (() => {
                  const productId = parseInt(id);
-                 console.log('Campaign:', campaign);
-                 console.log('Product list:', campaign.danhSachSanPham);
                  const isInCampaign = campaign.danhSachSanPham && 
                    Array.isArray(campaign.danhSachSanPham) &&
                    campaign.danhSachSanPham.some(p => {
-                     console.log('Checking product ID:', p.idSanPham, 'vs current:', productId, 'Match:', p.idSanPham === productId);
                      return p.idSanPham === productId;
                    });
-                 console.log('Is product in campaign?', isInCampaign);
                  return isInCampaign;
                })()
              ) && (

@@ -5,13 +5,14 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 class BaseApi {
   // Hàm helper để thực hiện fetch request với xử lý lỗi
   async _fetch(url, options = {}) {
+    const { headers: extraHeaders, ...restOptions } = options;
     const response = await fetch(url, {
+      ...restOptions,
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',   // Bỏ qua trang cảnh báo của ngrok free
-        ...options.headers
+        'ngrok-skip-browser-warning': 'true',
+        ...extraHeaders,
       },
-      ...options
     });
     if (!response.ok) throw new Error(await this._getErrorMessage(response));
     return response.json();

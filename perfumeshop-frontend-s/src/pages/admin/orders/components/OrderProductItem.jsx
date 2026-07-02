@@ -84,14 +84,15 @@ const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent 
       <div className="text-right">
         {discountPercent > 0 ? (
           <>
-            <p className="font-bold text-primary text-lg">
-              {(((price || 0) * (quantity || 0)) * (1 - discountPercent / 100)).toLocaleString('vi-VN')}₫
-            </p>
+            
             <p className="text-sm text-text-subtle-light dark:text-text-subtle-dark line-through">
               {((price || 0) * (quantity || 0)).toLocaleString('vi-VN')}₫
             </p>
             <p className="text-sm text-orange-600 font-semibold">
               Giảm: -{discountPercent}%
+            </p>
+            <p className="font-bold text-primary text-lg">
+              {(((price || 0) * (quantity || 0)) * (1 - discountPercent / 100)).toLocaleString('vi-VN')}₫
             </p>
           </>
         ) : (

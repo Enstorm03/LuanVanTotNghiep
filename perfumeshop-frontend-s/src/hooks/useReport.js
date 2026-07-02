@@ -115,20 +115,15 @@ const useReport = () => {
       setError('');
 
       const { startDate, endDate } = dateRange;
-      
-      console.log(`Fetching reports for date range: ${startDate} to ${endDate}`);
 
       const [summaryData, topProductsData, revenueByStatusData] = await Promise.all([
         api.getReportSummary(startDate, endDate).catch((e) => { console.error('Summary API Error:', e); return null; }),
         api.getTopProducts(startDate, endDate, 10).catch((e) => { console.error('Top Products API Error:', e); return []; }),
         api.getRevenueByStatus(startDate, endDate).catch((e) => { console.error('Revenue API Error:', e); return []; })
       ]);
-      
-      console.log('Summary Data:', summaryData);
 
       if (summaryData) {
         const mapped = mapReportData(summaryData, topProductsData, revenueByStatusData);
-        console.log('Mapped Report Data:', mapped);
         setReportData(mapped);
       } else {
         setError('Dữ liệu báo cáo chưa sẵn sàng. Vui lòng kiểm tra Console (F12) để xem chi tiết lỗi.');

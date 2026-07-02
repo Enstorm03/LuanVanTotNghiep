@@ -414,8 +414,6 @@ public class ProcurementService {
             if (!results.isEmpty()) {
                 SanPham matched = results.get(0);
                 dx.setIdSanPhamKhop(matched.getIdSanPham());
-                System.out.println("✅ [AUTO-CHECK] Cập nhật đề xuất #" + dx.getIdSanPhamDeXuat() 
-                    + " '" + cleanName + "' → SP #" + matched.getIdSanPham());
                 sanPhamDeXuatRepo.save(dx);
             }
         }
@@ -456,7 +454,6 @@ public class ProcurementService {
             spMoi = sanPhamKhop;
             daTonTai = true;
             dx.setIdSanPhamKhop(sanPhamKhop.getIdSanPham());
-            System.out.println("✓ Sản phẩm '" + dx.getTenSanPham() + "' đã tồn tại với ID: " + sanPhamKhop.getIdSanPham());
         } else {
             // Tạo sản phẩm mới — soLuongTonKho = 0, kho sẽ cộng sau khi duyệt PO
             SanPham sp = new SanPham();
@@ -476,7 +473,6 @@ public class ProcurementService {
             ThuongHieu th = new ThuongHieu(); th.setIdThuongHieu(idThuongHieu); sp.setThuongHieu(th);
         }
             spMoi = sanPhamRepository.save(sp);
-            System.out.println("✓ Tạo sản phẩm mới '" + dx.getTenSanPham() + "' với ID: " + spMoi.getIdSanPham());
         }
 
         // Tạo PO CHO_KHO_KIEM_TRA — kho sẽ kiểm và admin duyệt cuối mới cộng kho + áp giá
@@ -557,8 +553,6 @@ public class ProcurementService {
         int thatBai = 0;
         List<Map<String, Object>> chiTiet = new ArrayList<>();
 
-        System.out.println("🔍 [BULK APPROVE] Starting bulk approval for " + items.size() + " items");
-
         for (Map<String, Object> item : items) {
             try {
                 Integer idSanPhamDeXuat = ((Number) item.get("idSanPhamDeXuat")).intValue();
@@ -574,14 +568,10 @@ public class ProcurementService {
                     ? ((Number) item.get("soLuongNhap")).intValue() : null;
                 String phanHoi = item.containsKey("phanHoi") ? (String) item.get("phanHoi") : "Duyệt hàng loạt";
 
-                System.out.println("🔍 [BULK APPROVE] Processing item " + idSanPhamDeXuat);
-
                 // Gọi method duyệt trong transaction riêng
                 duyetDeXuatIndependent(idSanPhamDeXuat, idDanhMuc, idThuongHieu, 
                     idNhanVien.intValue(), phanHoi, phanTramBienDo, soLuongNhap);
                 thanhCong++;
-
-                System.out.println("✅ [BULK APPROVE] Success for item " + idSanPhamDeXuat);
 
                 Map<String, Object> result = new HashMap<>();
                 result.put("idSanPhamDeXuat", idSanPhamDeXuat);
@@ -590,8 +580,6 @@ public class ProcurementService {
 
             } catch (Exception e) {
                 thatBai++;
-                System.out.println("❌ [BULK APPROVE] Error for item " + item.get("idSanPhamDeXuat") + ": " + e.getMessage());
-                e.printStackTrace();
                 
                 Map<String, Object> result = new HashMap<>();
                 result.put("idSanPhamDeXuat", item.get("idSanPhamDeXuat"));
@@ -600,8 +588,6 @@ public class ProcurementService {
                 chiTiet.add(result);
             }
         }
-
-        System.out.println("🔍 [BULK APPROVE] Finished: " + thanhCong + " success, " + thatBai + " failed");
 
         Map<String, Object> response = new HashMap<>();
         response.put("thanhCong", thanhCong);

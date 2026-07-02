@@ -104,7 +104,7 @@ const NearExpiryWidget = () => {
                       <span className="text-gray-500">Số lô:</span> <strong>{batch.soLo || '—'}</strong>
                     </div>
                     <div>
-                      <span className="text-gray-500">SL:</span> <strong>{batch.soLuong}</strong>
+                      <span className="text-gray-500">SL:</span> <strong>{batch.soLuongConLai ?? batch.soLuong ?? '—'}</strong>
                     </div>
                   </div>
                 </div>
@@ -113,7 +113,7 @@ const NearExpiryWidget = () => {
                     {days} ngày
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                    HSD: {new Date(batch.hanSuDung).toLocaleDateString('vi-VN')}
+                    HSD: {(() => { const m = String(batch.hanSuDung||'').substring(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : String(batch.hanSuDung||'').substring(0,10); })()}
                   </p>
                 </div>
               </div>

@@ -55,7 +55,7 @@ const OrderRow = ({ order }) => {
       <td className="p-4 align-middle text-right font-bold text-text-light dark:text-text-dark">
         {order.tongTien || order.tong_tien
           ? (order.tongTien || order.tong_tien).toLocaleString('vi-VN') + '₫'
-          : 'N/A'}
+          : '0₫'}
       </td>
     </tr>
   );

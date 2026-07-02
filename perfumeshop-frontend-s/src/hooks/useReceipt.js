@@ -32,8 +32,7 @@ const useReceipt = () => {
         return 'Đã thanh toán thẻ tín dụng';
       case 'online':
         return 'Đã thanh toán ví điện tử';
-      case 'deposit':
-        return 'Đã đặt cọc 50%';
+      
       default:
         return 'Đã thanh toán';
     }

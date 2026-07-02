@@ -35,15 +35,6 @@ class OrderApi extends BaseApi {
   }
 
   // Lấy lịch sử đơn hàng DTO
-  // async getUserOrdersHistoryDto(userId, trangThai = null) {
-  //   try {
-  //     const url = `${API_BASE_URL}/don-hang/lich-su-dto?userId=${userId}${trangThai ? `&trangThai=${encodeURIComponent(trangThai)}` : ''}`;
-  //     return await this._fetch(url);
-  //   } catch (error) {
-  //     console.error('Lỗi lấy lịch sử đơn hàng:', error);
-  //     throw error;
-  //   }
-  // }
   async getUserOrdersHistoryDto(userId, trangThai = null) {
     try {
       const url = `${API_BASE_URL}/don-hang/lich-su-dto?userId=${userId}${trangThai ? `&trangThai=${encodeURIComponent(trangThai)}` : ''}`;

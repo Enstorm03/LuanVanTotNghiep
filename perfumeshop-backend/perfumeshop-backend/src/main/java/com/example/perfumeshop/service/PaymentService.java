@@ -297,7 +297,7 @@ public class PaymentService {
                 "<div class='info-row'><span class='info-label'>SĐT:</span><span class='info-value'>" + (soDienThoai != null ? soDienThoai : "") + "</span></div>" +
                 "<div class='info-row'><span class='info-label'>Địa chỉ:</span><span class='info-value'>" + (diaChiGiaoHang != null ? diaChiGiaoHang : "") + "</span></div></div>" +
                 "<p>Đơn hàng đang được chuẩn bị. Bạn sẽ nhận email cập nhật khi hàng được giao.</p>" +
-                "</div><div class='footer'><p>&copy; 2024 Perfume Shop</p></div></div></body></html>";
+                "</div><div class='footer'><p>&copy; 2026 Perfume Shop</p></div></div></body></html>";
     }
 
     private String buildOrderCancelledTemplate(String hoTen, Integer idDonHang, String lyDoHuy) {
@@ -314,7 +314,7 @@ public class PaymentService {
                 "<p><strong>Mã đơn:</strong> #" + idDonHang + "</p>" +
                 "<p><strong>Lý do:</strong> " + (lyDoHuy != null ? lyDoHuy : "Không rõ") + "</p>" +
                 "<p>Nếu bạn có câu hỏi, vui lòng liên hệ với chúng tôi.</p>" +
-                "</div><div class='footer'><p>&copy; 2024 Perfume Shop</p></div></div></body></html>";
+                "</div><div class='footer'><p>&copy; 2026 Perfume Shop</p></div></div></body></html>";
     }
 
     private String truncate(String s, int max) {

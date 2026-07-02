@@ -425,14 +425,12 @@ const AdminProcurementPage = () => {
 
       const result = await api.procurementBulkApprove(user?.id_nhan_vien || user?.id || 1, items);
       
-      console.log('✅ Bulk approve result:', result);
-      showPropToast(`✅ Duyệt hàng loạt NCC: ${result.thanhCong} thành công, ${result.thatBai} thất bại`);
+      showPropToast(`✅ Duyệt hàng loạt: ${result.thanhCong} thành công, ${result.thatBai} thất bại`);
       setBulkApproveModal(null);
       setSelectedSupplier(null);
       // Force refresh sau 300ms để lấy dữ liệu mới có idSanPhamKhop
       setTimeout(() => fetchProposals(), 300);
     } catch (e) {
-      console.error('❌ Bulk approve error:', e);
       alert('Lỗi duyệt hàng loạt: ' + e.message);
     } finally {
       setBulkApproving(false);

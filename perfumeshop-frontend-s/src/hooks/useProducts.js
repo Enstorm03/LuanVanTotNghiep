@@ -64,32 +64,6 @@ const useProducts = () => {
     setEditingProduct(null);
   };
 
-  // const handleSaveProduct = async (productData) => {
-  //   try {
-  //     setSaving(true);
-  //     if (editingProduct) {
-  //       // Update existing product - remove IDs since we're sending full objects
-  //       const { idDanhMuc, idThuongHieu, ...updateData } = productData;
-  //       await api.updateProduct(editingProduct.id_san_pham, updateData);
-  //       alert('Cập nhật sản phẩm thành công!');
-  //       handleCloseModal();
-  //       fetchData(); // Refresh all data
-  //     } else {
-  //       // Create new product - remove IDs since we're sending full objects
-  //       const { idDanhMuc, idThuongHieu, ...createData } = productData;
-  //       await api.createProduct(createData);
-  //       alert('Thêm sản phẩm thành công!');
-  //       handleCloseModal();
-        
-  //       fetchData(); // Refresh all data
-  //     }
-  //   } catch (error) {
-  //     alert('Lỗi khi lưu sản phẩm: ' + (error.message || 'Vui lòng thử lại'));
-  //     console.error('Error saving product:', error);
-  //   } finally {
-  //     setSaving(false);
-  //   }
-  // };
   const handleSaveProduct = async (productData) => {
     try {
       setSaving(true);

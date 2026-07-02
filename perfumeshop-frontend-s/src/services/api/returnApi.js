@@ -4,9 +4,7 @@ class ReturnApi extends BaseApi {
   // Lấy danh sách tất cả hoàn trả
   async getAllReturns() {
     try {
-      console.log('ReturnApi - Calling /doi-tra/all');
       const result = await this._fetch(`${API_BASE_URL}/doi-tra/all`);
-      console.log('ReturnApi - /doi-tra/all response:', result);
       return result;
     } catch (error) {
       console.error('Lỗi lấy danh sách hoàn trả:', error);
@@ -17,9 +15,7 @@ class ReturnApi extends BaseApi {
   // Lấy danh sách hoàn trả chờ duyệt (giữ lại để tương thích)
   async getPendingReturns() {
     try {
-      console.log('ReturnApi - Calling /doi-tra/cho-duyet');
       const result = await this._fetch(`${API_BASE_URL}/doi-tra/cho-duyet`);
-      console.log('ReturnApi - /doi-tra/cho-duyet response:', result);
       return result;
     } catch (error) {
       console.error('Lỗi lấy hoàn trả chờ duyệt:', error);

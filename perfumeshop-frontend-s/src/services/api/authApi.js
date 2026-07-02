@@ -35,17 +35,12 @@ class AuthApi extends BaseApi {
     
     const response = await fetch(apiUrl, { signal });
 
-    console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
-
     if (!response.ok) {
       const text = await response.text();
-      console.error('Response text:', text);
       throw new Error(`Lỗi từ server: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Verify response:', data);
     
     return data;
   }

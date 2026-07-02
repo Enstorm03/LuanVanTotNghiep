@@ -1,24 +1,20 @@
 package com.example.perfumeshop.service;
 
 import com.example.perfumeshop.entity.ChiTietDonHang;
-import com.example.perfumeshop.entity.ChiTietPhieuNhap;
-import com.example.perfumeshop.entity.SanPham;
 import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.PhieuNhapKhoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.util.List;
 
 /**
  * FEFO (First Expired, First Out) Service
- * Implements 4-step transaction for batch allocation:
- * 1. Find earliest expiring batch with stock
- * 2. Check quantity availability in that batch
- * 3. Allocate from batch and link to order item
- * 4. Update batch inventory (so_luong_con_lai)
+ *
+ * Khi đặt hàng  → gắn idPhieuNhap lô cận-date nhất (traceability), chưa trừ kho.
+ * Khi admin xác nhận → multi-batch deduct:
+ *   Lô 1 (HSD sớm nhất) có 36sp, mua 37sp → trừ hết 36, sang lô 2 trừ thêm 1, lô 2 còn 49.
  */
 @Service
 public class FEFOService {
@@ -29,82 +25,84 @@ public class FEFOService {
     @Autowired
     private EntityManager entityManager;
 
+    // ── Giai đoạn 1: Đặt hàng — gắn lô cận-date nhất ──────────────────────
+
     /**
-     * Allocate stock to order item using FEFO strategy
-     * Step 1-2: Find earliest batch with sufficient stock
-     * Step 3-4: Link item to batch and decrement batch inventory
-     * 
-     * Does NOT throw exception - logs warning instead to prevent transaction rollback
+     * Chạy trong cùng transaction với placeOrder.
+     * Chỉ gán idPhieuNhap (traceability), chưa trừ soLuongConLai.
      */
-    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    public void allocateOrderItemFromBatch(ChiTietDonHang chiTietDonHang, Integer idSanPham, Integer soLuongCan) {
+    public void allocateOrderItemFromBatch(ChiTietDonHang chiTietDonHang,
+                                           Integer idSanPham, Integer soLuongCan) {
         try {
-            // Step 1: Find earliest expiring batch for this product
-            List<Integer> activeBatches = phieuNhapKhoRepository.findActiveBatchesByProductFEFO(idSanPham);
-            
-            if (activeBatches == null || activeBatches.isEmpty()) {
-                System.out.println("⚠ FEFO: Không có hàng có sẵn cho sản phẩm: " + idSanPham);
-                return;
+            List<Integer> batches = phieuNhapKhoRepository.findActiveBatchesByProductFEFO(idSanPham);
+            if (batches == null || batches.isEmpty()) return;
+            // Gắn lô cận-date nhất để traceability
+            chiTietDonHang.setIdPhieuNhap(batches.get(0));
+        } catch (Exception ignored) {}
+    }
+
+    // ── Giai đoạn 2: Admin xác nhận — multi-batch FEFO deduct ──────────────
+
+    /**
+     * Trừ soLuongConLai theo FEFO multi-batch.
+     * Ví dụ: mua 37sp, lô1=36 → trừ hết 36, lô2=50 → trừ thêm 1, lô2 còn 49.
+     * Ném BusinessException nếu tổng các lô không đủ.
+     */
+    public void deductFEFOOnConfirm(Integer idSanPham, Integer soLuongCan) {
+        List<Integer> batches = phieuNhapKhoRepository.findActiveBatchesByProductFEFO(idSanPham);
+        if (batches == null || batches.isEmpty()) {
+            throw new BusinessException("Không tìm thấy lô hàng cho sản phẩm #" + idSanPham);
+        }
+
+        int remaining = soLuongCan;
+        for (Integer batchId : batches) {
+            if (remaining <= 0) break;
+
+            // Lấy soLuongConLai hiện tại của lô này
+            String selectSql = "SELECT SUM(ct.so_luong_con_lai) " +
+                               "FROM Chi_Tiet_Phieu_Nhap ct WHERE ct.id_phieu = :batchId";
+            Query sq = entityManager.createNativeQuery(selectSql);
+            sq.setParameter("batchId", batchId);
+            Object res = sq.getSingleResult();
+            int available = res != null ? ((Number) res).intValue() : 0;
+            if (available <= 0) continue;
+
+            // Lấy tối đa từ lô này, không vượt quá remaining
+            int deduct = Math.min(available, remaining);
+
+            String updateSql = "UPDATE Chi_Tiet_Phieu_Nhap " +
+                               "SET so_luong_con_lai = so_luong_con_lai - :deduct " +
+                               "WHERE id_phieu = :batchId " +
+                               "  AND so_luong_con_lai >= :deduct";
+            Query uq = entityManager.createNativeQuery(updateSql);
+            uq.setParameter("deduct", deduct);
+            uq.setParameter("batchId", batchId);
+            int updated = uq.executeUpdate();
+            if (updated > 0) {
+                remaining -= deduct;
             }
+        }
 
-            // Step 2: Allocate from the first (earliest expiring) batch
-            Integer selectedBatchId = allocateFromBatch(activeBatches.get(0), soLuongCan);
-            if (selectedBatchId == null) {
-                System.out.println("⚠ FEFO: Không đủ hàng trong lô soonest-expiring");
-                return;
-            }
-
-            // Step 3: Link order item to the batch
-            chiTietDonHang.setIdPhieuNhap(selectedBatchId);
-
-            // Step 4: Update batch inventory (decrement so_luong_con_lai)
-            decrementBatchStock(selectedBatchId, soLuongCan);
-            
-            System.out.println("✓ FEFO: Cấp phát thành công từ batch " + selectedBatchId);
-        } catch (Exception e) {
-            System.out.println("⚠ FEFO allocation error (order will proceed without batch): " + e.getMessage());
+        if (remaining > 0) {
+            throw new BusinessException(
+                "Không đủ tồn kho lô hàng cho sản phẩm #" + idSanPham +
+                " (còn thiếu " + remaining + " sp)");
         }
     }
 
+    // ── Hoàn kho khi hủy đơn ───────────────────────────────────────────────
+
     /**
-     * Attempt to allocate quantity from a specific batch
-     * Returns batch ID if successful, null otherwise
+     * Hoàn soLuongConLai về lô được gán lúc đặt hàng.
      */
-    private Integer allocateFromBatch(Integer idPhieuNhap, Integer soLuongCan) {
-        String sql = "SELECT SUM(ct.so_luong_con_lai) as tong " +
-                     "FROM Chi_Tiet_Phieu_Nhap ct " +
-                     "WHERE ct.id_phieu = :idPhieuNhap";
-        
+    public void restoreBatchStock(Integer idPhieuNhap, Integer soLuongHoan) {
+        if (idPhieuNhap == null || soLuongHoan == null || soLuongHoan <= 0) return;
+        String sql = "UPDATE Chi_Tiet_Phieu_Nhap " +
+                     "SET so_luong_con_lai = so_luong_con_lai + :soLuong " +
+                     "WHERE id_phieu = :idPhieuNhap";
         Query q = entityManager.createNativeQuery(sql);
+        q.setParameter("soLuong", soLuongHoan);
         q.setParameter("idPhieuNhap", idPhieuNhap);
-        Object result = q.getSingleResult();
-        
-        Integer availableQty = result != null ? ((Number) result).intValue() : 0;
-        
-        if (availableQty >= soLuongCan) {
-            return idPhieuNhap;
-        }
-        
-        return null;
-    }
-
-    /**
-     * Decrement batch inventory (so_luong_con_lai)
-     */
-    @Transactional
-    private void decrementBatchStock(Integer idPhieuNhap, Integer soLuongGiam) {
-        String updateSql = "UPDATE Chi_Tiet_Phieu_Nhap " +
-                          "SET so_luong_con_lai = so_luong_con_lai - :soLuong " +
-                          "WHERE id_phieu = :idPhieuNhap " +
-                          "  AND so_luong_con_lai >= :soLuong";
-        
-        Query updateQ = entityManager.createNativeQuery(updateSql);
-        updateQ.setParameter("soLuong", soLuongGiam);
-        updateQ.setParameter("idPhieuNhap", idPhieuNhap);
-        
-        int updated = updateQ.executeUpdate();
-        if (updated == 0) {
-            throw new BusinessException("Không thể cập nhật lô hàng: không đủ tồn kho");
-        }
+        q.executeUpdate();
     }
 }

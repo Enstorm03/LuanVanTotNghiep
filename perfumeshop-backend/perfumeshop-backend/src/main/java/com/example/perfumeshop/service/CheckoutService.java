@@ -83,7 +83,6 @@ public class CheckoutService {
             } catch (BusinessException e) {
                 // If FEFO allocation fails, log but don't block order creation
                 // Batch allocation can fail if no suitable batches exist yet
-                System.out.println("⚠ FEFO allocation warning: " + e.getMessage());
             }
             
             ctList.add(ct);

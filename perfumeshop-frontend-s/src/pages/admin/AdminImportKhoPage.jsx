@@ -258,7 +258,7 @@ const AdminImportKhoPage = () => {
             <div>
               <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Ghi chú phiếu</label>
               <input value={ghiChu} onChange={e => setGhiChu(e.target.value)}
-                placeholder="VD: Lô hàng tháng 6/2025"
+                placeholder="VD: Lô hàng tháng 6/2026"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
           </div>

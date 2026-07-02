@@ -152,7 +152,7 @@ public class EmailService {
                 "            <a href='https://pendant-moustache-flask.ngrok-free.dev/' class='button'>Bắt Đầu Mua Sắm</a>\n" +
                 "        </div>\n" +
                 "        <div class='footer'>\n" +
-                "            <p>&copy; 2024 Perfume Shop. All rights reserved.</p>\n" +
+                "            <p>&copy; 2026 Perfume Shop. All rights reserved.</p>\n" +
                 "            <p>Đây là email tự động, vui lòng không trả lời email này.</p>\n" +
                 "        </div>\n" +
                 "    </div>\n" +
@@ -195,7 +195,7 @@ public class EmailService {
                 "            <p style='word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px; font-size: 12px;'>" + verificationUrl + "</p>\n" +
                 "        </div>\n" +
                 "        <div class='footer'>\n" +
-                "            <p>&copy; 2024 Perfume Shop. All rights reserved.</p>\n" +
+                "            <p>&copy; 2026 Perfume Shop. All rights reserved.</p>\n" +
                 "            <p>Đây là email tự động, vui lòng không trả lời email này.</p>\n" +
                 "        </div>\n" +
                 "    </div>\n" +
@@ -254,7 +254,7 @@ public class EmailService {
                 "            <p style='margin-top: 20px; color: #666;'>Đơn hàng của bạn sẽ được chuẩn bị và giao hàng sớm nhất. Bạn sẽ nhận được thông báo cập nhật trạng thái qua email.</p>\n" +
                 "        </div>\n" +
                 "        <div class='footer'>\n" +
-                "            <p>&copy; 2024 Perfume Shop. All rights reserved.</p>\n" +
+                "            <p>&copy; 2026 Perfume Shop. All rights reserved.</p>\n" +
                 "            <p>Đây là email tự động, vui lòng không trả lời email này.</p>\n" +
                 "        </div>\n" +
                 "    </div>\n" +
@@ -301,7 +301,7 @@ public class EmailService {
                 "            <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua email hoặc điện thoại.</p>\n" +
                 "        </div>\n" +
                 "        <div class='footer'>\n" +
-                "            <p>&copy; 2024 Perfume Shop. All rights reserved.</p>\n" +
+                "            <p>&copy; 2026 Perfume Shop. All rights reserved.</p>\n" +
                 "            <p>Đây là email tự động, vui lòng không trả lời email này.</p>\n" +
                 "        </div>\n" +
                 "    </div>\n" +

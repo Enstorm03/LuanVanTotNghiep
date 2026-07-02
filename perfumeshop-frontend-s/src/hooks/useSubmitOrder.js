@@ -28,9 +28,6 @@ const useSubmitOrder = () => {
         soLuong: item.soLuong || item.so_luong
       }));
       
-      console.log('Debug - checkoutData:', checkoutData);
-      console.log('Debug - items after mapping:', items);
-      
       // Validate items không rỗng
       if (!items || items.length === 0) {
         alert('Giỏ hàng rỗng, vui lòng thêm sản phẩm');
