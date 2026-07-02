@@ -813,11 +813,11 @@ const AdminProcurementPage = () => {
 
             <p className="text-sm font-medium text-indigo-800 dark:text-indigo-200">Link cổng chao hang</p>
 
-            <p className="text-xs text-indigo-600 dark:text-indigo-300">{window.location.origin}/supplier-portal</p>
+            <p className="text-xs text-indigo-600 dark:text-indigo-300">{window.location.origin}/procurement</p>
 
           </div>
 
-          <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/supplier-portal`)}
+          <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/procurement`)}
 
             className="text-xs text-indigo-600 hover:underline flex items-center gap-1">
 

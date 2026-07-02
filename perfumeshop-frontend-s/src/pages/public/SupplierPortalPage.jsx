@@ -8,7 +8,7 @@ const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
 const INIT_FORM = {
   tenNCC: '', lienHeNCC: '', tenSanPham: '', moTa: '',
   urlHinhAnh: '', giaDeXuat: '', soLuongCoTheCungCap: '',
-  dungTichMl: '', nongDo: '', ghiChu: '',
+  dungTichMl: '', nongDo: '', hanSuDung: '', soLo: '', ghiChu: '',
 };
 
 /* ── Tải template Excel (sử dụng csvFormatUtils chuẩn) ── */
@@ -289,6 +289,8 @@ const SupplierPortalPage = () => {
         soLuongCoTheCungCap: form.soLuongCoTheCungCap ? parseInt(form.soLuongCoTheCungCap) : null,
         dungTichMl: form.dungTichMl ? parseInt(form.dungTichMl) : null,
         nongDo: form.nongDo ? parseInt(form.nongDo) : null,
+        hanSuDung: form.hanSuDung || null,
+        soLo: form.soLo.trim() || null,
         ghiChu: form.ghiChu.trim() || null,
       });
       setSubmitted(true);
@@ -463,6 +465,25 @@ const SupplierPortalPage = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nồng độ (%)</label>
                       <input type="number" value={form.nongDo} onChange={e => set('nongDo', e.target.value)}
                         min={0} max={100} placeholder="VD: 15"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    </div>
+                  </div>
+                  {/* HSD và Số lô */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Hạn sử dụng (HSD)</label>
+                      <input type="date" value={form.hanSuDung} onChange={e => set('hanSuDung', e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                      {form.hanSuDung && (() => {
+                        const months = Math.floor((new Date(form.hanSuDung) - new Date()) / (1000*60*60*24*30));
+                        return months < 6 ? <p className="text-orange-500 text-xs mt-1">⚠ HSD còn {months} tháng — quá ngắn</p> : null;
+                      })()}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Số lô (Batch No.)</label>
+                      <input type="text" value={form.soLo} onChange={e => set('soLo', e.target.value)}
+                        placeholder="VD: LOT-2025-001"
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                     </div>
                   </div>

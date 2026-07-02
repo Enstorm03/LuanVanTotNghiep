@@ -203,7 +203,8 @@ public class ProcurementService {
     /** NCC gửi báo giá */
     @Transactional
     public BaoGiaNCC guiBaoGia(Integer idPhieu, String tenNCC, String lienHeNCC,
-                                BigDecimal giaNhapDeXuat, String ghiChu) {
+                                BigDecimal giaNhapDeXuat, String ghiChu,
+                                String hanSuDungStr, String soLo) {
         PhieuGoiThau phieu = getById(idPhieu);
         if (!"OPEN".equals(phieu.getTrangThai()))
             throw new BusinessException("Đợt gọi thầu này đã đóng");
@@ -214,6 +215,11 @@ public class ProcurementService {
         baoGia.setLienHeNCC(lienHeNCC);
         baoGia.setGiaNhapDeXuat(giaNhapDeXuat);
         baoGia.setGhiChu(ghiChu);
+        if (hanSuDungStr != null && !hanSuDungStr.isBlank()) {
+            try { baoGia.setHanSuDung(java.time.LocalDate.parse(hanSuDungStr.trim())); }
+            catch (Exception ignored) {}
+        }
+        if (soLo != null && !soLo.isBlank()) baoGia.setSoLo(soLo.trim());
         baoGia.setTrangThai("CHO_DUYET");
         baoGia.setNgayTao(LocalDateTime.now());
         return baoGiaNCCRepo.save(baoGia);
@@ -290,6 +296,8 @@ public class ProcurementService {
             ctNhap.setTenSanPhamSnapshot(sp.getTenSanPham());
             ctNhap.setSoLuong(ct.getSoLuongCanNhap());
             ctNhap.setGiaNhap(baoGiaChon.getGiaNhapDeXuat());
+            ctNhap.setHanSuDung(baoGiaChon.getHanSuDung());
+            ctNhap.setSoLo(baoGiaChon.getSoLo());
             // soLuongThucNhan để null — kho sẽ điền sau
             ctNhap.setSoLuongLoi(0);
             chiTiet.add(ctNhap);
@@ -337,7 +345,8 @@ public class ProcurementService {
     public SanPhamDeXuat deXuatSanPhamDocLap(String tenNCC, String lienHeNCC,
                                               String tenSanPham, String moTa, String urlHinhAnh,
                                               BigDecimal giaDeXuat, Integer soLuong,
-                                              Integer dungTichMl, Integer nongDo, String ghiChu) {
+                                              Integer dungTichMl, Integer nongDo, String ghiChu,
+                                              String hanSuDung, String soLo) {
         if (tenNCC == null || tenNCC.trim().isEmpty())
             throw new BusinessException("Tên nhà cung cấp không được để trống");
         if (tenSanPham == null || tenSanPham.trim().isEmpty())
@@ -345,8 +354,19 @@ public class ProcurementService {
         if (giaDeXuat == null || giaDeXuat.compareTo(BigDecimal.ZERO) <= 0)
             throw new BusinessException("Giá đề xuất phải lớn hơn 0");
 
+        // Gộp HSD và số lô vào ghiChu
+        StringBuilder ghiChuBuilder = new StringBuilder(ghiChu != null ? ghiChu : "");
+        if (hanSuDung != null && !hanSuDung.isBlank()) {
+            if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
+            ghiChuBuilder.append("HSD:").append(hanSuDung.trim());
+        }
+        if (soLo != null && !soLo.isBlank()) {
+            if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
+            ghiChuBuilder.append("Lô:").append(soLo.trim());
+        }
+
         SanPhamDeXuat dx = new SanPhamDeXuat();
-        dx.setPhieuGoiThau(null); // Độc lập, không thuộc phiếu nào
+        dx.setPhieuGoiThau(null);
         dx.setTenNCC(tenNCC.trim());
         dx.setLienHeNCC(lienHeNCC);
         dx.setTenSanPham(tenSanPham.trim());
@@ -356,18 +376,13 @@ public class ProcurementService {
         dx.setSoLuongCoTheCungCap(soLuong);
         dx.setDungTichMl(dungTichMl);
         dx.setNongDo(nongDo);
-        dx.setGhiChu(ghiChu);
+        dx.setGhiChu(ghiChuBuilder.toString());
         dx.setTrangThai("PENDING");
         dx.setNgayTao(LocalDateTime.now());
 
-        // Kiểm tra sản phẩm trùng ngay khi tạo đề xuất
         if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
-            String cleanName = tenSanPham.trim();
-            List<SanPham> results = sanPhamRepository.findByTenSanPhamIgnoreCase(cleanName);
-            if (!results.isEmpty()) {
-                SanPham matched = results.get(0);
-                dx.setIdSanPhamKhop(matched.getIdSanPham());
-            }
+            List<SanPham> results = sanPhamRepository.findByTenSanPhamIgnoreCase(tenSanPham.trim());
+            if (!results.isEmpty()) dx.setIdSanPhamKhop(results.get(0).getIdSanPham());
         }
 
         return sanPhamDeXuatRepo.save(dx);

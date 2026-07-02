@@ -1,10 +1,12 @@
 package com.example.perfumeshop.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -54,6 +56,15 @@ public class BaoGiaNCC {
 
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
+
+    /** Hạn sử dụng lô hàng NCC cung cấp */
+    @Column(name = "han_su_dung")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate hanSuDung;
+
+    /** Số lô hàng */
+    @Column(name = "so_lo", length = 100)
+    private String soLo;
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;

@@ -48,7 +48,9 @@ public class ProcurementController {
         String lienHeNCC     = (String) body.getOrDefault("lienHeNCC", "");
         BigDecimal giaNhap   = new BigDecimal(body.get("giaNhapDeXuat").toString());
         String ghiChu        = (String) body.getOrDefault("ghiChu", "");
-        return ResponseEntity.ok(procurementService.guiBaoGia(id, tenNCC, lienHeNCC, giaNhap, ghiChu));
+        String hanSuDung     = body.get("hanSuDung") != null ? body.get("hanSuDung").toString() : null;
+        String soLo          = body.get("soLo") != null ? body.get("soLo").toString() : null;
+        return ResponseEntity.ok(procurementService.guiBaoGia(id, tenNCC, lienHeNCC, giaNhap, ghiChu, hanSuDung, soLo));
     }
 
     // ── ADMIN ─────────────────────────────────────────────────────────────
@@ -174,8 +176,11 @@ public class ProcurementController {
         Integer nongDo      = body.get("nongDo") != null
             ? Integer.parseInt(body.get("nongDo").toString()) : null;
         String ghiChu       = (String) body.getOrDefault("ghiChu", "");
+        String hanSuDung    = body.get("hanSuDung") != null ? body.get("hanSuDung").toString() : null;
+        String soLo         = body.get("soLo") != null ? body.get("soLo").toString() : null;
         return ResponseEntity.ok(procurementService.deXuatSanPhamDocLap(tenNCC, lienHeNCC,
-            tenSanPham, moTa, urlHinhAnh, giaDeXuat, soLuong, dungTichMl, nongDo, ghiChu));
+            tenSanPham, moTa, urlHinhAnh, giaDeXuat, soLuong, dungTichMl, nongDo, ghiChu,
+            hanSuDung, soLo));
     }
 
     // ── NCC đề xuất hàng loạt qua Excel/CSV ──────────────────────────────
