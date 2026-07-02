@@ -41,7 +41,6 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage';
 import AdminDefectivePage from './pages/admin/AdminDefectivePage';
 import AdminCampaignsPage from './pages/admin/AdminCampaignsPage';
 import AdminKhoPage from './pages/admin/AdminKhoPage';
-import AdminImportKhoPage from './pages/admin/AdminImportKhoPage';
 import AdminNearExpiryProductsPage from './pages/admin/AdminNearExpiryProductsPage';
 import AdminProcurementPage from './pages/admin/AdminProcurementPage';
 import AdminProcurementDetailPage from './pages/admin/AdminProcurementDetailPage';
@@ -137,20 +136,44 @@ function App() {
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="reports" element={<AdminReportPage />} />
+          {/* Tài khoản — chỉ ADMIN */}
+          <Route path="users" element={
+            <ProtectedRoute requireRole="ADMIN"><AdminUsersPage /></ProtectedRoute>
+          } />
+          {/* Báo cáo — ADMIN + STORE_MANAGER */}
+          <Route path="reports" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminReportPage /></ProtectedRoute>
+          } />
           <Route path="returns" element={<AdminReturnsPage />} />
-          <Route path="brands" element={<AdminBrandsPage />} />
-          <Route path="categories" element={<AdminCategoriesPage />} />
+          <Route path="brands" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminBrandsPage /></ProtectedRoute>
+          } />
+          <Route path="categories" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminCategoriesPage /></ProtectedRoute>
+          } />
           <Route path="reviews" element={<AdminReviewsPage />} />
           <Route path="defective" element={<AdminDefectivePage />} />
-          <Route path="campaigns" element={<AdminCampaignsPage />} />
-           <Route path="kho" element={<AdminKhoPage />} />
-           <Route path="import-kho" element={<AdminImportKhoPage />} />
-           <Route path="near-expiry-products" element={<AdminNearExpiryProductsPage />} />
-           <Route path="procurement" element={<AdminProcurementPage />} />
-          <Route path="procurement/:id" element={<AdminProcurementDetailPage />} />
-          <Route path="suppliers" element={<AdminSuppliersPage />} />
+          {/* Chiến dịch — ADMIN + STORE_MANAGER */}
+          <Route path="campaigns" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminCampaignsPage /></ProtectedRoute>
+          } />
+          {/* Kho — ADMIN + STORE_MANAGER + WAREHOUSE_STAFF */}
+          <Route path="kho" element={
+            <ProtectedRoute requireRole="WAREHOUSE_STAFF"><AdminKhoPage /></ProtectedRoute>
+          } />
+          <Route path="near-expiry-products" element={
+            <ProtectedRoute requireRole="WAREHOUSE_STAFF"><AdminNearExpiryProductsPage /></ProtectedRoute>
+          } />
+          {/* Đấu thầu — ADMIN + STORE_MANAGER */}
+          <Route path="procurement" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminProcurementPage /></ProtectedRoute>
+          } />
+          <Route path="procurement/:id" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminProcurementDetailPage /></ProtectedRoute>
+          } />
+          <Route path="suppliers" element={
+            <ProtectedRoute requireRole="STORE_MANAGER"><AdminSuppliersPage /></ProtectedRoute>
+          } />
         </Route>
       </Routes>
     </div>

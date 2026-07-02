@@ -3,17 +3,29 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 /**
- * Bảo vệ các route yêu cầu đăng nhập.
- * - requireEmployee: chỉ cho phép nhân viên (ADMIN / STAFF) truy cập
- * - requireUser: chỉ cho phép khách hàng đã đăng nhập truy cập
- * Nếu chưa đăng nhập → redirect về /login (kèm returnUrl để quay lại sau khi login)
- * Nếu không đủ quyền → redirect về /
+ * Bảo vệ các route yêu cầu đăng nhập / phân quyền.
+ *
+ * Props:
+ * - requireEmployee: chỉ nhân viên (bất kỳ role nội bộ) mới được vào
+ * - requireUser:     chỉ khách hàng đã đăng nhập
+ * - requireRole:     role tối thiểu cần có (theo hierarchy)
+ *     'ADMIN'           → chỉ ADMIN
+ *     'STORE_MANAGER'   → ADMIN + STORE_MANAGER
+ *     'WAREHOUSE_STAFF' → ADMIN + STORE_MANAGER + WAREHOUSE_STAFF
+ *     'SALES_STAFF'     → ADMIN + STORE_MANAGER + SALES_STAFF
+ *
+ * Nếu chưa đăng nhập       → redirect /login
+ * Nếu không đủ quyền        → redirect /admin (với thông báo)
  */
-const ProtectedRoute = ({ children, requireEmployee = false, requireUser = false }) => {
-  const { user, authLoading, isNhanVien } = useAuth();
+const ProtectedRoute = ({
+  children,
+  requireEmployee = false,
+  requireUser = false,
+  requireRole = null,
+}) => {
+  const { user, authLoading, isNhanVien, isAdmin, isStoreManager, isWarehouseStaff, isSalesStaff } = useAuth();
   const location = useLocation();
 
-  // Chờ AuthContext khởi tạo xong (đọc localStorage)
   if (authLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -22,19 +34,43 @@ const ProtectedRoute = ({ children, requireEmployee = false, requireUser = false
     );
   }
 
-  // Chưa đăng nhập → về trang login, lưu lại URL để redirect sau
+  // Chưa đăng nhập
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Yêu cầu là nhân viên (admin/staff) nhưng user là khách hàng
+  // Yêu cầu nhân viên nhưng là khách
   if (requireEmployee && !isNhanVien()) {
     return <Navigate to="/" replace />;
   }
 
-  // Yêu cầu là khách hàng nhưng user là nhân viên (edge case)
+  // Yêu cầu khách nhưng là nhân viên
   if (requireUser && user.type !== 'customer') {
     return <Navigate to="/admin" replace />;
+  }
+
+  // Kiểm tra role cụ thể
+  if (requireRole) {
+    let hasPermission = false;
+    switch (requireRole) {
+      case 'ADMIN':
+        hasPermission = isAdmin();
+        break;
+      case 'STORE_MANAGER':
+        hasPermission = isStoreManager();
+        break;
+      case 'WAREHOUSE_STAFF':
+        hasPermission = isWarehouseStaff();
+        break;
+      case 'SALES_STAFF':
+        hasPermission = isSalesStaff();
+        break;
+      default:
+        hasPermission = isNhanVien();
+    }
+    if (!hasPermission) {
+      return <Navigate to="/admin" replace />;
+    }
   }
 
   return children;

@@ -1,41 +1,77 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 
+// Helper: map từ BE role (ADMIN, STORE_MANAGER...) sang nhãn hiển thị
+const getRoleLabel = (vaiTro) => {
+  const map = {
+    'ADMIN': 'Admin',
+    'STORE_MANAGER': 'Cửa hàng trưởng',
+    'WAREHOUSE_STAFF': 'Nhân viên kho',
+    'SALES_STAFF': 'Nhân viên bán hàng',
+    'CUSTOMER': 'Khách hàng',
+    'STAFF': 'Nhân viên',  // backward compat
+  };
+  return map[(vaiTro || '').toUpperCase()] || vaiTro || 'Nhân viên';
+};
+
+// Helper: từ nhãn UI → role BE
+const getRoleCode = (label) => {
+  const map = {
+    'Admin': 'ADMIN',
+    'Cửa hàng trưởng': 'STORE_MANAGER',
+    'Nhân viên kho': 'WAREHOUSE_STAFF',
+    'Nhân viên bán hàng': 'SALES_STAFF',
+    'Nhân viên': 'STAFF',  // fallback
+  };
+  return map[label] || 'SALES_STAFF';  // mặc định là SALES_STAFF
+};
+
 const useAdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterRole, setFilterRole] = useState('All');
 
-  // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [formData, setFormData] = useState({
-    id: null, type: 'staff', role: 'Nhân viên', hoTen: '', tenDangNhap: '', matKhau: '', soDienThoai: ''
+    id: null,
+    type: 'staff',
+    role: 'Nhân viên bán hàng',  // mặc định
+    hoTen: '',
+    tenDangNhap: '',
+    matKhau: '',
+    soDienThoai: ''
   });
 
   const fetchAllAccounts = async () => {
     try {
       setLoading(true);
-      const [staffres, customersRes] = await Promise.all([
+      const [staffRes, customersRes] = await Promise.all([
         api.getEmployees(),
         api.getCustomers()
       ]);
 
-      const staffList = staffres.map(s => {
-        const roleStr = s.vaiTro || s.vai_tro || '';
+      const staffList = staffRes.map(s => {
+        const roleStr = s.vaiTro || s.vai_tro || 'STAFF';
         return {
           ...s,
           id: s.idNhanVien || s.id_nhan_vien,
-          role: roleStr.toUpperCase() === 'ADMIN' ? 'Admin' : 'Nhân viên',
-          type: 'staff'
+          role: getRoleLabel(roleStr),
+          type: 'staff',
+          tenDangNhap: s.tenDangNhap,
+          hoTen: s.hoTen,
+          soDienThoai: s.soDienThoai || '',
         };
       });
 
       const customerList = customersRes.map(c => ({
-        ...c, 
+        ...c,
         id: c.idNguoiDung,
         role: 'Khách hàng',
-        type: 'customer'
+        type: 'customer',
+        tenDangNhap: c.tenDangNhap,
+        hoTen: c.hoTen,
+        soDienThoai: c.soDienThoai || '',
       }));
 
       setUsers([...staffList, ...customerList].sort((a, b) => b.id - a.id));
@@ -52,15 +88,28 @@ const useAdminUsers = () => {
 
   const handleOpenAdd = () => {
     setModalMode('add');
-    setFormData({ id: null, type: 'staff', role: 'Nhân viên', hoTen: '', tenDangNhap: '', matKhau: '', soDienThoai: '' });
+    setFormData({
+      id: null,
+      type: 'staff',
+      role: 'Nhân viên bán hàng',
+      hoTen: '',
+      tenDangNhap: '',
+      matKhau: '',
+      soDienThoai: ''
+    });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (user) => {
     setModalMode('edit');
     setFormData({
-      id: user.id, type: user.type, role: user.role, hoTen: user.hoTen || '',
-      tenDangNhap: user.tenDangNhap || '', soDienThoai: user.soDienThoai || '', matKhau: ''
+      id: user.id,
+      type: user.type,
+      role: user.role,
+      hoTen: user.hoTen || '',
+      tenDangNhap: user.tenDangNhap || '',
+      soDienThoai: user.soDienThoai || '',
+      matKhau: ''
     });
     setIsModalOpen(true);
   };
@@ -83,25 +132,37 @@ const useAdminUsers = () => {
       if (modalMode === 'add') {
         if (formData.type === 'staff') {
           await api.createEmployee({
-             hoTen: formData.hoTen, tenDangNhap: formData.tenDangNhap, matKhau: formData.matKhau,
-             soDienThoai: formData.soDienThoai, vaiTro: formData.role === 'Admin' ? 'ADMIN' : 'STAFF'
+            hoTen: formData.hoTen,
+            tenDangNhap: formData.tenDangNhap,
+            matKhau: formData.matKhau,
+            soDienThoai: formData.soDienThoai,
+            vaiTro: getRoleCode(formData.role)
           });
         } else {
           await api.createCustomer({
-             hoTen: formData.hoTen, tenDangNhap: formData.tenDangNhap, matKhau: formData.matKhau, soDienThoai: formData.soDienThoai
+            hoTen: formData.hoTen,
+            tenDangNhap: formData.tenDangNhap,
+            matKhau: formData.matKhau,
+            soDienThoai: formData.soDienThoai
           });
         }
         alert('Đã thêm tài khoản mới thành công!');
       } else {
         if (formData.type === 'staff') {
-          await api.updateEmployee(formData.id, {
-             hoTen: formData.hoTen, soDienThoai: formData.soDienThoai,
-             vaiTro: formData.role === 'Admin' ? 'ADMIN' : 'STAFF', matKhau: formData.matKhau || undefined
-          });
+          const payload = {
+            hoTen: formData.hoTen,
+            soDienThoai: formData.soDienThoai,
+            vaiTro: getRoleCode(formData.role),
+          };
+          if (formData.matKhau) payload.matKhau = formData.matKhau;
+          await api.updateEmployee(formData.id, payload);
         } else {
-          await api.updateCustomer(formData.id, {
-             hoTen: formData.hoTen, soDienThoai: formData.soDienThoai, matKhau: formData.matKhau || undefined
-          });
+          const payload = {
+            hoTen: formData.hoTen,
+            soDienThoai: formData.soDienThoai,
+          };
+          if (formData.matKhau) payload.matKhau = formData.matKhau;
+          await api.updateCustomer(formData.id, payload);
         }
         alert('Cập nhật tài khoản thành công!');
       }
@@ -116,7 +177,6 @@ const useAdminUsers = () => {
 
   const filteredUsers = users.filter(u => filterRole === 'All' ? true : u.role === filterRole);
 
-  // Trả về những data và function mà UI cần dùng
   return {
     loading,
     filterRole, setFilterRole, filteredUsers,

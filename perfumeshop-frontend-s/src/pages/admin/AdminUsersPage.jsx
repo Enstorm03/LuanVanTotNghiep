@@ -21,7 +21,9 @@ const AdminUsersPage = () => {
           >
             <option value="All">Tất cả vai trò</option>
             <option value="Admin">Admin</option>
-            <option value="Nhân viên">Nhân viên</option>
+            <option value="Cửa hàng trưởng">Cửa hàng trưởng</option>
+            <option value="Nhân viên kho">Nhân viên kho</option>
+            <option value="Nhân viên bán hàng">Nhân viên bán hàng</option>
             <option value="Khách hàng">Khách hàng</option>
           </select>
 
@@ -59,8 +61,11 @@ const AdminUsersPage = () => {
                   <td className="p-4 text-sm text-gray-500">{user.tenDangNhap}</td>
                   <td className="p-4 text-center">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                      user.role === 'Admin' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
-                      user.role === 'Nhân viên' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 
+                      user.role === 'Admin'               ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                      user.role === 'Cửa hàng trưởng'    ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                      user.role === 'Nhân viên kho'       ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                      user.role === 'Nhân viên bán hàng'  ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' :
+                      user.role === 'Nhân viên'           ? 'bg-blue-100 text-blue-700 border border-blue-200' :
                       'bg-green-100 text-green-700 border border-green-200'
                     }`}>
                       {user.role}
@@ -126,8 +131,10 @@ const AdminUsersPage = () => {
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700">Phân quyền</label>
                   <select name="role" value={formData.role} onChange={handleChange} className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/50">
-                    <option value="Nhân viên">Nhân viên</option>
                     <option value="Admin">Admin</option>
+                    <option value="Cửa hàng trưởng">Cửa hàng trưởng</option>
+                    <option value="Nhân viên kho">Nhân viên kho</option>
+                    <option value="Nhân viên bán hàng">Nhân viên bán hàng</option>
                   </select>
                 </div>
               )}

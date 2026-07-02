@@ -11,6 +11,10 @@ export const useAuth = () => {
   return context;
 };
 
+// Danh sách vai trò hợp lệ cho nhân viên
+// Hierarchy: ADMIN > STORE_MANAGER > WAREHOUSE_STAFF / SALES_STAFF
+const EMPLOYEE_ROLES = ['ADMIN', 'STORE_MANAGER', 'WAREHOUSE_STAFF', 'SALES_STAFF'];
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,7 +23,14 @@ export const AuthProvider = ({ children }) => {
     const savedUser = sessionStorage.getItem('user');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        // Nếu là nhân viên nhưng không có token → session cũ, xóa đi
+        // để buộc đăng nhập lại lấy JWT mới
+        if (parsed.type === 'employee' && !parsed.token) {
+          sessionStorage.removeItem('user');
+        } else {
+          setUser(parsed);
+        }
       } catch (e) {
         sessionStorage.removeItem('user');
       }
@@ -34,15 +45,15 @@ export const AuthProvider = ({ children }) => {
         matKhau: data.matKhau
       });
 
-      // Chỉ sử dụng vai_tro, không dùng role nữa
       const userData = {
         id: loginData.userId,
         id_nguoi_dung: loginData.userId,
         id_nhan_vien: loginData.userId,
         ten_dang_nhap: data.tenDangNhap,
         ho_ten: loginData.displayName,
-        type: loginData.type,            // 'employee' hoặc 'customer'
-        vai_tro: loginData.role          // Lấy từ BE 'ADMIN' hoặc 'STAFF'
+        type: loginData.type,       // 'employee' hoặc 'customer'
+        vai_tro: loginData.role,    // 'ADMIN' | 'STORE_MANAGER' | 'WAREHOUSE_STAFF' | 'SALES_STAFF' | 'CUSTOMER'
+        token: loginData.token,     // JWT token
       };
 
       setUser(userData);
@@ -61,18 +72,42 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/';
   };
 
-  // QUAN TRỌNG: Chỉ trả về true nếu thực sự là ADMIN
-  const isAdmin = () => {
-    if (!user) return false;
-    const vaiTro = (user.vai_tro || '').toUpperCase();
-    return vaiTro === 'ADMIN';
-  };
+  // ========== Role Helpers ==========
 
-  // Dành cho mọi nhân viên nội bộ (bao gồm cả Admin và Staff) để vào CMS
+  const getRole = () => (user?.vai_tro || '').toUpperCase();
+
+  /** Chỉ ADMIN */
+  const isAdmin = () => getRole() === 'ADMIN';
+
+  /** ADMIN + STORE_MANAGER */
+  const isStoreManager = () => ['ADMIN', 'STORE_MANAGER'].includes(getRole());
+
+  /** ADMIN + STORE_MANAGER + WAREHOUSE_STAFF */
+  const isWarehouseStaff = () => ['ADMIN', 'STORE_MANAGER', 'WAREHOUSE_STAFF'].includes(getRole());
+
+  /** ADMIN + STORE_MANAGER + SALES_STAFF */
+  const isSalesStaff = () => ['ADMIN', 'STORE_MANAGER', 'SALES_STAFF'].includes(getRole());
+
+  /** Bất kỳ nhân viên nội bộ nào (để vào CMS) */
   const isNhanVien = () => {
     if (!user) return false;
-    const vaiTro = (user.vai_tro || '').toUpperCase();
-    return user.type === 'employee' || vaiTro === 'ADMIN' || vaiTro === 'STAFF';
+    return user.type === 'employee' || EMPLOYEE_ROLES.includes(getRole());
+  };
+
+  /** Khách hàng đã đăng nhập */
+  const isUser = () => user !== null && user.type === 'customer';
+
+  // ========== Helpers lấy nhãn hiển thị của vai trò ==========
+  const getRoleLabel = (vaiTro) => {
+    const map = {
+      'ADMIN': 'Admin',
+      'STORE_MANAGER': 'Cửa hàng trưởng',
+      'WAREHOUSE_STAFF': 'Nhân viên kho',
+      'SALES_STAFF': 'Nhân viên bán hàng',
+      'CUSTOMER': 'Khách hàng',
+      'STAFF': 'Nhân viên',       // backward compat
+    };
+    return map[(vaiTro || '').toUpperCase()] || vaiTro || 'Không xác định';
   };
 
   const value = {
@@ -80,10 +115,16 @@ export const AuthProvider = ({ children }) => {
     authLoading: loading,
     loginUser,
     logout,
-    isAdmin,      // Để check hiện mục "Tài khoản"
-    isNhanVien,   // Để check quyền vào trang Admin CMS
-    isUser: () => user !== null && user.type === 'customer',
-    getCurrentUser: () => user
+    // Role checks
+    isAdmin,
+    isStoreManager,
+    isWarehouseStaff,
+    isSalesStaff,
+    isNhanVien,
+    isUser,
+    getRole,
+    getRoleLabel,
+    getCurrentUser: () => user,
   };
 
   return (

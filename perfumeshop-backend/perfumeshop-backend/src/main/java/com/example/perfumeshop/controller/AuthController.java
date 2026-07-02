@@ -8,6 +8,7 @@ import com.example.perfumeshop.entity.NhanVien;
 import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.NguoiDungRepository;
 import com.example.perfumeshop.repository.NhanVienRepository;
+import com.example.perfumeshop.security.JwtUtil;
 import com.example.perfumeshop.service.AdminUserService;
 import com.example.perfumeshop.service.EmailVerificationService;
 import com.example.perfumeshop.service.PasswordService;
@@ -21,7 +22,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
@@ -39,6 +39,9 @@ public class AuthController {
     @Autowired
     private EmailVerificationService emailVerificationService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
         String username = req.getTenDangNhap();
@@ -48,14 +51,15 @@ public class AuthController {
         var nvOpt = nhanVienRepository.findByTenDangNhap(username);
         if (nvOpt.isPresent()) {
             NhanVien nv = nvOpt.get();
-            // CHỈ SỬ DỤNG BCRYPT ĐỂ KIỂM TRA MẬT KHẨU
             if (passwordService.matches(rawPassword, nv.getMatKhauBam())) {
+                String token = jwtUtil.generateEmployeeToken(nv.getIdNhanVien(), nv.getTenDangNhap(), nv.getVaiTro());
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
                 body.put("type", "employee");
                 body.put("userId", nv.getIdNhanVien());
                 body.put("displayName", nv.getHoTen());
                 body.put("role", nv.getVaiTro());
+                body.put("token", token);
                 return ResponseEntity.ok(body);
             }
         }
@@ -64,23 +68,25 @@ public class AuthController {
         var khOpt = nguoiDungRepository.findByTenDangNhap(username);
         if (khOpt.isPresent()) {
             NguoiDung kh = khOpt.get();
-            // CHỈ SỬ DỤNG BCRYPT ĐỂ KIỂM TRA MẬT KHẨU
             if (passwordService.matches(rawPassword, kh.getMatKhauBam())) {
                 // Kiểm tra email đã xác thực chưa
                 if (kh.getIsVerified() != null && !kh.getIsVerified()) {
                     throw new BusinessException("Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn.");
                 }
-                
+
+                String token = jwtUtil.generateCustomerToken(kh.getIdNguoiDung(), kh.getTenDangNhap());
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
                 body.put("type", "customer");
                 body.put("userId", kh.getIdNguoiDung());
                 body.put("displayName", kh.getHoTen());
+                body.put("role", "CUSTOMER");
+                body.put("token", token);
                 return ResponseEntity.ok(body);
             }
         }
 
-        // Bước 3: Không khớp (Sai tài khoản hoặc mật khẩu)
+        // Bước 3: Không khớp
         throw new BusinessException("Sai tài khoản hoặc mật khẩu");
     }
 

@@ -10,10 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class AdminUserService {
+
+    /** Danh sách vai trò hợp lệ cho nhân viên */
+    private static final Set<String> VALID_ROLES = Set.of(
+            "ADMIN", "STORE_MANAGER", "WAREHOUSE_STAFF", "SALES_STAFF"
+    );
 
     @Autowired
     private NhanVienRepository nhanVienRepository;
@@ -23,6 +29,13 @@ public class AdminUserService {
 
     @Autowired
     private PasswordService passwordService;
+
+    private void validateRole(String vaiTro) {
+        if (vaiTro == null || !VALID_ROLES.contains(vaiTro.toUpperCase())) {
+            throw new BusinessException("Vai trò không hợp lệ: " + vaiTro
+                    + ". Các vai trò được phép: " + VALID_ROLES);
+        }
+    }
 
     // ================= Nhân viên =================
 
@@ -38,17 +51,19 @@ public class AdminUserService {
     public NhanVienResponse createNhanVien(CreateNhanVienRequest req) {
         nhanVienRepository.findByTenDangNhap(req.getTenDangNhap())
                 .ifPresent(x -> { throw new BusinessException("Tên đăng nhập đã tồn tại"); });
+        validateRole(req.getVaiTro());
         NhanVien nv = new NhanVien();
         nv.setTenDangNhap(req.getTenDangNhap());
         nv.setMatKhauBam(passwordService.encode(req.getMatKhau()));
         nv.setHoTen(req.getHoTen());
-        nv.setVaiTro(req.getVaiTro());
+        nv.setVaiTro(req.getVaiTro().toUpperCase());
         return NhanVienResponse.from(nhanVienRepository.save(nv));
     }
 
     public NhanVienResponse updateNhanVienRole(Integer id, UpdateNhanVienRoleRequest req) {
         NhanVien nv = getNhanVienEntity(id);
-        nv.setVaiTro(req.getVaiTro());
+        validateRole(req.getVaiTro());
+        nv.setVaiTro(req.getVaiTro().toUpperCase());
         return NhanVienResponse.from(nhanVienRepository.save(nv));
     }
 

@@ -917,16 +917,16 @@ const TabLoHang = () => {
 
 /* ── Trang chính ── */
 const AdminKhoPage = () => {
-  const { user } = useAuth();
+  const { user, isStoreManager } = useAuth();
   const nhanVienId = user?.id_nhan_vien || user?.id || null;
   const [tab, setTab] = useState('po-kiem-tra');
 
   const tabs = [
-    { id: 'po-kiem-tra',    label: 'PO chờ kiểm tra',    icon: 'inventory_2',   badge: true },
-    { id: 'po-admin-duyet', label: 'Chờ admin duyệt',    icon: 'fact_check',    badge: true },
+    { id: 'po-kiem-tra',    label: 'Kho kiểm tra',    icon: 'inventory_2',   badge: true },
+    // Tab duyệt cuối chỉ hiện với ADMIN + STORE_MANAGER
+    ...(isStoreManager() ? [{ id: 'po-admin-duyet', label: 'Chờ cửa hàng trưởng duyệt', icon: 'fact_check', badge: true }] : []),
     { id: 'lo-hang',        label: 'Quản lý lô hàng',    icon: 'layers'        },
     { id: 'bien-dong',      label: 'Biến động kho',       icon: 'history'       },
-    // { id: 'ban-cham',       label: 'Bán chậm',            icon: 'trending_down' },
     { id: 'phieu-nhap',     label: 'Lịch sử nhập kho',   icon: 'receipt'       },
   ];
 
@@ -937,11 +937,6 @@ const AdminKhoPage = () => {
           <h1 className="font-semibold text-lg md:text-2xl text-text-light dark:text-text-dark">Quản lý Kho</h1>
           <p className="text-sm text-gray-500 mt-0.5">Kiểm tra hàng nhập · Duyệt PO · Lịch sử biến động</p>
         </div>
-        {/* <a href="/admin/import-kho"
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors">
-          <span className="material-symbols-outlined text-base">upload_file</span>
-          Nhập kho CSV/Excel
-        </a> */}
       </div>
 
       {/* Tab bar */}
@@ -960,10 +955,9 @@ const AdminKhoPage = () => {
       </div>
 
       {tab === 'po-kiem-tra'    && <TabPoChoKiemTra nhanVienId={nhanVienId} />}
-      {tab === 'po-admin-duyet' && <TabPoChoAdminDuyet nhanVienId={nhanVienId} />}
+      {tab === 'po-admin-duyet' && isStoreManager() && <TabPoChoAdminDuyet nhanVienId={nhanVienId} />}
       {tab === 'lo-hang'        && <TabLoHang />}
       {tab === 'bien-dong'      && <TabBienDong />}
-      {tab === 'ban-cham'       && <TabBanCham />}
       {tab === 'phieu-nhap'     && <TabPhieuNhap />}
     </div>
   );

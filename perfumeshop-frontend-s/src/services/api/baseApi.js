@@ -3,17 +3,55 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 class BaseApi {
+  // Lấy JWT token từ sessionStorage
+  _getToken() {
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const parsed = JSON.parse(user);
+        return parsed.token || null;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  }
+
   // Hàm helper để thực hiện fetch request với xử lý lỗi
   async _fetch(url, options = {}) {
     const { headers: extraHeaders, ...restOptions } = options;
+    const token = this._getToken();
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
     const response = await fetch(url, {
       ...restOptions,
       headers: {
         'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 'true',
+        ...authHeaders,
         ...extraHeaders,
       },
     });
+
+    // Token hết hạn hoặc không hợp lệ → xóa session và redirect login
+    if (response.status === 401) {
+      sessionStorage.removeItem('user');
+      window.location.href = '/login';
+      throw new Error('Phiên đăng nhập hết hạn, vui lòng đăng nhập lại');
+    }
+
+    // Forbidden — token không có quyền hoặc thiếu token với protected route
+    if (response.status === 403) {
+      const token = this._getToken();
+      if (!token) {
+        // Chưa login hoặc session cũ không có token → force re-login
+        sessionStorage.removeItem('user');
+        window.location.href = '/login';
+        throw new Error('Vui lòng đăng nhập lại');
+      }
+      throw new Error(await this._getErrorMessage(response));
+    }
+
     if (!response.ok) throw new Error(await this._getErrorMessage(response));
     return response.json();
   }

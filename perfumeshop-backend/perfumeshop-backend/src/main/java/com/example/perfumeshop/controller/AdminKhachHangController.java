@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/khach-hang")
-@CrossOrigin(origins = "*")
 public class AdminKhachHangController {
 
     @Autowired

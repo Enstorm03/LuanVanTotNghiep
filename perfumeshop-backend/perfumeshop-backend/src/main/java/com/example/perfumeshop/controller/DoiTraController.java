@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/doi-tra")
-@CrossOrigin(origins = "*")
 public class DoiTraController {
 
     @Autowired

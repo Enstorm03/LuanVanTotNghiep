@@ -92,10 +92,10 @@ const AdminNearExpiryProductsPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                {batches.map((batch) => {
+                {batches.map((batch, idx) => {
                   const days = daysUntilExpiry(batch.hanSuDung);
                   return (
-                    <tr key={batch.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
+                    <tr key={batch.id ?? batch.idLoHang ?? batch.idSanPham ?? idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
                       <td className="px-6 py-3 font-medium text-text-light dark:text-text-dark">
                         {batch.tenSanPham}
                       </td>

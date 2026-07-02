@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/don-hang")
-@CrossOrigin(origins = "*")
 public class DonHangController {
 
     @Autowired

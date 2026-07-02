@@ -93,6 +93,7 @@ const api = {
   getEmployees: employeeApi.getEmployees.bind(employeeApi),
   getEmployee: employeeApi.getEmployee.bind(employeeApi),
   createEmployee: employeeApi.createEmployee.bind(employeeApi),
+  updateEmployee: employeeApi.updateEmployee.bind(employeeApi),
   updateEmployeeRole: employeeApi.updateEmployeeRole.bind(employeeApi),
   resetEmployeePassword: employeeApi.resetEmployeePassword.bind(employeeApi),
   deleteEmployee: employeeApi.deleteEmployee.bind(employeeApi),

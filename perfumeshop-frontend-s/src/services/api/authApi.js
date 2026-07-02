@@ -19,7 +19,7 @@ class AuthApi extends BaseApi {
   // Register customer method
   async registerCustomer(customerData) {
     try {
-      return await this._fetch(`${API_BASE_URL}/auth/register`, {
+      return await this._fetch(`${API_BASE_URL}/auth/register-customer`, {
         method: 'POST',
         body: JSON.stringify(customerData),
       });

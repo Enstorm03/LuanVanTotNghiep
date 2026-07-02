@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 const STATUS_STYLE = {
   'Chờ duyệt':            'bg-yellow-100 text-yellow-800',
@@ -9,6 +10,7 @@ const STATUS_STYLE = {
 
 const ReturnItem = ({ returnItem, onApprove, onConfirmRefund, onReject, processing }) => {
   const isProcessing = processing === returnItem.idDoiTra;
+  const { isStoreManager } = useAuth();
 
   return (
     <div className="border border-border-light dark:border-border-dark rounded-lg p-4">
@@ -77,15 +79,21 @@ const ReturnItem = ({ returnItem, onApprove, onConfirmRefund, onReject, processi
             </>
           )}
 
-          {/* Bước 2: Xác nhận đã hoàn tiền */}
+          {/* Bước 2: Xác nhận đã hoàn tiền — chỉ ADMIN + STORE_MANAGER */}
           {returnItem.trangThai === 'Chờ hoàn tiền' && (
-            <button
-              onClick={() => onConfirmRefund(returnItem.idDoiTra, returnItem.soTienHoan)}
-              disabled={isProcessing}
-              className="px-3 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50 whitespace-nowrap"
-            >
-              {isProcessing ? 'Đang xử lý...' : '💰 Đã hoàn tiền'}
-            </button>
+            isStoreManager() ? (
+              <button
+                onClick={() => onConfirmRefund(returnItem.idDoiTra, returnItem.soTienHoan)}
+                disabled={isProcessing}
+                className="px-3 py-2 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50 whitespace-nowrap"
+              >
+                {isProcessing ? 'Đang xử lý...' : '💰 Đã hoàn tiền'}
+              </button>
+            ) : (
+              <span className="px-3 py-2 bg-gray-100 text-gray-400 text-xs rounded border border-gray-200 whitespace-nowrap">
+                Chờ cửa hàng trưởng duyệt
+              </span>
+            )
           )}
         </div>
       </div>

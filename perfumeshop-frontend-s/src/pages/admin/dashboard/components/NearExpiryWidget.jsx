@@ -87,7 +87,7 @@ const NearExpiryWidget = () => {
           const days = daysUntilExpiry(batch.hanSuDung);
           return (
             <div
-              key={batch.id}
+              key={batch.id ?? batch.idLoHang ?? batch.idSanPham ?? idx}
               className={`p-4 border-l-4 border-l-orange-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer ${getStatusColor(days)}`}
               onClick={() => navigate(`/admin/near-expiry-products?batchId=${batch.id}`)}
             >

@@ -153,11 +153,22 @@ public class UserProfileController {
     private HttpServletRequest request;
 
     /**
-     * Lấy ID của user từ context (session/token)
-     * Lấy từ header X-User-Id được gửi từ client
+     * Lấy ID của user từ JWT token trong SecurityContext
      */
     private Integer getUserIdFromContext() {
         try {
+            // Ưu tiên lấy từ JWT (SecurityContext)
+            var authentication = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()
+                    && !"anonymousUser".equals(authentication.getPrincipal())) {
+                // Username trong JWT chính là tenDangNhap
+                String username = authentication.getName();
+                return nguoiDungRepository.findByTenDangNhap(username)
+                    .map(NguoiDung::getIdNguoiDung)
+                    .orElse(null);
+            }
+            // Fallback: lấy từ header X-User-Id (backward compat)
             String userIdHeader = request.getHeader("X-User-Id");
             if (userIdHeader != null && !userIdHeader.isEmpty()) {
                 return Integer.parseInt(userIdHeader);
@@ -178,6 +189,7 @@ public class UserProfileController {
         response.put("ho_ten", user.getHoTen());
         response.put("so_dien_thoai", user.getSoDienThoai());
         response.put("dia_chi", user.getDiaChi());
+        response.put("email", user.getEmail());
         return response;
     }
 }

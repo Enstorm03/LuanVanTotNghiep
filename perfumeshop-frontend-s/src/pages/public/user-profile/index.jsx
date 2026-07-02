@@ -13,6 +13,7 @@ const UserProfilePage = () => {
 
   const [formData, setFormData] = useState({
     hoTen: '',
+    email: '',
     soDienThoai: '',
     diaChi: '',
   });
@@ -26,18 +27,20 @@ const UserProfilePage = () => {
         const response = await api.getProfile?.();
         if (response) {
           setFormData({
-            hoTen: response.ho_ten || '',
-            soDienThoai: response.so_dien_thoai || '',
-            diaChi: response.dia_chi || '',
+            hoTen:        response.ho_ten        || response.hoTen        || '',
+            email:        response.email         || '',
+            soDienThoai:  response.so_dien_thoai || response.soDienThoai  || '',
+            diaChi:       response.dia_chi       || response.diaChi       || '',
           });
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
         if (user) {
           setFormData({
-            hoTen: user.ho_ten || '',
+            hoTen:       user.ho_ten       || '',
+            email:       user.email        || '',
             soDienThoai: user.so_dien_thoai || '',
-            diaChi: user.dia_chi || '',
+            diaChi:      user.dia_chi      || '',
           });
         }
       } finally {
@@ -47,9 +50,10 @@ const UserProfilePage = () => {
     
     if (user) {
       setFormData({
-        hoTen: user.ho_ten || '',
+        hoTen:       user.ho_ten       || '',
+        email:       user.email        || '',
         soDienThoai: user.so_dien_thoai || '',
-        diaChi: user.dia_chi || '',
+        diaChi:      user.dia_chi      || '',
       });
       fetchUserProfile();
     }

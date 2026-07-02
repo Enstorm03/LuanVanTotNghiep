@@ -31,6 +31,32 @@ class EmployeeApi extends BaseApi {
     }
   }
 
+  // Cập nhật thông tin + vai trò nhân viên
+  async updateEmployee(id, data) {
+    try {
+      // Tách vai trò ra để gọi đúng endpoint
+      const { vaiTro, matKhau, ...infoData } = data;
+      // Cập nhật vai trò nếu có
+      if (vaiTro) {
+        await this._fetch(`${API_BASE_URL}/admin/nhan-vien/${id}/role`, {
+          method: 'POST',
+          body: JSON.stringify({ vaiTro }),
+        });
+      }
+      // Đổi mật khẩu nếu có
+      if (matKhau) {
+        await this._fetch(`${API_BASE_URL}/admin/nhan-vien/${id}/reset-password`, {
+          method: 'POST',
+          body: JSON.stringify({ newPassword: matKhau }),
+        });
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Lỗi cập nhật nhân viên:', error);
+      throw error;
+    }
+  }
+
   // Cập nhật vai trò nhân viên
   async updateEmployeeRole(id, roleData) {
     try {
@@ -44,10 +70,12 @@ class EmployeeApi extends BaseApi {
   // Đặt lại mật khẩu nhân viên
   async resetEmployeePassword(id, passwordData) {
     try {
+      const token = this._getToken();
       const response = await fetch(`${API_BASE_URL}/admin/nhan-vien/${id}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(passwordData),
       });
@@ -56,12 +84,11 @@ class EmployeeApi extends BaseApi {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Handle empty response (204 No Content)
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       } else {
-        return {}; // Return empty object for non-JSON responses
+        return {};
       }
     } catch (error) {
       console.error('Lỗi đặt lại mật khẩu nhân viên:', error);
@@ -72,10 +99,12 @@ class EmployeeApi extends BaseApi {
   // Xóa nhân viên
   async deleteEmployee(id) {
     try {
+      const token = this._getToken();
       const response = await fetch(`${API_BASE_URL}/admin/nhan-vien/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
       });
 
@@ -83,12 +112,11 @@ class EmployeeApi extends BaseApi {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Handle empty response (204 No Content)
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       } else {
-        return {}; // Return empty object for non-JSON responses
+        return {};
       }
     } catch (error) {
       console.error('Lỗi xóa nhân viên:', error);

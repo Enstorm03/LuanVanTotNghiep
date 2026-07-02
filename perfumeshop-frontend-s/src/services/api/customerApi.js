@@ -44,10 +44,12 @@ class CustomerApi extends BaseApi {
   // Đặt lại mật khẩu khách hàng
   async resetCustomerPassword(id, passwordData) {
     try {
+      const token = this._getToken();
       const response = await fetch(`${API_BASE_URL}/admin/khach-hang/${id}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(passwordData),
       });
@@ -56,12 +58,11 @@ class CustomerApi extends BaseApi {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Handle empty response (204 No Content)
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       } else {
-        return {}; // Return empty object for non-JSON responses
+        return {};
       }
     } catch (error) {
       console.error('Lỗi đặt lại mật khẩu khách hàng:', error);
@@ -72,11 +73,12 @@ class CustomerApi extends BaseApi {
   // Xóa khách hàng
   async deleteCustomer(id) {
     try {
+      const token = this._getToken();
       const response = await fetch(`${API_BASE_URL}/admin/khach-hang/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          // Add auth header if needed
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
       });
 
@@ -84,12 +86,11 @@ class CustomerApi extends BaseApi {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Handle empty response (204 No Content)
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
       } else {
-        return {}; // Return empty object for non-JSON responses
+        return {};
       }
     } catch (error) {
       console.error('Lỗi xóa khách hàng:', error);

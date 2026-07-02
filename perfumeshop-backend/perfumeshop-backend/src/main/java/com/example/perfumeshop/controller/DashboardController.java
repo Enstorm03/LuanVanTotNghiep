@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/dashboard")
-@CrossOrigin(origins = "*")
 public class DashboardController {
 
     @Autowired

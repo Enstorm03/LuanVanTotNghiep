@@ -1,0 +1,279 @@
+@startuml
+' ============================================
+' USE CASE DIAGRAM - TỔNG QUAN HỆ THỐNG
+' Perfume Shop Management System
+' Version: 1.0
+' Date: 2026-07-02
+' ============================================
+
+' Cấu hình
+skinparam dpi 300
+skinparam defaultFontName Arial Unicode MS
+skinparam packageStyle rectangle
+
+' Màu sắc
+skinparam actorBackgroundColor #E8F5E9
+skinparam usecaseBackgroundColor #E3F2FD
+skinparam packageBackgroundColor #FFF9C4
+
+' ============================================
+' ACTORS (6 vai trò)
+' ============================================
+
+:Khách Hàng: as Customer
+:Nhân Viên\nBán Hàng: as Sales
+:Nhân Viên Kho: as Warehouse
+:Cửa Hàng Trưởng: as StoreManager
+:Admin: as Admin
+:Nhà Cung Cấp: as Supplier
+
+' ============================================
+' HỆ THỐNG
+' ============================================
+
+rectangle "Perfume Shop Management System" {
+  
+  ' --- PACKAGE: QUẢN LÝ TÀI KHOẢN ---
+  package "Quản lý Tài khoản" #LightYellow {
+    usecase "Đăng ký" as UC1
+    usecase "Đăng nhập" as UC2
+    usecase "Xác thực Email" as UC3
+    usecase "Quản lý Profile" as UC4
+    usecase "Đổi mật khẩu" as UC5
+  }
+  
+  ' --- PACKAGE: MUA SẮM TRỰC TUYẾN ---
+  package "Mua sắm Online" #LightCyan {
+    usecase "Tìm kiếm\nSản phẩm" as UC10
+    usecase "Xem chi tiết\nSản phẩm" as UC11
+    usecase "Thêm vào\nGiỏ hàng" as UC12
+    usecase "Đặt hàng" as UC13
+    usecase "Thanh toán\nVNPay" as UC14
+    usecase "Theo dõi\nĐơn hàng" as UC15
+    usecase "Hủy đơn hàng" as UC16
+    usecase "Đánh giá\nSản phẩm" as UC17
+    usecase "Yêu cầu\nĐổi trả" as UC18
+  }
+  
+  ' --- PACKAGE: QUẢN LÝ SẢN PHẨM ---
+  package "Quản lý Sản phẩm" #LightGreen {
+    usecase "CRUD Sản phẩm" as UC20
+    usecase "Quản lý\nDanh mục" as UC21
+    usecase "Quản lý\nThương hiệu" as UC22
+    usecase "Upload\nHình ảnh" as UC23
+  }
+  
+  ' --- PACKAGE: QUẢN LÝ KHO ---
+  package "Quản lý Kho" #LightSalmon {
+    usecase "Nhập kho\n(FEFO)" as UC30
+    usecase "Quản lý\nBatch/Lot" as UC31
+    usecase "Kiểm tra\nTồn kho" as UC32
+    usecase "Cảnh báo\nHết hạn" as UC33
+    usecase "Tạo Pick List\n(FEFO)" as UC34
+    usecase "Import/Export\nCSV" as UC35
+    usecase "Kiểm kê kho" as UC36
+  }
+  
+  ' --- PACKAGE: XỬ LÝ ĐƠN HÀNG ---
+  package "Xử lý Đơn hàng" #LightPink {
+    usecase "Xem danh sách\nĐơn hàng" as UC40
+    usecase "Xác nhận\nĐơn hàng" as UC41
+    usecase "Cập nhật\nTrạng thái" as UC42
+    usecase "Xử lý Hủy\nđơn" as UC43
+    usecase "Xử lý Đổi trả" as UC44
+    usecase "Giao hàng" as UC45
+  }
+  
+  ' --- PACKAGE: PROCUREMENT (ĐẤU THẦU) ---
+  package "Procurement" #Lavender {
+    usecase "Tạo Phiếu\nGọi thầu" as UC50
+    usecase "Đề xuất\nSản phẩm" as UC51
+    usecase "Đề xuất Giá" as UC52
+    usecase "Duyệt Đề xuất" as UC53
+    usecase "Quyết định\nTrúng thầu" as UC54
+    usecase "Quản lý\nHợp đồng" as UC55
+  }
+  
+  ' --- PACKAGE: BÁO CÁO & THỐNG KÊ ---
+  package "Báo cáo & Thống kê" #MistyRose {
+    usecase "Dashboard" as UC60
+    usecase "Báo cáo\nDoanh thu" as UC61
+    usecase "Báo cáo\nTồn kho" as UC62
+    usecase "Sales Velocity\nAnalysis" as UC63
+    usecase "Báo cáo\nProfit Margin" as UC64
+    usecase "Xuất báo cáo\nExcel" as UC65
+  }
+  
+  ' --- PACKAGE: QUẢN TRỊ HỆ THỐNG ---
+  package "Quản trị Hệ thống" #LightGoldenRodYellow {
+    usecase "Quản lý\nNgười dùng" as UC70
+    usecase "Phân quyền\n(RBAC)" as UC71
+    usecase "Quản lý\nCấu hình" as UC72
+    usecase "Audit Logs" as UC73
+    usecase "Backup/Restore" as UC74
+  }
+  
+  ' --- PACKAGE: CHIẾN DỊCH MARKETING ---
+  package "Marketing" #Honeydew {
+    usecase "Quản lý\nSự kiện" as UC80
+    usecase "Quản lý\nVoucher" as UC81
+    usecase "Email\nMarketing" as UC82
+    usecase "Áp dụng\nKhuyến mãi" as UC83
+  }
+}
+
+' ============================================
+' RELATIONSHIPS - KHÁCH HÀNG
+' ============================================
+Customer --> UC1
+Customer --> UC2
+Customer --> UC3
+Customer --> UC4
+Customer --> UC5
+Customer --> UC10
+Customer --> UC11
+Customer --> UC12
+Customer --> UC13
+Customer --> UC14
+Customer --> UC15
+Customer --> UC16
+Customer --> UC17
+Customer --> UC18
+
+' ============================================
+' RELATIONSHIPS - NHÂN VIÊN BÁN HÀNG
+' ============================================
+Sales --> UC2
+Sales --> UC4
+Sales --> UC5
+Sales --> UC10
+Sales --> UC11
+Sales --> UC13 : Tạo đơn cho khách
+Sales --> UC40
+Sales --> UC41
+Sales --> UC42
+Sales --> UC83 : Áp dụng cho khách
+Sales --> UC60
+
+' ============================================
+' RELATIONSHIPS - NHÂN VIÊN KHO
+' ============================================
+Warehouse --> UC2
+Warehouse --> UC4
+Warehouse --> UC5
+Warehouse --> UC30
+Warehouse --> UC31
+Warehouse --> UC32
+Warehouse --> UC33
+Warehouse --> UC34
+Warehouse --> UC35
+Warehouse --> UC36
+Warehouse --> UC42 : Đã chuẩn bị hàng
+Warehouse --> UC62
+
+' ============================================
+' RELATIONSHIPS - CỬA HÀNG TRƯỞNG
+' ============================================
+StoreManager --> UC2
+StoreManager --> UC4
+StoreManager --> UC5
+StoreManager --> UC20
+StoreManager --> UC21
+StoreManager --> UC22
+StoreManager --> UC23
+StoreManager --> UC30
+StoreManager --> UC32
+StoreManager --> UC33
+StoreManager --> UC40
+StoreManager --> UC41
+StoreManager --> UC42
+StoreManager --> UC43
+StoreManager --> UC44
+StoreManager --> UC45
+StoreManager --> UC50
+StoreManager --> UC53
+StoreManager --> UC54
+StoreManager --> UC60
+StoreManager --> UC61
+StoreManager --> UC62
+StoreManager --> UC63
+StoreManager --> UC80
+StoreManager --> UC81
+
+' ============================================
+' RELATIONSHIPS - ADMIN
+' ============================================
+Admin --> UC2
+Admin --> UC4
+Admin --> UC5
+Admin --> UC20
+Admin --> UC21
+Admin --> UC22
+Admin --> UC23
+Admin --> UC30
+Admin --> UC32
+Admin --> UC33
+Admin --> UC40
+Admin --> UC41
+Admin --> UC42
+Admin --> UC43
+Admin --> UC44
+Admin --> UC45
+Admin --> UC50
+Admin --> UC53
+Admin --> UC54
+Admin --> UC55
+Admin --> UC60
+Admin --> UC61
+Admin --> UC62
+Admin --> UC63
+Admin --> UC64
+Admin --> UC65
+Admin --> UC70
+Admin --> UC71
+Admin --> UC72
+Admin --> UC73
+Admin --> UC74
+Admin --> UC80
+Admin --> UC81
+Admin --> UC82
+
+' ============================================
+' RELATIONSHIPS - NHÀ CUNG CẤP
+' ============================================
+Supplier --> UC2
+Supplier --> UC4
+Supplier --> UC5
+Supplier --> UC51
+Supplier --> UC52
+Supplier --> UC55 : Xem hợp đồng
+
+' ============================================
+' EXTEND & INCLUDE RELATIONSHIPS
+' ============================================
+UC13 ..> UC14 : <<include>>
+UC13 ..> UC32 : <<include>>\nKiểm tra tồn kho
+UC41 ..> UC34 : <<include>>\nTạo pick list
+UC30 ..> UC31 : <<include>>
+UC33 ..> UC32 : <<extend>>
+UC18 ..> UC15 : <<extend>>
+
+' ============================================
+' NOTES
+' ============================================
+note right of Admin
+  Admin có toàn quyền
+  truy cập hệ thống
+end note
+
+note right of Supplier
+  Supplier chỉ truy cập
+  qua Portal riêng
+end note
+
+note bottom of "Quản lý Kho"
+  Sử dụng phương pháp FEFO
+  (First Expired, First Out)
+end note
+
+@enduml

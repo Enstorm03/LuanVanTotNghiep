@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/nha-cung-cap")
-@CrossOrigin(origins = "*")
 public class NhaCungCapController {
 
     @Autowired

@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/kho")
-@CrossOrigin(origins = "*")
 public class KhoController {
 
     @Autowired

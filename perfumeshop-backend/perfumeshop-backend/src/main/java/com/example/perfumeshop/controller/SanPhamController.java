@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/san-pham")
-@CrossOrigin(origins = "*")
 public class SanPhamController {
 
     @Autowired

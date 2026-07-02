@@ -81,7 +81,9 @@ const ProfileInfoTab = ({ formData, setFormData, setError, setSuccess, user }) =
               Email
             </div>
           </label>
-          <p className="text-text-secondary-light dark:text-text-secondary-dark">{user?.email || 'Chưa cập nhật'}</p>
+          <p className="text-text-secondary-light dark:text-text-secondary-dark">
+            {formData.email || 'Chưa cập nhật'}
+          </p>
           <p className="text-xs text-gray-500 mt-1">Email không thể thay đổi</p>
         </div>
 
