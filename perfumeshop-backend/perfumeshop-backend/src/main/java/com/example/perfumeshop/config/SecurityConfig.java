@@ -80,31 +80,30 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/procurement/*/bao-gia").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/procurement/*/de-xuat-san-pham").permitAll()
 
-                // ======== CHỈ ADMIN ========
-                // Quản lý tài khoản nhân viên & khách hàng
+                // ======== CHỈ ADMIN ROOT ========
                 .requestMatchers("/api/admin/nhan-vien/**").hasRole("ADMIN")
                 .requestMatchers("/api/admin/khach-hang/**").hasRole("ADMIN")
-                // Báo cáo profit margin — chỉ Admin
                 .requestMatchers("/api/admin/reports/profit-margin").hasRole("ADMIN")
-                // DELETE toàn hệ thống — chỉ Admin
                 .requestMatchers(HttpMethod.DELETE, "/api/admin/products/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/admin/campaigns/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/admin/categories/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/admin/brands/**").hasRole("ADMIN")
 
-                // ======== ADMIN + STORE_MANAGER ========
-                .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "STORE_MANAGER")
-                .requestMatchers("/api/admin/reports/**").hasAnyRole("ADMIN", "STORE_MANAGER")
-                .requestMatchers("/api/admin/procurement/**").hasAnyRole("ADMIN", "STORE_MANAGER")
-                .requestMatchers("/api/admin/campaigns/**").hasAnyRole("ADMIN", "STORE_MANAGER")
+                // ======== ADMIN + DIRECTOR ========
+                .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "DIRECTOR")
+                .requestMatchers("/api/admin/reports/**").hasAnyRole("ADMIN", "DIRECTOR")
 
-                // ======== ADMIN + STORE_MANAGER + WAREHOUSE_STAFF ========
-                .requestMatchers("/api/admin/kho/**").hasAnyRole("ADMIN", "STORE_MANAGER", "WAREHOUSE_STAFF")
-                .requestMatchers("/api/admin/import-kho/**").hasAnyRole("ADMIN", "STORE_MANAGER", "WAREHOUSE_STAFF")
-                .requestMatchers("/api/admin/near-expiry/**").hasAnyRole("ADMIN", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                // ======== ADMIN + DIRECTOR + STORE_MANAGER ========
+                .requestMatchers("/api/admin/procurement/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers("/api/admin/campaigns/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
 
-                // ======== TẤT CẢ NHÂN VIÊN (bất kỳ /api/admin/**) ========
-                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "STORE_MANAGER", "WAREHOUSE_STAFF", "SALES_STAFF")
+                // ======== ADMIN + DIRECTOR + STORE_MANAGER + WAREHOUSE_STAFF ========
+                .requestMatchers("/api/admin/kho/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers("/api/admin/import-kho/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers("/api/admin/near-expiry/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+
+                // ======== TẤT CẢ NHÂN VIÊN NỘI BỘ ========
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
 
                 // ======== ĐÃ ĐĂNG NHẬP (customer + employee) ========
                 // Giỏ hàng, đặt hàng, lịch sử — cần login

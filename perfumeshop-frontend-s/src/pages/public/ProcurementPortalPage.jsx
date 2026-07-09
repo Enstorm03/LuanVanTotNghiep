@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { useSupplier } from '../../contexts/SupplierContext';
 
 const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—';
 
@@ -10,14 +9,12 @@ const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
    Route: /procurement/:id
    ════════════════════════════════════════════════════════════ */
 export const ProcurementDetailPage = ({ requestId }) => {
-  const { supplier } = useSupplier();
   const navigate = useNavigate();
 
   const [request,    setRequest]    = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [submitted,  setSubmitted]  = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  // Pre-fill tên NCC từ session nếu đã đăng nhập
   const [form, setForm] = useState({
     supplierName:    '',
     supplierContact: '',
@@ -45,22 +42,6 @@ export const ProcurementDetailPage = ({ requestId }) => {
     soLo:                '',
     ghiChu:              '',
   });
-
-  // Đồng bộ thông tin NCC từ SupplierContext khi supplier thay đổi
-  useEffect(() => {
-    if (supplier) {
-      setForm(f => ({
-        ...f,
-        supplierName:    supplier.tenCongTy    || '',
-        supplierContact: supplier.soDienThoai  || supplier.email || '',
-      }));
-      setProposal(p => ({
-        ...p,
-        tenNCC:    supplier.tenCongTy   || '',
-        lienHeNCC: supplier.soDienThoai || supplier.email || '',
-      }));
-    }
-  }, [supplier]);
 
   const setProposalField = (k, v) => setProposal(p => ({ ...p, [k]: v }));
 
@@ -222,28 +203,15 @@ export const ProcurementDetailPage = ({ requestId }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Tên công ty *</label>
-                    {supplier ? (
-                      <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800 font-medium">
-                        <span className="material-symbols-outlined text-sm">verified</span>
-                        {proposal.tenNCC}
-                      </div>
-                    ) : (
-                      <input value={proposal.tenNCC} onChange={e => setProposalField('tenNCC', e.target.value)} required
-                        placeholder="VD: Công ty TNHH Nước Hoa XYZ"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                    )}
+                    <input value={proposal.tenNCC} onChange={e => setProposalField('tenNCC', e.target.value)} required
+                      placeholder="VD: Công ty TNHH Nước Hoa XYZ"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Liên hệ</label>
-                    {supplier ? (
-                      <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">
-                        {proposal.lienHeNCC || '—'}
-                      </div>
-                    ) : (
-                      <input value={proposal.lienHeNCC} onChange={e => setProposalField('lienHeNCC', e.target.value)}
-                        placeholder="SĐT / Email"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                    )}
+                    <input value={proposal.lienHeNCC} onChange={e => setProposalField('lienHeNCC', e.target.value)}
+                      placeholder="SĐT / Email"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                   </div>
                 </div>
                 <div>
@@ -331,28 +299,15 @@ export const ProcurementDetailPage = ({ requestId }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Tên công ty / Nhà cung cấp *</label>
-                  {supplier ? (
-                    <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800 font-medium">
-                      <span className="material-symbols-outlined text-sm">verified</span>
-                      {form.supplierName}
-                    </div>
-                  ) : (
-                    <input value={form.supplierName} onChange={e => set('supplierName', e.target.value)} required
-                      placeholder="VD: Công ty TNHH Nước Hoa XYZ"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                  )}
+                  <input value={form.supplierName} onChange={e => set('supplierName', e.target.value)} required
+                    placeholder="VD: Công ty TNHH Nước Hoa XYZ"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">SĐT / Email liên hệ</label>
-                  {supplier ? (
-                    <div className="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">
-                      {form.supplierContact || '—'}
-                    </div>
-                  ) : (
-                    <input value={form.supplierContact} onChange={e => set('supplierContact', e.target.value)}
-                      placeholder="0901234567 / email@..."
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
-                  )}
+                  <input value={form.supplierContact} onChange={e => set('supplierContact', e.target.value)}
+                    placeholder="0901234567 / email@..."
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                 </div>
               </div>
               <div>
@@ -399,7 +354,6 @@ export const ProcurementDetailPage = ({ requestId }) => {
    Route: /procurement
    ════════════════════════════════════════════════════════════ */
 const ProcurementPortalPage = () => {
-  const { supplier, logoutSupplier } = useSupplier();
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -420,36 +374,13 @@ const ProcurementPortalPage = () => {
             <h1 className="text-3xl font-bold text-gray-800">Cổng Đấu thầu</h1>
             <p className="text-gray-500 mt-1 text-sm">Các đợt thu mua đang mở</p>
           </div>
-          {supplier ? (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-semibold text-gray-800">{supplier.tenCongTy}</p>
-                <p className="text-xs text-gray-400">{supplier.tenDangNhap}</p>
-              </div>
-              <a href="/supplier-portal"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
-                <span className="material-symbols-outlined text-sm">storefront</span>
-                Chào hàng mới
-              </a>
-              <button onClick={() => { logoutSupplier(); navigate('/procurement'); }}
-                className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
-                Đăng xuất
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <a href="/supplier-portal"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-200 transition-colors">
-                <span className="material-symbols-outlined text-sm">storefront</span>
-                Chào hàng
-              </a>
-              <button onClick={() => navigate('/procurement/login')}
-                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors">
-                <span className="material-symbols-outlined text-base">login</span>
-                Đăng nhập NCC
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <a href="/supplier-portal"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition-colors">
+              <span className="material-symbols-outlined text-sm">storefront</span>
+              Chào hàng
+            </a>
+          </div>
         </div>
 
         {loading ? (

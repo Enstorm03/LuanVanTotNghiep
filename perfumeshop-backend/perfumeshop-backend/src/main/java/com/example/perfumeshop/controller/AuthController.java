@@ -47,24 +47,27 @@ public class AuthController {
         String username = req.getTenDangNhap();
         String rawPassword = req.getMatKhau();
 
-        // Bước 1: Thử tìm trong bảng Nhân viên (Admin/Staff)
+        // Bước 1: Thử tìm trong bảng Nhân viên (Admin/Staff/Supplier)
         var nvOpt = nhanVienRepository.findByTenDangNhap(username);
         if (nvOpt.isPresent()) {
             NhanVien nv = nvOpt.get();
             if (passwordService.matches(rawPassword, nv.getMatKhauBam())) {
-                String token = jwtUtil.generateEmployeeToken(nv.getIdNhanVien(), nv.getTenDangNhap(), nv.getVaiTro());
+                String vaiTro = nv.getVaiTro();
+                // NCC login qua cùng bảng NhanVien nhưng type = "supplier"
+                String type = "SUPPLIER".equalsIgnoreCase(vaiTro) ? "supplier" : "employee";
+                String token = jwtUtil.generateEmployeeToken(nv.getIdNhanVien(), nv.getTenDangNhap(), vaiTro);
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
-                body.put("type", "employee");
+                body.put("type", type);
                 body.put("userId", nv.getIdNhanVien());
                 body.put("displayName", nv.getHoTen());
-                body.put("role", nv.getVaiTro());
+                body.put("role", vaiTro);
                 body.put("token", token);
                 return ResponseEntity.ok(body);
             }
         }
 
-        // Bước 2: Thử tìm trong bảng Khách hàng
+        // Bước 2: Thử tìm trong bảng Khách hàng (bao gồm cả NCC được duyệt từ customer)
         var khOpt = nguoiDungRepository.findByTenDangNhap(username);
         if (khOpt.isPresent()) {
             NguoiDung kh = khOpt.get();
@@ -74,13 +77,16 @@ public class AuthController {
                     throw new BusinessException("Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn.");
                 }
 
+                String vaiTro = kh.getVaiTro() != null ? kh.getVaiTro() : "CUSTOMER";
+                // NCC được duyệt từ customer → type = "supplier"
+                String type = "SUPPLIER".equalsIgnoreCase(vaiTro) ? "supplier" : "customer";
                 String token = jwtUtil.generateCustomerToken(kh.getIdNguoiDung(), kh.getTenDangNhap());
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
-                body.put("type", "customer");
+                body.put("type", type);
                 body.put("userId", kh.getIdNguoiDung());
                 body.put("displayName", kh.getHoTen());
-                body.put("role", "CUSTOMER");
+                body.put("role", vaiTro);
                 body.put("token", token);
                 return ResponseEntity.ok(body);
             }

@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSupplier } from '../../contexts/SupplierContext';
 import procurementApi from '../../services/api/procurementApi';
 import { calculateMonthsToExpiry } from '../../utils/csvFormatUtils';
 
 /**
  * Trang cho Nhà Cung Cấp tự đề xuất sản phẩm mới
- * KHÔNG cần phiếu gọi thầu — NCC có thể chủ động gửi đề nghị bán hàng.
- * Tự động điền thông tin NCC nếu đã đăng nhập.
+ * Nhúng trong ProcurementDetailPage — NCC nhập tay thông tin.
  */
 const SupplierProposeProductPage = () => {
   const navigate = useNavigate();
-  const { supplier } = useSupplier();
 
   const [formData, setFormData] = useState({
     tenNCC: '',
@@ -31,17 +28,6 @@ const SupplierProposeProductPage = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [warnings, setWarnings] = useState({});
-
-  // Tự động điền thông tin NCC từ context nếu đã đăng nhập
-  useEffect(() => {
-    if (supplier) {
-      setFormData((prev) => ({
-        ...prev,
-        tenNCC: supplier.tenNCC || supplier.tenCongTy || '',
-        lienHeNCC: supplier.lienHe || supplier.email || supplier.sdt || '',
-      }));
-    }
-  }, [supplier]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -112,9 +98,6 @@ const SupplierProposeProductPage = () => {
     }
   };
 
-  // Đã đăng nhập chưa?
-  const isLoggedIn = !!supplier;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8">
@@ -123,11 +106,6 @@ const SupplierProposeProductPage = () => {
           <p className="text-gray-500 mt-2">
             Gửi đề nghị bán hàng đến chúng tôi — không cần đợi phiếu gọi thầu
           </p>
-          {isLoggedIn && (
-            <div className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
-              ✔ Đã đăng nhập với tư cách <strong>{supplier.tenNCC || supplier.tenDangNhap}</strong>
-            </div>
-          )}
         </div>
 
         {success ? (
@@ -152,7 +130,6 @@ const SupplierProposeProductPage = () => {
               </div>
             )}
 
-            {/* Thông tin NCC — tự động điền nếu đã login */}
             <div>
               <h2 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
                 Thông tin nhà cung cấp
@@ -168,15 +145,9 @@ const SupplierProposeProductPage = () => {
                     value={formData.tenNCC}
                     onChange={handleChange}
                     required
-                    readOnly={isLoggedIn}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      isLoggedIn ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'
-                    }`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     placeholder="Công ty TNHH XYZ"
                   />
-                  {isLoggedIn && (
-                    <p className="text-xs text-gray-400 mt-1">Tự động từ thông tin đăng nhập</p>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -187,15 +158,9 @@ const SupplierProposeProductPage = () => {
                     name="lienHeNCC"
                     value={formData.lienHeNCC}
                     onChange={handleChange}
-                    readOnly={isLoggedIn}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent ${
-                      isLoggedIn ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'
-                    }`}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     placeholder="SĐT / Email"
                   />
-                  {isLoggedIn && (
-                    <p className="text-xs text-gray-400 mt-1">Tự động từ thông tin đăng nhập</p>
-                  )}
                 </div>
               </div>
             </div>

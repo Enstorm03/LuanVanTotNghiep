@@ -29,11 +29,14 @@ const useAuthLogin = () => {
         const role = (response.role || '').toUpperCase();
         const type = response.type;
 
-        if (type === 'employee' || role === 'ADMIN' || role === 'STAFF') {
-          // Nhân viên → vào trang admin (hoặc trang admin họ muốn vào)
+        if (type === 'supplier' || role === 'SUPPLIER') {
+          // Nhà cung cấp → trang portal NCC
+          navigate('/supplier-portal', { replace: true });
+        } else if (type === 'employee') {
+          // Nhân viên nội bộ → trang admin
           navigate(returnTo?.startsWith('/admin') ? returnTo : '/admin', { replace: true });
         } else {
-          // Khách hàng → về trang họ muốn vào, hoặc trang chủ
+          // Khách hàng → trang họ muốn vào hoặc trang chủ
           navigate(returnTo && !returnTo.startsWith('/admin') ? returnTo : '/', { replace: true });
         }
       } else {

@@ -1,29 +1,31 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 
-// Helper: map từ BE role (ADMIN, STORE_MANAGER...) sang nhãn hiển thị
+// Helper: map từ BE role → nhãn hiển thị
 const getRoleLabel = (vaiTro) => {
   const map = {
-    'ADMIN': 'Admin',
-    'STORE_MANAGER': 'Cửa hàng trưởng',
+    'ADMIN':           'Admin Root',
+    'DIRECTOR':        'Giám đốc',
+    'STORE_MANAGER':   'Cửa hàng trưởng',
     'WAREHOUSE_STAFF': 'Nhân viên kho',
-    'SALES_STAFF': 'Nhân viên bán hàng',
-    'CUSTOMER': 'Khách hàng',
-    'STAFF': 'Nhân viên',  // backward compat
+    'SUPPLIER':        'Nhà cung cấp',
+    'CUSTOMER':        'Khách hàng',
+    'STAFF':           'Nhân viên',
   };
   return map[(vaiTro || '').toUpperCase()] || vaiTro || 'Nhân viên';
 };
 
-// Helper: từ nhãn UI → role BE
+// Helper: nhãn UI → role code BE
 const getRoleCode = (label) => {
   const map = {
-    'Admin': 'ADMIN',
-    'Cửa hàng trưởng': 'STORE_MANAGER',
-    'Nhân viên kho': 'WAREHOUSE_STAFF',
-    'Nhân viên bán hàng': 'SALES_STAFF',
-    'Nhân viên': 'STAFF',  // fallback
+    'Admin Root':        'ADMIN',
+    'Giám đốc':          'DIRECTOR',
+    'Cửa hàng trưởng':   'STORE_MANAGER',
+    'Nhân viên kho':     'WAREHOUSE_STAFF',
+    'Nhà cung cấp':      'SUPPLIER',
+    'Nhân viên':         'STAFF',
   };
-  return map[label] || 'SALES_STAFF';  // mặc định là SALES_STAFF
+  return map[label] || 'WAREHOUSE_STAFF';
 };
 
 const useAdminUsers = () => {
@@ -36,7 +38,7 @@ const useAdminUsers = () => {
   const [formData, setFormData] = useState({
     id: null,
     type: 'staff',
-    role: 'Nhân viên bán hàng',  // mặc định
+    role: 'Cửa hàng trưởng',  // mặc định
     hoTen: '',
     tenDangNhap: '',
     matKhau: '',
@@ -67,11 +69,12 @@ const useAdminUsers = () => {
       const customerList = customersRes.map(c => ({
         ...c,
         id: c.idNguoiDung,
-        role: 'Khách hàng',
+        role: c.vaiTro === 'SUPPLIER' ? 'Nhà cung cấp' : 'Khách hàng',
         type: 'customer',
         tenDangNhap: c.tenDangNhap,
         hoTen: c.hoTen,
         soDienThoai: c.soDienThoai || '',
+        vaiTro: c.vaiTro || 'CUSTOMER',
       }));
 
       setUsers([...staffList, ...customerList].sort((a, b) => b.id - a.id));
@@ -91,7 +94,7 @@ const useAdminUsers = () => {
     setFormData({
       id: null,
       type: 'staff',
-      role: 'Nhân viên bán hàng',
+      role: 'Cửa hàng trưởng',
       hoTen: '',
       tenDangNhap: '',
       matKhau: '',
@@ -175,13 +178,36 @@ const useAdminUsers = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  const handleDuyetNCC = async (user) => {
+    if (!window.confirm(`Duyệt "${user.hoTen}" thành Nhà cung cấp?`)) return;
+    try {
+      await api.duyetNCC(user.id);
+      alert('Đã duyệt thành Nhà cung cấp!');
+      fetchAllAccounts();
+    } catch (error) {
+      alert('Lỗi: ' + error.message);
+    }
+  };
+
+  const handleHuyNCC = async (user) => {
+    if (!window.confirm(`Hủy vai trò NCC của "${user.hoTen}"?`)) return;
+    try {
+      await api.huyNCC(user.id);
+      alert('Đã hủy vai trò NCC!');
+      fetchAllAccounts();
+    } catch (error) {
+      alert('Lỗi: ' + error.message);
+    }
+  };
+
   const filteredUsers = users.filter(u => filterRole === 'All' ? true : u.role === filterRole);
 
   return {
     loading,
     filterRole, setFilterRole, filteredUsers,
     isModalOpen, setIsModalOpen, modalMode, formData,
-    handleOpenAdd, handleOpenEdit, handleDelete, handleSubmit, handleChange
+    handleOpenAdd, handleOpenEdit, handleDelete, handleSubmit, handleChange,
+    handleDuyetNCC, handleHuyNCC,
   };
 };
 

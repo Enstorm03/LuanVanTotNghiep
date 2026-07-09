@@ -7,7 +7,7 @@ import AdminLayout from './layouts/AdminLayout';
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
 
-// Contexts
+// Contexts — SupplierProvider chỉ dùng cho ProcurementPortalPage cũ
 import { SupplierProvider } from './contexts/SupplierContext';
 
 // Public Pages
@@ -46,7 +46,6 @@ import AdminProcurementPage from './pages/admin/AdminProcurementPage';
 import AdminProcurementDetailPage from './pages/admin/AdminProcurementDetailPage';
 import AdminSuppliersPage from './pages/admin/AdminSuppliersPage';
 import ProcurementPortalPage, { ProcurementDetailPage } from './pages/public/ProcurementPortalPage';
-import SupplierLoginPage from './pages/public/SupplierLoginPage';
 import SupplierPortalPage from './pages/public/SupplierPortalPage';
 
 // Wrapper lấy :id từ URL và truyền vào ProcurementDetailPage
@@ -59,7 +58,6 @@ const ProcurementDetailWrapper = () => {
 
 function App() {
   return (
-    <SupplierProvider>
     <div className="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
       <Routes>
         {/* Public Routes with Layout */}
@@ -112,13 +110,14 @@ function App() {
          <Route path="/verify-email" element={<VerifyEmailPage />} />
         
 
-        {/* Route công khai — NCC xem đợt gọi thầu và chào giá */}
-        <Route path="/procurement" element={<ProcurementPortalPage />} />
-        <Route path="/procurement/login" element={<SupplierLoginPage />} />
-        <Route path="/procurement/:id" element={<ProcurementDetailWrapper />} />
+        {/* Route NCC — procurement portal (public, NCC xem thầu và chào giá) */}
+        <Route path="/procurement" element={<SupplierProvider><ProcurementPortalPage /></SupplierProvider>} />
+        <Route path="/procurement/:id" element={<SupplierProvider><ProcurementDetailWrapper /></SupplierProvider>} />
 
-        {/* Route công khai — NCC chào hàng độc lập */}
-        <Route path="/supplier-portal" element={<SupplierPortalPage />} />
+        {/* Route NCC — cần đăng nhập với role SUPPLIER */}
+        <Route path="/supplier-portal" element={
+          <ProtectedRoute requireRole="SUPPLIER"><SupplierPortalPage /></ProtectedRoute>
+        } />
 
         {/* Route công khai — khách quét QR xác nhận nhận hàng / đổi trả (không cần login) */}
         <Route path="/don-hang/:orderId/xac-nhan" element={<XacNhanDonHangPage />} />
@@ -136,13 +135,13 @@ function App() {
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:orderId" element={<AdminOrderDetailPage />} />
-          {/* Tài khoản — chỉ ADMIN */}
+          {/* Tài khoản — chỉ ADMIN root */}
           <Route path="users" element={
             <ProtectedRoute requireRole="ADMIN"><AdminUsersPage /></ProtectedRoute>
           } />
-          {/* Báo cáo — ADMIN + STORE_MANAGER */}
+          {/* Báo cáo — ADMIN + DIRECTOR */}
           <Route path="reports" element={
-            <ProtectedRoute requireRole="STORE_MANAGER"><AdminReportPage /></ProtectedRoute>
+            <ProtectedRoute requireRole="DIRECTOR"><AdminReportPage /></ProtectedRoute>
           } />
           <Route path="returns" element={<AdminReturnsPage />} />
           <Route path="brands" element={
@@ -153,18 +152,18 @@ function App() {
           } />
           <Route path="reviews" element={<AdminReviewsPage />} />
           <Route path="defective" element={<AdminDefectivePage />} />
-          {/* Chiến dịch — ADMIN + STORE_MANAGER */}
+          {/* Chiến dịch — ADMIN + DIRECTOR + STORE_MANAGER */}
           <Route path="campaigns" element={
             <ProtectedRoute requireRole="STORE_MANAGER"><AdminCampaignsPage /></ProtectedRoute>
           } />
-          {/* Kho — ADMIN + STORE_MANAGER + WAREHOUSE_STAFF */}
+          {/* Kho — ADMIN + DIRECTOR + STORE_MANAGER + WAREHOUSE_STAFF */}
           <Route path="kho" element={
             <ProtectedRoute requireRole="WAREHOUSE_STAFF"><AdminKhoPage /></ProtectedRoute>
           } />
           <Route path="near-expiry-products" element={
             <ProtectedRoute requireRole="WAREHOUSE_STAFF"><AdminNearExpiryProductsPage /></ProtectedRoute>
           } />
-          {/* Đấu thầu — ADMIN + STORE_MANAGER */}
+          {/* Đấu thầu — ADMIN + DIRECTOR + STORE_MANAGER */}
           <Route path="procurement" element={
             <ProtectedRoute requireRole="STORE_MANAGER"><AdminProcurementPage /></ProtectedRoute>
           } />
@@ -177,7 +176,6 @@ function App() {
         </Route>
       </Routes>
     </div>
-    </SupplierProvider>
   );
 }
 

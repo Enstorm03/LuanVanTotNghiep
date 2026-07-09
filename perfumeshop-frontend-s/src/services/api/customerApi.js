@@ -97,6 +97,30 @@ class CustomerApi extends BaseApi {
       throw error;
     }
   }
+
+  // Giám đốc duyệt khách hàng thành NCC
+  async duyetNCC(id) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/admin/khach-hang/${id}/duyet-ncc`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Lỗi duyệt NCC:', error);
+      throw error;
+    }
+  }
+
+  // Hủy vai trò NCC → trở lại CUSTOMER
+  async huyNCC(id) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/admin/khach-hang/${id}/huy-ncc`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Lỗi hủy NCC:', error);
+      throw error;
+    }
+  }
 }
 
 const customerApi = new CustomerApi();

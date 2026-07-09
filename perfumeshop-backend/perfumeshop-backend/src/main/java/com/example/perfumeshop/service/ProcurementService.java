@@ -310,33 +310,6 @@ public class ProcurementService {
 
     // ── Sản phẩm đề xuất từ NCC ──────────────────────────────────────────
 
-    /** NCC đề xuất sản phẩm mới — trong 1 đợt gọi thầu */
-    @Transactional
-    public SanPhamDeXuat deXuatSanPham(Integer idPhieu, String tenNCC, String lienHeNCC,
-                                        String tenSanPham, String moTa, String urlHinhAnh,
-                                        BigDecimal giaDeXuat, Integer soLuong,
-                                        Integer dungTichMl, Integer nongDo, String ghiChu) {
-        PhieuGoiThau phieu = getById(idPhieu);
-        if (!"OPEN".equals(phieu.getTrangThai()))
-            throw new BusinessException("Đợt gọi thầu này đã đóng, không thể đề xuất");
-
-        SanPhamDeXuat dx = new SanPhamDeXuat();
-        dx.setPhieuGoiThau(phieu);
-        dx.setTenNCC(tenNCC);
-        dx.setLienHeNCC(lienHeNCC);
-        dx.setTenSanPham(tenSanPham);
-        dx.setMoTa(moTa);
-        dx.setUrlHinhAnh(urlHinhAnh);
-        dx.setGiaDeXuat(giaDeXuat);
-        dx.setSoLuongCoTheCungCap(soLuong);
-        dx.setDungTichMl(dungTichMl);
-        dx.setNongDo(nongDo);
-        dx.setGhiChu(ghiChu);
-        dx.setTrangThai("PENDING");
-        dx.setNgayTao(LocalDateTime.now());
-        return sanPhamDeXuatRepo.save(dx);
-    }
-
     /**
      * NCC tự đề xuất sản phẩm — KHÔNG cần phiếu gọi thầu.
      * Đây là nghiệp vụ riêng: NCC có thể chủ động gửi đề nghị bán hàng.

@@ -5,17 +5,12 @@ import { useAuth } from '../../contexts/AuthContext';
 /**
  * Bảo vệ các route yêu cầu đăng nhập / phân quyền.
  *
- * Props:
- * - requireEmployee: chỉ nhân viên (bất kỳ role nội bộ) mới được vào
- * - requireUser:     chỉ khách hàng đã đăng nhập
- * - requireRole:     role tối thiểu cần có (theo hierarchy)
- *     'ADMIN'           → chỉ ADMIN
- *     'STORE_MANAGER'   → ADMIN + STORE_MANAGER
- *     'WAREHOUSE_STAFF' → ADMIN + STORE_MANAGER + WAREHOUSE_STAFF
- *     'SALES_STAFF'     → ADMIN + STORE_MANAGER + SALES_STAFF
- *
- * Nếu chưa đăng nhập       → redirect /login
- * Nếu không đủ quyền        → redirect /admin (với thông báo)
+ * requireRole:
+ *   'ADMIN'           → chỉ ADMIN root
+ *   'DIRECTOR'        → ADMIN + DIRECTOR
+ *   'STORE_MANAGER'   → ADMIN + DIRECTOR + STORE_MANAGER
+ *   'WAREHOUSE_STAFF' → ADMIN + DIRECTOR + STORE_MANAGER + WAREHOUSE_STAFF
+ *   'SUPPLIER'        → chỉ SUPPLIER
  */
 const ProtectedRoute = ({
   children,
@@ -23,7 +18,10 @@ const ProtectedRoute = ({
   requireUser = false,
   requireRole = null,
 }) => {
-  const { user, authLoading, isNhanVien, isAdmin, isStoreManager, isWarehouseStaff, isSalesStaff } = useAuth();
+  const {
+    user, authLoading,
+    isAdmin, isDirector, isStoreManager, isWarehouseStaff, isSupplier, isNhanVien,
+  } = useAuth();
   const location = useLocation();
 
   if (authLoading) {
@@ -34,19 +32,19 @@ const ProtectedRoute = ({
     );
   }
 
-  // Chưa đăng nhập
+  // Chưa đăng nhập → về login
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Yêu cầu nhân viên nhưng là khách
+  // Yêu cầu nhân viên nội bộ nhưng là customer/supplier
   if (requireEmployee && !isNhanVien()) {
     return <Navigate to="/" replace />;
   }
 
-  // Yêu cầu khách nhưng là nhân viên
+  // Yêu cầu customer nhưng là nhân viên
   if (requireUser && user.type !== 'customer') {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to={user.type === 'supplier' ? '/supplier-portal' : '/admin'} replace />;
   }
 
   // Kiểm tra role cụ thể
@@ -56,20 +54,26 @@ const ProtectedRoute = ({
       case 'ADMIN':
         hasPermission = isAdmin();
         break;
+      case 'DIRECTOR':
+        hasPermission = isDirector();
+        break;
       case 'STORE_MANAGER':
         hasPermission = isStoreManager();
         break;
       case 'WAREHOUSE_STAFF':
         hasPermission = isWarehouseStaff();
         break;
-      case 'SALES_STAFF':
-        hasPermission = isSalesStaff();
+      case 'SUPPLIER':
+        hasPermission = isSupplier();
         break;
       default:
         hasPermission = isNhanVien();
     }
     if (!hasPermission) {
-      return <Navigate to="/admin" replace />;
+      // Redirect về đúng trang chủ của từng loại user
+      if (isSupplier()) return <Navigate to="/supplier-portal" replace />;
+      if (isNhanVien()) return <Navigate to="/admin" replace />;
+      return <Navigate to="/" replace />;
     }
   }
 

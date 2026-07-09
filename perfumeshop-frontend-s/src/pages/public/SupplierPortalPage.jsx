@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
-import { useSupplier } from '../../contexts/SupplierContext';
-import { generateCSVTemplate, downloadCSV, CSV_DISPLAY_HEADERS, CSV_HEADERS } from '../../utils/csvFormatUtils';
+import { useAuth } from '../../contexts/AuthContext';
+import { generateCSVTemplate } from '../../utils/csvFormatUtils';
 
 const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—';
 
@@ -226,12 +226,12 @@ const BulkUploadSection = ({ prefillTenNCC = '', prefillLienHe = '', locked = fa
 
 /* ── Trang chính ── */
 const SupplierPortalPage = () => {
-  const { supplier } = useSupplier();
+  const { user, logout, isSupplier } = useAuth();
 
-  // Pre-fill từ supplier đã đăng nhập
-  const supplierName    = supplier?.tenCongTy   || '';
-  const supplierContact = supplier?.soDienThoai || supplier?.email || '';
-  const isLoggedIn      = !!supplier;
+  // Lấy thông tin NCC từ tài khoản đã đăng nhập
+  const supplierName    = user?.ho_ten || '';
+  const supplierContact = user?.ten_dang_nhap || '';
+  const isLoggedIn      = isSupplier() && !!user;
 
   const [form, setForm] = useState({
     ...INIT_FORM,
@@ -245,16 +245,7 @@ const SupplierPortalPage = () => {
   const [loadingReq, setLoadingReq] = useState(true);
   const [activeTab, setActiveTab] = useState('single');
 
-  // Sync khi supplier login sau khi trang đã mount
-  useEffect(() => {
-    if (supplier) {
-      setForm(f => ({
-        ...f,
-        tenNCC: supplier.tenCongTy || f.tenNCC,
-        lienHeNCC: supplier.soDienThoai || supplier.email || f.lienHeNCC,
-      }));
-    }
-  }, [supplier]);
+  // Form đã được init từ user trong state khởi tạo, không cần sync thêm
 
   useEffect(() => {
     api.procurementGetOpen()
@@ -315,7 +306,7 @@ const SupplierPortalPage = () => {
           {isLoggedIn && (
             <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">
               <span className="material-symbols-outlined text-base">verified</span>
-              Đang đăng nhập: <strong>{supplier.tenCongTy}</strong>
+              Đang đăng nhập: <strong>{user?.ho_ten || user?.ten_dang_nhap}</strong>
             </div>
           )}
         </div>

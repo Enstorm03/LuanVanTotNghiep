@@ -14,6 +14,8 @@ public class NguoiDungResponse {
     private String hoTen;
     private String soDienThoai;
     private String diaChi;
+    private String email;
+    private String vaiTro;
 
     public static NguoiDungResponse from(NguoiDung entity) {
         NguoiDungResponse dto = new NguoiDungResponse();
@@ -22,6 +24,8 @@ public class NguoiDungResponse {
         dto.setHoTen(entity.getHoTen());
         dto.setSoDienThoai(entity.getSoDienThoai());
         dto.setDiaChi(entity.getDiaChi());
+        dto.setEmail(entity.getEmail());
+        dto.setVaiTro(entity.getVaiTro() != null ? entity.getVaiTro() : "CUSTOMER");
         return dto;
     }
 }

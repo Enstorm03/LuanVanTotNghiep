@@ -77,9 +77,9 @@ public class UserProfileService {
             throw new BusinessException("Vui lòng nhập mật khẩu mới");
         }
 
-        if (matKhauMoi.length() < 6) {
-            throw new BusinessException("Mật khẩu mới phải có ít nhất 6 ký tự");
-        }
+//        if (matKhauMoi.length() < 6) {
+//            throw new BusinessException("Mật khẩu mới phải có ít nhất 6 ký tự");
+//        }
 
         NguoiDung user = nguoiDungRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException("User không tồn tại"));

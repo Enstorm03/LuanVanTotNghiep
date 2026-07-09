@@ -1,12 +1,14 @@
 import React from 'react';
 import useAdminUsers from '../../hooks/useAdminUsers';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AdminUsersPage = () => {
-  // Rút toàn bộ logic từ file JS riêng ra để xài
+  const { isDirector } = useAuth();
   const {
     loading, filterRole, setFilterRole, filteredUsers,
     isModalOpen, setIsModalOpen, modalMode, formData,
-    handleOpenAdd, handleOpenEdit, handleDelete, handleSubmit, handleChange
+    handleOpenAdd, handleOpenEdit, handleDelete, handleSubmit, handleChange,
+    handleDuyetNCC, handleHuyNCC,
   } = useAdminUsers();
 
   return (
@@ -20,10 +22,11 @@ const AdminUsersPage = () => {
             onChange={(e) => setFilterRole(e.target.value)}
           >
             <option value="All">Tất cả vai trò</option>
-            <option value="Admin">Admin</option>
+            <option value="Admin Root">Admin Root</option>
+            <option value="Giám đốc">Giám đốc</option>
             <option value="Cửa hàng trưởng">Cửa hàng trưởng</option>
             <option value="Nhân viên kho">Nhân viên kho</option>
-            <option value="Nhân viên bán hàng">Nhân viên bán hàng</option>
+            <option value="Nhà cung cấp">Nhà cung cấp</option>
             <option value="Khách hàng">Khách hàng</option>
           </select>
 
@@ -61,11 +64,12 @@ const AdminUsersPage = () => {
                   <td className="p-4 text-sm text-gray-500">{user.tenDangNhap}</td>
                   <td className="p-4 text-center">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                      user.role === 'Admin'               ? 'bg-purple-100 text-purple-700 border border-purple-200' :
-                      user.role === 'Cửa hàng trưởng'    ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                      user.role === 'Nhân viên kho'       ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
-                      user.role === 'Nhân viên bán hàng'  ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' :
-                      user.role === 'Nhân viên'           ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                      user.role === 'Admin Root'        ? 'bg-red-100 text-red-700 border border-red-200' :
+                      user.role === 'Giám đốc'          ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                      user.role === 'Cửa hàng trưởng'  ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                      user.role === 'Nhân viên kho'     ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                      user.role === 'Nhà cung cấp'      ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+                      user.role === 'Nhân viên'         ? 'bg-gray-100 text-gray-600 border border-gray-200' :
                       'bg-green-100 text-green-700 border border-green-200'
                     }`}>
                       {user.role}
@@ -73,6 +77,14 @@ const AdminUsersPage = () => {
                   </td>
                   <td className="p-4 text-center">
                      <button onClick={() => handleOpenEdit(user)} className="text-blue-600 hover:text-blue-800 text-sm font-medium mr-4 transition-colors">Sửa</button>
+                     {/* Nút duyệt/hủy NCC — chỉ Giám đốc trở lên */}
+                     {isDirector() && user.type === 'customer' && (
+                       user.vaiTro === 'SUPPLIER' ? (
+                         <button onClick={() => handleHuyNCC(user)} className="text-orange-500 hover:text-orange-700 text-sm font-medium mr-4 transition-colors">Hủy NCC</button>
+                       ) : (
+                         <button onClick={() => handleDuyetNCC(user)} className="text-emerald-600 hover:text-emerald-800 text-sm font-medium mr-4 transition-colors">Duyệt NCC</button>
+                       )
+                     )}
                      <button onClick={() => handleDelete(user)} className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors">Xóa</button>
                   </td>
                 </tr>
@@ -131,10 +143,11 @@ const AdminUsersPage = () => {
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700">Phân quyền</label>
                   <select name="role" value={formData.role} onChange={handleChange} className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/50">
-                    <option value="Admin">Admin</option>
+                    <option value="Admin Root">Admin Root</option>
+                    <option value="Giám đốc">Giám đốc</option>
                     <option value="Cửa hàng trưởng">Cửa hàng trưởng</option>
                     <option value="Nhân viên kho">Nhân viên kho</option>
-                    <option value="Nhân viên bán hàng">Nhân viên bán hàng</option>
+                    <option value="Nhà cung cấp">Nhà cung cấp</option>
                   </select>
                 </div>
               )}

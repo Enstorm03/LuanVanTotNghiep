@@ -88,6 +88,8 @@ const api = {
   updateCustomer: customerApi.updateCustomer.bind(customerApi),
   resetCustomerPassword: customerApi.resetCustomerPassword.bind(customerApi),
   deleteCustomer: customerApi.deleteCustomer.bind(customerApi),
+  duyetNCC: customerApi.duyetNCC.bind(customerApi),
+  huyNCC: customerApi.huyNCC.bind(customerApi),
 
   // Employee methods
   getEmployees: employeeApi.getEmployees.bind(employeeApi),

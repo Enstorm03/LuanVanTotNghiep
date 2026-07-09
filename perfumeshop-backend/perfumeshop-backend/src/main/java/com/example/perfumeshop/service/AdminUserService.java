@@ -18,7 +18,8 @@ public class AdminUserService {
 
     /** Danh sách vai trò hợp lệ cho nhân viên */
     private static final Set<String> VALID_ROLES = Set.of(
-            "ADMIN", "STORE_MANAGER", "WAREHOUSE_STAFF", "SALES_STAFF"
+            "ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF",
+            "SUPPLIER", "STAFF"
     );
 
     @Autowired
@@ -111,6 +112,20 @@ public class AdminUserService {
 
     public void deleteKhachHang(Integer id) {
         nguoiDungRepository.deleteById(id);
+    }
+
+    /** Giám đốc duyệt khách hàng thành NCC */
+    public NguoiDungResponse duyetNCC(Integer id) {
+        NguoiDung kh = getKhachHangEntity(id);
+        kh.setVaiTro("SUPPLIER");
+        return NguoiDungResponse.from(nguoiDungRepository.save(kh));
+    }
+
+    /** Hủy vai trò NCC → trở lại CUSTOMER */
+    public NguoiDungResponse huyNCC(Integer id) {
+        NguoiDung kh = getKhachHangEntity(id);
+        kh.setVaiTro("CUSTOMER");
+        return NguoiDungResponse.from(nguoiDungRepository.save(kh));
     }
 
     public void resetKhachHangPassword(Integer id, ResetPasswordRequest req) {

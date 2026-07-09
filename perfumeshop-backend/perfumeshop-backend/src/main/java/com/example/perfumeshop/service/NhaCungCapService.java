@@ -113,12 +113,4 @@ public class NhaCungCapService {
         return nhaCungCapRepository.save(ncc);
     }
 
-    /**
-     * Xóa nhà cung cấp
-     */
-    public void delete(Integer id) {
-        nhaCungCapRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("NCC không tồn tại"));
-        nhaCungCapRepository.deleteById(id);
-    }
 }

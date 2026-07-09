@@ -11,9 +11,8 @@ export const useAuth = () => {
   return context;
 };
 
-// Danh sách vai trò hợp lệ cho nhân viên
-// Hierarchy: ADMIN > STORE_MANAGER > WAREHOUSE_STAFF / SALES_STAFF
-const EMPLOYEE_ROLES = ['ADMIN', 'STORE_MANAGER', 'WAREHOUSE_STAFF', 'SALES_STAFF'];
+// Danh sách vai trò hợp lệ cho nhân viên nội bộ
+const EMPLOYEE_ROLES = ['ADMIN', 'DIRECTOR', 'STORE_MANAGER', 'WAREHOUSE_STAFF', 'SUPPLIER'];
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,9 +23,8 @@ export const AuthProvider = ({ children }) => {
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
-        // Nếu là nhân viên nhưng không có token → session cũ, xóa đi
-        // để buộc đăng nhập lại lấy JWT mới
-        if (parsed.type === 'employee' && !parsed.token) {
+        // Session cũ không có token (employee/supplier) → xóa để buộc login lại
+        if ((parsed.type === 'employee' || parsed.type === 'supplier') && !parsed.token) {
           sessionStorage.removeItem('user');
         } else {
           setUser(parsed);
@@ -76,17 +74,20 @@ export const AuthProvider = ({ children }) => {
 
   const getRole = () => (user?.vai_tro || '').toUpperCase();
 
-  /** Chỉ ADMIN */
+  /** Chỉ ADMIN root */
   const isAdmin = () => getRole() === 'ADMIN';
 
-  /** ADMIN + STORE_MANAGER */
-  const isStoreManager = () => ['ADMIN', 'STORE_MANAGER'].includes(getRole());
+  /** ADMIN + DIRECTOR — xem báo cáo, dashboard toàn hệ thống */
+  const isDirector = () => ['ADMIN', 'DIRECTOR'].includes(getRole());
 
-  /** ADMIN + STORE_MANAGER + WAREHOUSE_STAFF */
-  const isWarehouseStaff = () => ['ADMIN', 'STORE_MANAGER', 'WAREHOUSE_STAFF'].includes(getRole());
+  /** ADMIN + DIRECTOR + STORE_MANAGER — quản lý vận hành */
+  const isStoreManager = () => ['ADMIN', 'DIRECTOR', 'STORE_MANAGER'].includes(getRole());
 
-  /** ADMIN + STORE_MANAGER + SALES_STAFF */
-  const isSalesStaff = () => ['ADMIN', 'STORE_MANAGER', 'SALES_STAFF'].includes(getRole());
+  /** ADMIN + DIRECTOR + STORE_MANAGER + WAREHOUSE_STAFF — quản lý kho */
+  const isWarehouseStaff = () => ['ADMIN', 'DIRECTOR', 'STORE_MANAGER', 'WAREHOUSE_STAFF'].includes(getRole());
+
+  /** Nhà cung cấp */
+  const isSupplier = () => getRole() === 'SUPPLIER';
 
   /** Bất kỳ nhân viên nội bộ nào (để vào CMS) */
   const isNhanVien = () => {
@@ -100,12 +101,13 @@ export const AuthProvider = ({ children }) => {
   // ========== Helpers lấy nhãn hiển thị của vai trò ==========
   const getRoleLabel = (vaiTro) => {
     const map = {
-      'ADMIN': 'Admin',
-      'STORE_MANAGER': 'Cửa hàng trưởng',
+      'ADMIN':           'Admin Root',
+      'DIRECTOR':        'Giám đốc',
+      'STORE_MANAGER':   'Cửa hàng trưởng',
       'WAREHOUSE_STAFF': 'Nhân viên kho',
-      'SALES_STAFF': 'Nhân viên bán hàng',
-      'CUSTOMER': 'Khách hàng',
-      'STAFF': 'Nhân viên',       // backward compat
+      'SUPPLIER':        'Nhà cung cấp',
+      'CUSTOMER':        'Khách hàng',
+      'STAFF':           'Nhân viên',   // backward compat
     };
     return map[(vaiTro || '').toUpperCase()] || vaiTro || 'Không xác định';
   };
@@ -117,9 +119,10 @@ export const AuthProvider = ({ children }) => {
     logout,
     // Role checks
     isAdmin,
+    isDirector,
     isStoreManager,
     isWarehouseStaff,
-    isSalesStaff,
+    isSupplier,
     isNhanVien,
     isUser,
     getRole,

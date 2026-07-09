@@ -35,6 +35,9 @@ public class NguoiDung {
     @Column(name = "is_verified", columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean isVerified = false;
 
+    @Column(name = "vai_tro", columnDefinition = "VARCHAR(20) DEFAULT 'CUSTOMER'")
+    private String vaiTro = "CUSTOMER";
+
     @Column(name = "verification_token")
     private String verificationToken;
 

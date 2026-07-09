@@ -52,4 +52,22 @@ public class AdminKhachHangController {
         adminUserService.deleteKhachHang(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Giám đốc duyệt khách hàng thành NCC
+     * POST /api/admin/khach-hang/{id}/duyet-ncc
+     */
+    @PostMapping("/{id}/duyet-ncc")
+    public ResponseEntity<NguoiDungResponse> duyetNCC(@PathVariable Integer id) {
+        return ResponseEntity.ok(adminUserService.duyetNCC(id));
+    }
+
+    /**
+     * Hủy vai trò NCC → trở lại CUSTOMER
+     * POST /api/admin/khach-hang/{id}/huy-ncc
+     */
+    @PostMapping("/{id}/huy-ncc")
+    public ResponseEntity<NguoiDungResponse> huyNCC(@PathVariable Integer id) {
+        return ResponseEntity.ok(adminUserService.huyNCC(id));
+    }
 }
