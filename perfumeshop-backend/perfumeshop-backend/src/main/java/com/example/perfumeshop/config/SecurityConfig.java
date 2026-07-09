@@ -56,20 +56,20 @@ public class SecurityConfig {
 
                 // ======== PUBLIC — không cần token ========
                 .requestMatchers("/api/auth/**").permitAll()
-                // GET sản phẩm, danh mục, thương hiệu công khai
+                // GET catalog công khai (sản phẩm, danh mục, thương hiệu)
+                .requestMatchers(HttpMethod.GET, "/api/catalog/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/san-pham/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/danh-muc/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/thuong-hieu/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()
+                // Đánh giá sản phẩm hiển thị công khai trên trang chi tiết
+                .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll()
                 // Xác nhận đơn hàng qua QR (khách không cần login)
                 .requestMatchers("/api/don-hang/*/xac-nhan").permitAll()
                 // Thanh toán callback (PayOS webhook)
                 .requestMatchers("/api/payment/callback/**").permitAll()
                 .requestMatchers("/api/payment/webhook/**").permitAll()
-                // Campaign công khai
-                .requestMatchers(HttpMethod.GET, "/api/campaigns/active").permitAll()
+                // Campaign công khai (path thật: /api/public/campaigns/active)
+                .requestMatchers(HttpMethod.GET, "/api/public/campaigns/active").permitAll()
                 // Procurement: NCC xem phiếu gọi thầu công khai
                 .requestMatchers(HttpMethod.GET, "/api/procurement/public").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/procurement/public/**").permitAll()
@@ -82,40 +82,61 @@ public class SecurityConfig {
 
                 // ======== CHỈ ADMIN ROOT ========
                 .requestMatchers("/api/admin/nhan-vien/**").hasRole("ADMIN")
-                .requestMatchers("/api/admin/khach-hang/**").hasRole("ADMIN")
-                .requestMatchers("/api/admin/reports/profit-margin").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/products/**").hasRole("ADMIN")
+                // Xóa sản phẩm / danh mục / thương hiệu / campaign — chỉ ADMIN
+                .requestMatchers(HttpMethod.DELETE, "/api/san-pham/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/danh-muc/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/thuong-hieu/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/admin/campaigns/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/categories/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/brands/**").hasRole("ADMIN")
 
                 // ======== ADMIN + DIRECTOR ========
+                .requestMatchers("/api/admin/khach-hang/**").hasAnyRole("ADMIN", "DIRECTOR")
                 .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "DIRECTOR")
                 .requestMatchers("/api/admin/reports/**").hasAnyRole("ADMIN", "DIRECTOR")
 
                 // ======== ADMIN + DIRECTOR + STORE_MANAGER ========
-                .requestMatchers("/api/admin/procurement/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                // CRUD sản phẩm / danh mục / thương hiệu (POST, PUT)
+                .requestMatchers(HttpMethod.POST, "/api/san-pham/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/san-pham/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/danh-muc/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/danh-muc/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/thuong-hieu/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/thuong-hieu/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                // Gọi thầu / duyệt đề xuất (các endpoint không public còn lại)
+                .requestMatchers("/api/procurement/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                // Campaign quản trị
                 .requestMatchers("/api/admin/campaigns/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                // Quản trị đánh giá (xem tất cả / xóa)
+                .requestMatchers(HttpMethod.GET, "/api/reviews/all").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                // Duyệt đổi trả
+                .requestMatchers(HttpMethod.GET, "/api/doi-tra/cho-duyet").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/api/doi-tra/all").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/doi-tra/*/duyet").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/doi-tra/*/xac-nhan-hoan-tien").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/doi-tra/*/tu-choi").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+
+                // Duyệt cuối / từ chối PO — chỉ cấp quản lý (kho chỉ được kiểm hàng)
+                .requestMatchers(HttpMethod.POST, "/api/kho/po/*/admin-duyet-cuoi").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/kho/po/*/admin-tu-choi").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
 
                 // ======== ADMIN + DIRECTOR + STORE_MANAGER + WAREHOUSE_STAFF ========
-                .requestMatchers("/api/admin/kho/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
-                .requestMatchers("/api/admin/import-kho/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
-                .requestMatchers("/api/admin/near-expiry/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers("/api/kho/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
 
-                // ======== TẤT CẢ NHÂN VIÊN NỘI BỘ ========
+                // ======== TẤT CẢ NHÂN VIÊN NỘI BỘ (route /api/admin còn lại) ========
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
 
                 // ======== ĐÃ ĐĂNG NHẬP (customer + employee) ========
-                // Giỏ hàng, đặt hàng, lịch sử — cần login
+                // Giỏ hàng, đặt hàng, lịch sử, hồ sơ, thanh toán, đổi trả — cần login
                 .requestMatchers("/api/cart/**").authenticated()
+                .requestMatchers("/api/dat-hang").authenticated()
                 .requestMatchers("/api/don-hang/**").authenticated()
-                .requestMatchers("/api/orders/**").authenticated()
-                .requestMatchers("/api/user/**").authenticated()
+                .requestMatchers("/api/users/**").authenticated()
                 .requestMatchers("/api/reviews/**").authenticated()
-                .requestMatchers("/api/returns/**").authenticated()
+                .requestMatchers("/api/doi-tra/**").authenticated()
+                .requestMatchers("/api/payment/**").authenticated()
 
-                // Tất cả còn lại — cho phép (GET public data)
-                .anyRequest().permitAll()
+                // Tất cả còn lại — từ chối mặc định
+                .anyRequest().denyAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

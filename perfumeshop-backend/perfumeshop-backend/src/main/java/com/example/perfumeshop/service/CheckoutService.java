@@ -22,6 +22,8 @@ import java.util.UUID;
 @Service
 public class CheckoutService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CheckoutService.class);
+
     @Autowired
     private SanPhamRepository sanPhamRepository;
 
@@ -81,8 +83,8 @@ public class CheckoutService {
             try {
                 fefoService.allocateOrderItemFromBatch(ct, it.getSanPhamId(), it.getSoLuong());
             } catch (BusinessException e) {
-                // If FEFO allocation fails, log but don't block order creation
-                // Batch allocation can fail if no suitable batches exist yet
+                // Batch allocation can fail if no suitable batches exist yet — don't block order creation
+                log.warn("FEFO allocate thất bại cho SP #{}: {}", it.getSanPhamId(), e.getMessage());
             }
             
             ctList.add(ct);

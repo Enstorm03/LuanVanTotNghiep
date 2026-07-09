@@ -6,9 +6,14 @@ class KhoApi extends BaseApi {
   async importPreview(file) {
     const formData = new FormData();
     formData.append('file', file);
+    // Không set Content-Type — browser tự thêm boundary cho multipart
+    const token = this._getToken();
     const response = await fetch(`${API_BASE_URL}/kho/import-preview`, {
       method: 'POST',
-      headers: { 'ngrok-skip-browser-warning': 'true' },
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
       body: formData,
     });
     if (!response.ok) throw new Error(await this._getErrorMessage(response));
@@ -27,11 +32,16 @@ class KhoApi extends BaseApi {
   }
 
   async deleteRow(rowId) {
+    const token = this._getToken();
     const res = await fetch(`${API_BASE_URL}/kho/import-preview/row/${rowId}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
     });
-    if (!res.ok) throw new Error('Lỗi xóa dòng');
+    if (!res.ok) throw new Error(await this._getErrorMessage(res));
     return null;
   }
 

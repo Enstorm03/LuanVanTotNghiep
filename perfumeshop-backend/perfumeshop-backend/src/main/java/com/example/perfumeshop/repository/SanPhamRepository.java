@@ -55,4 +55,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
      // Tìm sản phẩm theo tên (không phân biệt hoa/thường)
      @Query("SELECT p FROM SanPham p WHERE LOWER(TRIM(p.tenSanPham)) = LOWER(TRIM(:tenSanPham))")
      List<SanPham> findByTenSanPhamIgnoreCase(@Param("tenSanPham") String tenSanPham);
+
+     // Sản phẩm sắp hết kho (tồn < ngưỡng), sắp theo tồn kho tăng dần
+     List<SanPham> findBySoLuongTonKhoLessThanOrderBySoLuongTonKhoAsc(Integer nguong);
 }

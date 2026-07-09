@@ -8,7 +8,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -446,24 +445,12 @@ public class KhoService {
     }
 
     public List<Map<String, Object>> getNearExpiryBatches(int limit) {
-        LocalDate threshold = LocalDate.now().plusMonths(3);
-        List<ChiTietPhieuNhap> batches = new ArrayList<>();
-        List<PhieuNhapKho> allPhieus = phieuNhapKhoRepository.findAll();
-
-        for (PhieuNhapKho phieu : allPhieus) {
-            for (ChiTietPhieuNhap ct : phieu.getChiTiet()) {
-                if (ct.getHanSuDung() != null && 
-                    ct.getHanSuDung().isAfter(LocalDate.now()) &&
-                    ct.getHanSuDung().isBefore(threshold) &&
-                    ct.getSoLuongConLai() != null && 
-                    ct.getSoLuongConLai() > 0) {
-                    batches.add(ct);
-                }
-            }
-        }
+        LocalDate today = LocalDate.now();
+        LocalDate threshold = today.plusMonths(3);
+        // Query trực tiếp các lô còn hàng sắp hết hạn (thay cho findAll + lọc trong Java)
+        List<ChiTietPhieuNhap> batches = phieuNhapKhoRepository.findLoSapHetHan(today, threshold);
 
         return batches.stream()
-            .sorted((a, b) -> a.getHanSuDung().compareTo(b.getHanSuDung()))
             .limit(limit)
             .map(ct -> {
                 SanPham sp = sanPhamRepository.findById(ct.getIdSanPham()).orElse(null);
@@ -532,13 +519,16 @@ public class KhoService {
 
     private List<PhieuNhapTam> parseExcel(MultipartFile file, String sessionId) throws IOException {
         List<PhieuNhapTam> rows = new ArrayList<>();
-        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+        // WorkbookFactory hỗ trợ cả .xlsx (XSSF) lẫn .xls (HSSF)
+        try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = wb.getSheetAt(0);
             Row header = sheet.getRow(0);
             Map<String, Integer> colMap = new HashMap<>();
             if (header != null) {
                 for (Cell cell : header) {
-                    colMap.put(cell.getStringCellValue().trim().toLowerCase(), cell.getColumnIndex());
+                    if (cell.getCellType() == CellType.STRING) {
+                        colMap.put(cell.getStringCellValue().trim().toLowerCase(), cell.getColumnIndex());
+                    }
                 }
             }
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -549,7 +539,9 @@ public class KhoService {
                     cellStr(row, colMap.getOrDefault("ten_san_pham", -1)),
                     cellStr(row, colMap.getOrDefault("so_luong", -1)),
                     cellStr(row, colMap.getOrDefault("gia_nhap", -1)),
-                    cellStr(row, colMap.getOrDefault("ghi_chu", -1)));
+                    cellStr(row, colMap.getOrDefault("ghi_chu", -1)),
+                    cellStr(row, colMap.getOrDefault("han_su_dung", colMap.getOrDefault("hansudung", -1))),
+                    cellStr(row, colMap.getOrDefault("so_lo", colMap.getOrDefault("solo", -1))));
                 rows.add(tam);
             }
         }
@@ -618,7 +610,13 @@ public class KhoService {
         Cell cell = row.getCell(colIdx);
         if (cell == null) return null;
         if (cell.getCellType() == CellType.STRING) return cell.getStringCellValue().trim();
-        if (cell.getCellType() == CellType.NUMERIC) return String.valueOf((int)cell.getNumericCellValue());
+        if (cell.getCellType() == CellType.NUMERIC) {
+            if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                // Cell là ngày → format về YYYY-MM-DD để parse HSD
+                return new java.text.SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue());
+            }
+            return String.valueOf((long) cell.getNumericCellValue());
+        }
         return null;
     }
 

@@ -30,4 +30,16 @@ public interface PhieuNhapKhoRepository extends JpaRepository<PhieuNhapKho, Inte
     long countByMaPhieuStartingWith(String prefix);
     
     List<PhieuNhapKho> findByTrangThai(String trangThai);
+
+    /** Ngày nhập kho gần nhất của 1 sản phẩm (thay cho findAll + lọc trong Java) */
+    @Query("SELECT MAX(ct.phieuNhap.ngayNhap) FROM ChiTietPhieuNhap ct WHERE ct.idSanPham = :idSanPham")
+    java.time.LocalDateTime findNgayNhapGanNhatCuaSanPham(@org.springframework.data.repository.query.Param("idSanPham") Integer idSanPham);
+
+    /** Các dòng lô còn hàng, sắp hết hạn trong khoảng (today, threshold) — sắp theo HSD tăng dần */
+    @Query("SELECT ct FROM ChiTietPhieuNhap ct " +
+           "WHERE ct.hanSuDung IS NOT NULL AND ct.hanSuDung > :today AND ct.hanSuDung < :threshold " +
+           "AND ct.soLuongConLai > 0 ORDER BY ct.hanSuDung ASC")
+    List<com.example.perfumeshop.entity.ChiTietPhieuNhap> findLoSapHetHan(
+        @org.springframework.data.repository.query.Param("today") java.time.LocalDate today,
+        @org.springframework.data.repository.query.Param("threshold") java.time.LocalDate threshold);
 }

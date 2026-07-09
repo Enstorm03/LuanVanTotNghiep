@@ -40,15 +40,19 @@ public class JwtUtil {
 
     /**
      * Tạo JWT token cho khách hàng (customer).
+     * Nếu vaiTro = SUPPLIER thì type = "supplier", còn lại = "customer".
      *
      * @param userId   id_nguoi_dung
      * @param username ten_dang_nhap
+     * @param vaiTro   vai_tro thực tế: CUSTOMER | SUPPLIER
      */
-    public String generateCustomerToken(Integer userId, String username) {
+    public String generateCustomerToken(Integer userId, String username, String vaiTro) {
+        String role = (vaiTro != null && !vaiTro.isBlank()) ? vaiTro.toUpperCase() : "CUSTOMER";
+        String type = "SUPPLIER".equals(role) ? "supplier" : "customer";
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("type", "customer");
-        claims.put("role", "CUSTOMER");
+        claims.put("type", type);
+        claims.put("role", role);
         return buildToken(username, claims);
     }
 

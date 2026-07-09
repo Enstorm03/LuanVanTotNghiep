@@ -1,10 +1,12 @@
 package com.example.perfumeshop.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -86,6 +88,15 @@ public class SanPhamDeXuat {
     /** Ghi chú thêm từ NCC */
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
+
+    /** Hạn sử dụng lô hàng NCC cung cấp (NCC khai báo khi đề xuất) */
+    @Column(name = "han_su_dung")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate hanSuDung;
+
+    /** Số lô hàng NCC cung cấp */
+    @Column(name = "so_lo", length = 100)
+    private String soLo;
 
     /** Phản hồi từ admin (lý do từ chối hoặc ghi chú duyệt) */
     @Column(name = "phan_hoi_admin", columnDefinition = "TEXT")

@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class DonHangService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DonHangService.class);
+
     public static final String TT_CHO_XAC_NHAN = "Đang chờ";
     public static final String TT_DA_XAC_NHAN = "Đã xác nhận";
     public static final String TT_DANG_GIAO = "Đang giao hàng";
@@ -144,8 +146,10 @@ public class DonHangService {
                 // 2. Trừ soLuongConLai multi-batch FEFO — lô1 hết thì sang lô2
                 try {
                     fefoService.deductFEFOOnConfirm(sp.getIdSanPham(), ct.getSoLuong());
-                } catch (Exception ignored) {
+                } catch (Exception e) {
                     // Không block xác nhận nếu batch không đủ (data cũ không có batch)
+                    log.warn("FEFO deduct thất bại cho đơn #{} SP #{}: {}",
+                        dh.getIdDonHang(), sp.getIdSanPham(), e.getMessage());
                 }
             }
         }
@@ -235,9 +239,11 @@ public class DonHangService {
             // Hoàn soLuongConLai bảng chi_tiet_phieu_nhap (FEFO batch)
             if (item.getIdPhieuNhap() != null) {
                 try {
-                    fefoService.restoreBatchStock(item.getIdPhieuNhap(), item.getSoLuong());
-                } catch (Exception ignored) {
+                    fefoService.restoreBatchStock(item.getIdPhieuNhap(), sp.getIdSanPham(), item.getSoLuong());
+                } catch (Exception e) {
                     // Không block hoàn kho chính nếu batch restore thất bại
+                    log.warn("FEFO restore thất bại cho đơn #{} SP #{}: {}",
+                        dh.getIdDonHang(), sp.getIdSanPham(), e.getMessage());
                 }
             }
         }

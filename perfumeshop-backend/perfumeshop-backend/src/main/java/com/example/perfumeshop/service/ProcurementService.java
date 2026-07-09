@@ -9,7 +9,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +25,10 @@ import java.util.*;
 @Service
 public class ProcurementService {
 
+    // Self-proxy: bắt buộc để @Transactional(REQUIRES_NEW) có hiệu lực khi gọi nội bộ
+    @Autowired @org.springframework.context.annotation.Lazy
+    private ProcurementService self;
+
     @Autowired private PhieuGoiThauRepository phieuGoiThauRepo;
     @Autowired private BaoGiaNCCRepository baoGiaNCCRepo;
     @Autowired private SanPhamRepository sanPhamRepository;
@@ -38,8 +41,7 @@ public class ProcurementService {
 
     /** Lấy sản phẩm sắp hết kho để hiển thị trong modal tạo phiếu */
     public List<Map<String, Object>> getDanhSachSapHetKho(int nguong) {
-        return sanPhamRepository.findAll().stream()
-            .filter(sp -> sp.getSoLuongTonKho() != null && sp.getSoLuongTonKho() < nguong)
+        return sanPhamRepository.findBySoLuongTonKhoLessThanOrderBySoLuongTonKhoAsc(nguong).stream()
             .map(sp -> {
                 Map<String, Object> m = new HashMap<>();
                 m.put("idSanPham",     sp.getIdSanPham());
@@ -55,7 +57,6 @@ public class ProcurementService {
                 
                 return m;
             })
-            .sorted(Comparator.comparingInt(m -> (int) m.get("soLuongTonKho")))
             .toList();
     }
     
@@ -67,14 +68,8 @@ public class ProcurementService {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            // D: Tìm ngày nhập kho gần nhất
-            LocalDateTime ngayNhapGanNhat = phieuNhapKhoRepository.findAll().stream()
-                .flatMap(phieu -> phieu.getChiTiet() != null ? phieu.getChiTiet().stream() : java.util.stream.Stream.empty())
-                .filter(ct -> ct.getIdSanPham().equals(idSanPham))
-                .map(ct -> ct.getPhieuNhap().getNgayNhap())
-                .filter(Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+            // D: Tìm ngày nhập kho gần nhất (query trực tiếp thay vì findAll + lọc)
+            LocalDateTime ngayNhapGanNhat = phieuNhapKhoRepository.findNgayNhapGanNhatCuaSanPham(idSanPham);
             
             if (ngayNhapGanNhat == null) {
                 // Chưa từng nhập hàng
@@ -96,19 +91,10 @@ public class ProcurementService {
             if (soNgayBienDo <= 0) soNgayBienDo = 1; // Tránh chia cho 0
             result.put("soNgayBienDo", soNgayBienDo);
             
-            // S: Tổng số lượng đã bán từ ngày nhập đến nay
-            int tongBanRa = chiTietDonHangRepo.findAll().stream()
-                .filter(ct -> ct.getSanPham() != null && ct.getSanPham().getIdSanPham().equals(idSanPham))
-                .filter(ct -> {
-                    DonHang dh = ct.getDonHang();
-                    if (dh == null || dh.getNgayDatHang() == null) return false;
-                    // Chỉ tính đơn đã hoàn thành
-                    if (!"Hoàn thành".equals(dh.getTrangThaiVanHanh())) return false;
-                    // Đơn hàng sau ngày nhập
-                    return !dh.getNgayDatHang().isBefore(ngayNhapGanNhat);
-                })
-                .mapToInt(ct -> ct.getSoLuong() != null ? ct.getSoLuong() : 0)
-                .sum();
+            // S: Tổng số lượng đã bán từ ngày nhập đến nay (chỉ tính đơn Hoàn thành)
+            Long daBan = chiTietDonHangRepo.tongSoLuongDaBanTuNgay(
+                idSanPham, DonHangService.TT_HOAN_THANH, ngayNhapGanNhat);
+            int tongBanRa = daBan != null ? daBan.intValue() : 0;
             result.put("tongBanRa", tongBanRa);
             
             // V: Tốc độ tiêu thụ trung bình (sản phẩm/ngày)
@@ -327,15 +313,16 @@ public class ProcurementService {
         if (giaDeXuat == null || giaDeXuat.compareTo(BigDecimal.ZERO) <= 0)
             throw new BusinessException("Giá đề xuất phải lớn hơn 0");
 
-        // Gộp HSD và số lô vào ghiChu
-        StringBuilder ghiChuBuilder = new StringBuilder(ghiChu != null ? ghiChu : "");
+        // Validate HSD không được trong quá khứ
+        LocalDate hanSuDungDate = null;
         if (hanSuDung != null && !hanSuDung.isBlank()) {
-            if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
-            ghiChuBuilder.append("HSD:").append(hanSuDung.trim());
-        }
-        if (soLo != null && !soLo.isBlank()) {
-            if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
-            ghiChuBuilder.append("Lô:").append(soLo.trim());
+            try {
+                hanSuDungDate = LocalDate.parse(hanSuDung.trim());
+                if (hanSuDungDate.isBefore(LocalDate.now()))
+                    throw new BusinessException("Hạn sử dụng không được là ngày trong quá khứ");
+            } catch (BusinessException e) {
+                throw e;
+            } catch (Exception ignored) {}
         }
 
         SanPhamDeXuat dx = new SanPhamDeXuat();
@@ -349,7 +336,9 @@ public class ProcurementService {
         dx.setSoLuongCoTheCungCap(soLuong);
         dx.setDungTichMl(dungTichMl);
         dx.setNongDo(nongDo);
-        dx.setGhiChu(ghiChuBuilder.toString());
+        dx.setGhiChu(ghiChu);
+        dx.setHanSuDung(hanSuDungDate);
+        dx.setSoLo(soLo != null && !soLo.isBlank() ? soLo.trim() : null);
         dx.setTrangThai("PENDING");
         dx.setNgayTao(LocalDateTime.now());
 
@@ -488,19 +477,9 @@ public class ProcurementService {
         ct.setGiaNhap(dx.getGiaDeXuat());
         ct.setSoLuongLoi(0);
 
-        // Parse HSD và số lô từ ghiChu của đề xuất NCC (dạng "... | HSD:2027-12-31 | Lô:LOT001")
-        if (dx.getGhiChu() != null) {
-            for (String part : dx.getGhiChu().split("\\|")) {
-                String p = part.trim();
-                if (p.startsWith("HSD:")) {
-                    try {
-                        ct.setHanSuDung(java.time.LocalDate.parse(p.substring(4).trim()));
-                    } catch (Exception ignored) {}
-                } else if (p.startsWith("Lô:")) {
-                    ct.setSoLo(p.substring(3).trim());
-                }
-            }
-        }
+        // Đọc HSD và số lô từ field riêng của đề xuất
+        ct.setHanSuDung(dx.getHanSuDung());
+        ct.setSoLo(dx.getSoLo());
 
         po.setChiTiet(List.of(ct));
         phieuNhapKhoRepository.save(po);
@@ -556,9 +535,10 @@ public class ProcurementService {
                     ? ((Number) item.get("soLuongNhap")).intValue() : null;
                 String phanHoi = item.containsKey("phanHoi") ? (String) item.get("phanHoi") : "Duyệt hàng loạt";
 
-                // Gọi method duyệt trong transaction riêng
-                duyetDeXuatIndependent(idSanPhamDeXuat, idDanhMuc, idThuongHieu, 
-                    idNhanVien.intValue(), phanHoi, phanTramBienDo, soLuongNhap);
+                // Gọi qua self-proxy để transaction REQUIRES_NEW có hiệu lực
+                // (gọi trực tiếp this.duyetDeXuatIndependent sẽ bỏ qua Spring AOP proxy)
+                self.duyetDeXuatIndependent(idSanPhamDeXuat, idDanhMuc, idThuongHieu, 
+                    idNhanVien, phanHoi, phanTramBienDo, soLuongNhap);
                 thanhCong++;
 
                 Map<String, Object> result = new HashMap<>();
@@ -604,9 +584,24 @@ public class ProcurementService {
      * Bước 1: NCC upload file → preview danh sách, validate, trả về sessionId.
      * Không commit vào DB chính. Dữ liệu lưu trong Map bộ nhớ theo sessionId.
      */
-    private static final Map<String, List<Map<String, Object>>> BULK_SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long BULK_SESSION_TTL_MS = 30 * 60 * 1000L; // 30 phút
+
+    private static final class BulkSession {
+        final List<Map<String, Object>> rows;
+        final long createdAt = System.currentTimeMillis();
+        BulkSession(List<Map<String, Object>> rows) { this.rows = rows; }
+    }
+
+    private static final Map<String, BulkSession> BULK_SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** Dọn các session quá hạn để tránh rò rỉ bộ nhớ */
+    private static void evictExpiredBulkSessions() {
+        long now = System.currentTimeMillis();
+        BULK_SESSIONS.entrySet().removeIf(e -> now - e.getValue().createdAt > BULK_SESSION_TTL_MS);
+    }
 
     public Map<String, Object> bulkDeXuatPreview(MultipartFile file, String tenNCC, String lienHeNCC) throws IOException {
+        evictExpiredBulkSessions();
         String sessionId = UUID.randomUUID().toString();
         String filename  = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
 
@@ -617,7 +612,7 @@ public class ProcurementService {
             rows = parseBulkCsv(file, tenNCC, lienHeNCC);
         }
 
-        BULK_SESSIONS.put(sessionId, rows);
+        BULK_SESSIONS.put(sessionId, new BulkSession(rows));
 
         long ok  = rows.stream().filter(r -> "OK".equals(r.get("trangThai"))).count();
         long loi = rows.stream().filter(r -> "LOI".equals(r.get("trangThai"))).count();
@@ -636,8 +631,10 @@ public class ProcurementService {
      */
     @Transactional
     public Map<String, Object> bulkDeXuatConfirm(String sessionId) {
-        List<Map<String, Object>> rows = BULK_SESSIONS.remove(sessionId);
-        if (rows == null) throw new BusinessException("Session không tồn tại hoặc đã hết hạn");
+        evictExpiredBulkSessions();
+        BulkSession session = BULK_SESSIONS.remove(sessionId);
+        if (session == null) throw new BusinessException("Session không tồn tại hoặc đã hết hạn");
+        List<Map<String, Object>> rows = session.rows;
 
         List<Map<String, Object>> okRows = rows.stream()
             .filter(r -> "OK".equals(r.get("trangThai"))).toList();
@@ -648,9 +645,10 @@ public class ProcurementService {
             SanPhamDeXuat dx = new SanPhamDeXuat();
             dx.setPhieuGoiThau(null);
             dx.setTenNCC(row.get("tenNCC").toString());
-            dx.setLienHeNCC(row.getOrDefault("lienHeNCC", "").toString());
+            // lienHeNCC có thể là null (key tồn tại nhưng value null) → tránh NPE
+            dx.setLienHeNCC(row.get("lienHeNCC") != null ? row.get("lienHeNCC").toString() : null);
             dx.setTenSanPham(row.get("tenSanPham").toString());
-            dx.setMoTa(row.getOrDefault("moTa", "").toString());
+            dx.setMoTa(row.get("moTa") != null ? row.get("moTa").toString() : "");
             dx.setUrlHinhAnh(row.getOrDefault("urlHinhAnh", null) != null
                 ? row.get("urlHinhAnh").toString() : null);
             dx.setGiaDeXuat(new BigDecimal(row.get("giaDeXuat").toString()));
@@ -661,17 +659,16 @@ public class ProcurementService {
             dx.setNongDo(row.get("nongDo") != null
                 ? Integer.parseInt(row.get("nongDo").toString()) : null);
             dx.setGhiChu(row.getOrDefault("ghiChu", "").toString());
-            // Gộp hanSuDung + soLo vào ghiChu nếu có (sẽ được kho điền lại khi kiểm hàng thực tế)
-            StringBuilder ghiChuBuilder = new StringBuilder(dx.getGhiChu() != null ? dx.getGhiChu() : "");
+            // Lưu HSD và soLo vào field riêng
             if (row.get("hanSuDung") != null && !row.get("hanSuDung").toString().isBlank()) {
-                if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
-                ghiChuBuilder.append("HSD:").append(row.get("hanSuDung"));
+                try {
+                    LocalDate hsd = LocalDate.parse(row.get("hanSuDung").toString().trim());
+                    dx.setHanSuDung(hsd);
+                } catch (Exception ignored) {}
             }
             if (row.get("soLo") != null && !row.get("soLo").toString().isBlank()) {
-                if (ghiChuBuilder.length() > 0) ghiChuBuilder.append(" | ");
-                ghiChuBuilder.append("Lô:").append(row.get("soLo"));
+                dx.setSoLo(row.get("soLo").toString().trim());
             }
-            dx.setGhiChu(ghiChuBuilder.toString());
             dx.setTrangThai("PENDING");
             dx.setNgayTao(LocalDateTime.now());
             created.add(sanPhamDeXuatRepo.save(dx));
@@ -687,13 +684,16 @@ public class ProcurementService {
 
     private List<Map<String, Object>> parseBulkExcel(MultipartFile file, String tenNCC, String lienHeNCC) throws IOException {
         List<Map<String, Object>> rows = new ArrayList<>();
-        try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+        // WorkbookFactory hỗ trợ cả .xlsx (XSSF) lẫn .xls (HSSF)
+        try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = wb.getSheetAt(0);
             Row header = sheet.getRow(0);
             Map<String, Integer> colMap = new HashMap<>();
             if (header != null) {
                 for (Cell cell : header) {
-                    colMap.put(cell.getStringCellValue().trim().toLowerCase(), cell.getColumnIndex());
+                    if (cell.getCellType() == CellType.STRING) {
+                        colMap.put(cell.getStringCellValue().trim().toLowerCase(), cell.getColumnIndex());
+                    }
                 }
             }
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -830,6 +830,33 @@ public class ProcurementService {
             case STRING  -> cell.getStringCellValue();
             default      -> null;
         };
+    }
+
+    /** NCC đề xuất sản phẩm mới — trong 1 đợt gọi thầu */
+    @Transactional
+    public SanPhamDeXuat deXuatSanPham(Integer idPhieu, String tenNCC, String lienHeNCC,
+                                       String tenSanPham, String moTa, String urlHinhAnh,
+                                       BigDecimal giaDeXuat, Integer soLuong,
+                                       Integer dungTichMl, Integer nongDo, String ghiChu) {
+        PhieuGoiThau phieu = getById(idPhieu);
+        if (!"OPEN".equals(phieu.getTrangThai()))
+            throw new BusinessException("Đợt gọi thầu này đã đóng, không thể đề xuất");
+
+        SanPhamDeXuat dx = new SanPhamDeXuat();
+        dx.setPhieuGoiThau(phieu);
+        dx.setTenNCC(tenNCC);
+        dx.setLienHeNCC(lienHeNCC);
+        dx.setTenSanPham(tenSanPham);
+        dx.setMoTa(moTa);
+        dx.setUrlHinhAnh(urlHinhAnh);
+        dx.setGiaDeXuat(giaDeXuat);
+        dx.setSoLuongCoTheCungCap(soLuong);
+        dx.setDungTichMl(dungTichMl);
+        dx.setNongDo(nongDo);
+        dx.setGhiChu(ghiChu);
+        dx.setTrangThai("PENDING");
+        dx.setNgayTao(LocalDateTime.now());
+        return sanPhamDeXuatRepo.save(dx);
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────

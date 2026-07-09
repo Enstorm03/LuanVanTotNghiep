@@ -342,18 +342,15 @@ const AdminProcurementPage = () => {
   const PROP_STYLE = { PENDING: 'bg-yellow-100 text-yellow-800', APPROVED: 'bg-green-100 text-green-800', REJECTED: 'bg-red-100 text-red-800' };
   const PROP_LABEL = { PENDING: '⏳ Chờ duyệt', APPROVED: '✓ Đã duyệt', REJECTED: '✗ Từ chối' };
 
-  /** Parse HSD và số lô từ ghiChu dạng "HSD:2027-12-31 | Lô:LOT001 | ghi chú khác" */
-  const parseGhiChu = (ghiChu) => {
-    if (!ghiChu) return { hanSuDung: null, soLo: null, ghiChuClean: '' };
-    let hanSuDung = null, soLo = null;
-    const parts = ghiChu.split('|').map(s => s.trim());
-    const remaining = [];
-    for (const part of parts) {
-      if (part.startsWith('HSD:')) hanSuDung = part.replace('HSD:', '').trim();
-      else if (part.startsWith('Lô:')) soLo = part.replace('Lô:', '').trim();
-      else if (part) remaining.push(part);
-    }
-    return { hanSuDung, soLo, ghiChuClean: remaining.join(' | ') };
+  /**
+   * Trả về { hanSuDung, soLo } từ field riêng của SanPhamDeXuat.
+   * Field riêng thay thế cách cũ gộp vào ghiChu.
+   */
+  const parseGhiChu = (p) => {
+    return {
+      hanSuDung: p.hanSuDung || null,
+      soLo: p.soLo || null,
+    };
   };
 
   /** Format ngày YYYY-MM-DD an toàn, tránh timezone shift */
@@ -484,7 +481,7 @@ const AdminProcurementPage = () => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   {selectedSupplier.proposals.map(p => {
-                    const { hanSuDung, soLo } = parseGhiChu(p.ghiChu);
+                    const { hanSuDung, soLo } = parseGhiChu(p);
                     return (
                     <tr key={p.idSanPhamDeXuat} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                       <td className="px-4 py-3">

@@ -12,7 +12,8 @@ export const calculateItemSubtotal = (item) => {
 };
 
 export const formatCurrency = (amount) => {
-  return amount.toLocaleString('vi-VN') + '₫';
+  // Null-safe: tránh crash khi amount là null/undefined
+  return (Number(amount) || 0).toLocaleString('vi-VN') + '₫';
 };
 
 export const validateQuantity = (quantity) => {

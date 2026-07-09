@@ -49,34 +49,37 @@ public class FEFOService {
      * Ném BusinessException nếu tổng các lô không đủ.
      */
     public void deductFEFOOnConfirm(Integer idSanPham, Integer soLuongCan) {
-        List<Integer> batches = phieuNhapKhoRepository.findActiveBatchesByProductFEFO(idSanPham);
-        if (batches == null || batches.isEmpty()) {
+        // Lấy từng dòng lô của ĐÚNG sản phẩm này, sắp theo HSD sớm nhất (FEFO)
+        String selectSql = "SELECT ct.id, ct.so_luong_con_lai " +
+                           "FROM Chi_Tiet_Phieu_Nhap ct " +
+                           "WHERE ct.id_san_pham = :idSanPham AND ct.so_luong_con_lai > 0 " +
+                           "ORDER BY ct.han_su_dung ASC, ct.id ASC";
+        Query sq = entityManager.createNativeQuery(selectSql);
+        sq.setParameter("idSanPham", idSanPham);
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = sq.getResultList();
+        if (rows == null || rows.isEmpty()) {
             throw new BusinessException("Không tìm thấy lô hàng cho sản phẩm #" + idSanPham);
         }
 
         int remaining = soLuongCan;
-        for (Integer batchId : batches) {
+        for (Object[] r : rows) {
             if (remaining <= 0) break;
 
-            // Lấy soLuongConLai hiện tại của lô này
-            String selectSql = "SELECT SUM(ct.so_luong_con_lai) " +
-                               "FROM Chi_Tiet_Phieu_Nhap ct WHERE ct.id_phieu = :batchId";
-            Query sq = entityManager.createNativeQuery(selectSql);
-            sq.setParameter("batchId", batchId);
-            Object res = sq.getSingleResult();
-            int available = res != null ? ((Number) res).intValue() : 0;
+            Number rowId = (Number) r[0];
+            int available = r[1] != null ? ((Number) r[1]).intValue() : 0;
             if (available <= 0) continue;
 
-            // Lấy tối đa từ lô này, không vượt quá remaining
+            // Lấy tối đa từ dòng lô này, không vượt quá remaining
             int deduct = Math.min(available, remaining);
 
             String updateSql = "UPDATE Chi_Tiet_Phieu_Nhap " +
                                "SET so_luong_con_lai = so_luong_con_lai - :deduct " +
-                               "WHERE id_phieu = :batchId " +
+                               "WHERE id = :rowId " +
                                "  AND so_luong_con_lai >= :deduct";
             Query uq = entityManager.createNativeQuery(updateSql);
             uq.setParameter("deduct", deduct);
-            uq.setParameter("batchId", batchId);
+            uq.setParameter("rowId", rowId);
             int updated = uq.executeUpdate();
             if (updated > 0) {
                 remaining -= deduct;
@@ -94,15 +97,27 @@ public class FEFOService {
 
     /**
      * Hoàn soLuongConLai về lô được gán lúc đặt hàng.
+     * Chỉ hoàn vào dòng lô của ĐÚNG sản phẩm (1 PO có thể chứa nhiều sản phẩm).
      */
-    public void restoreBatchStock(Integer idPhieuNhap, Integer soLuongHoan) {
-        if (idPhieuNhap == null || soLuongHoan == null || soLuongHoan <= 0) return;
+    public void restoreBatchStock(Integer idPhieuNhap, Integer idSanPham, Integer soLuongHoan) {
+        if (idPhieuNhap == null || idSanPham == null || soLuongHoan == null || soLuongHoan <= 0) return;
+        // Tìm 1 dòng chi tiết đúng PO + đúng sản phẩm để hoàn
+        String selectSql = "SELECT ct.id FROM Chi_Tiet_Phieu_Nhap ct " +
+                           "WHERE ct.id_phieu = :idPhieuNhap AND ct.id_san_pham = :idSanPham " +
+                           "ORDER BY ct.id ASC";
+        Query sq = entityManager.createNativeQuery(selectSql);
+        sq.setParameter("idPhieuNhap", idPhieuNhap);
+        sq.setParameter("idSanPham", idSanPham);
+        @SuppressWarnings("unchecked")
+        List<Object> ids = sq.getResultList();
+        if (ids == null || ids.isEmpty()) return;
+
         String sql = "UPDATE Chi_Tiet_Phieu_Nhap " +
                      "SET so_luong_con_lai = so_luong_con_lai + :soLuong " +
-                     "WHERE id_phieu = :idPhieuNhap";
+                     "WHERE id = :rowId";
         Query q = entityManager.createNativeQuery(sql);
         q.setParameter("soLuong", soLuongHoan);
-        q.setParameter("idPhieuNhap", idPhieuNhap);
+        q.setParameter("rowId", ids.get(0));
         q.executeUpdate();
     }
 }

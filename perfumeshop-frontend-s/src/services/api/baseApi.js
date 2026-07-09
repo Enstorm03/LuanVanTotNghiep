@@ -57,12 +57,19 @@ class BaseApi {
   }
 
   // Lấy thông báo lỗi từ response
+  // Chỉ đọc body 1 lần (text), sau đó thử parse JSON — tránh lỗi "body stream already read"
   async _getErrorMessage(response) {
+    let text = '';
     try {
-      const data = await response.json();
+      text = await response.text();
+    } catch {
+      return `Lỗi HTTP ${response.status}`;
+    }
+    try {
+      const data = JSON.parse(text);
       return data.message || data.error || 'Có lỗi xảy ra';
     } catch {
-      return await response.text() || `Lỗi HTTP ${response.status}`;
+      return text || `Lỗi HTTP ${response.status}`;
     }
   }
 

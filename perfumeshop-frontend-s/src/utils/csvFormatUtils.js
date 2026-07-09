@@ -230,7 +230,7 @@ export const validateCSVRow = (rowData, rowIndex) => {
       if (isNaN(Number(value))) {
         errors.push(`Hàng ${rowIndex}: ${CSV_DISPLAY_HEADERS[field]} phải là số`);
       } else if (Number(value) < 0) {
-        errors.push(`Hàng ${rowIndex}: ${CSV_DISPLAY_HEADERS[field]} phải lớn hơn 0`);
+        errors.push(`Hàng ${rowIndex}: ${CSV_DISPLAY_HEADERS[field]} không được âm`);
       }
     }
   });
@@ -250,10 +250,11 @@ export const validateCSVRow = (rowData, rowIndex) => {
     }
   }
 
-  // Validate URL format
-  if (rowData.urlHinhAnh) {
+  // Validate URL format (key theo CSV_HEADERS là url_hinh_anh)
+  const urlHinhAnh = rowData.url_hinh_anh || rowData.urlHinhAnh;
+  if (urlHinhAnh) {
     try {
-      new URL(rowData.urlHinhAnh);
+      new URL(urlHinhAnh);
     } catch {
       errors.push(`Hàng ${rowIndex}: URL hình ảnh không hợp lệ`);
     }
@@ -266,16 +267,17 @@ export const validateCSVRow = (rowData, rowIndex) => {
  * Generate sample CSV template for users to download
  */
 export const generateCSVTemplate = () => {
+  // Key phải khớp CSV_HEADERS (snake_case) để formDataToCSVRow đọc được giá trị
   const sampleData = [
     {
-      tenSanPham: 'Bleu de Chanel',
-      moTa: 'Mùi hương nam',
-      giaDeXuat: 350000,
-      soLuongCoTheCungCap: 50,
-      dungTichMl: 100,
-      nongDo: 20,
-      urlHinhAnh: '',
-      ghiChu: 'Hàng chính hãng',
+      ten_san_pham: 'Bleu de Chanel',
+      mo_ta: 'Mùi hương nam',
+      gia_de_xuat: 350000,
+      so_luong: 50,
+      dung_tich_ml: 100,
+      nong_do: 20,
+      url_hinh_anh: '',
+      ghi_chu: 'Hàng chính hãng',
       hanSuDung: '2027-12-31',
       soLo: 'LOT001',
     },

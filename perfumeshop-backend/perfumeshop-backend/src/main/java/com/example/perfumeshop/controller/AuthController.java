@@ -78,9 +78,9 @@ public class AuthController {
                 }
 
                 String vaiTro = kh.getVaiTro() != null ? kh.getVaiTro() : "CUSTOMER";
-                // NCC được duyệt từ customer → type = "supplier"
+                // NCC được duyệt từ customer → type = "supplier", token mang đúng role
                 String type = "SUPPLIER".equalsIgnoreCase(vaiTro) ? "supplier" : "customer";
-                String token = jwtUtil.generateCustomerToken(kh.getIdNguoiDung(), kh.getTenDangNhap());
+                String token = jwtUtil.generateCustomerToken(kh.getIdNguoiDung(), kh.getTenDangNhap(), vaiTro);
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
                 body.put("type", type);

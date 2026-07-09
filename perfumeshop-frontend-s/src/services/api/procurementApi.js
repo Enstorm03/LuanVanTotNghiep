@@ -134,9 +134,14 @@ class ProcurementApi extends BaseApi {
     formData.append('file', file);
     formData.append('tenNCC', tenNCC);
     formData.append('lienHeNCC', lienHeNCC);
+    // Không set Content-Type — browser tự thêm boundary cho multipart
+    const token = this._getToken();
     const response = await fetch(`${API_BASE_URL}/procurement/bulk-preview`, {
       method: 'POST',
-      headers: { 'ngrok-skip-browser-warning': 'true' },
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
       body: formData,
     });
     if (!response.ok) throw new Error(await this._getErrorMessage(response));
