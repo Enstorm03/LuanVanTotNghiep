@@ -7,9 +7,6 @@ import AdminLayout from './layouts/AdminLayout';
 // Guards
 import ProtectedRoute from './components/common/ProtectedRoute';
 
-// Contexts — SupplierProvider chỉ dùng cho ProcurementPortalPage cũ
-import { SupplierProvider } from './contexts/SupplierContext';
-
 // Public Pages
 import HomePage from './pages/public/TrangChu';
 import ProductDetail from './pages/public/ChiTietSanPham';
@@ -111,12 +108,13 @@ function App() {
         
 
         {/* Route NCC — procurement portal (public, NCC xem thầu và chào giá) */}
-        <Route path="/procurement" element={<SupplierProvider><ProcurementPortalPage /></SupplierProvider>} />
-        <Route path="/procurement/:id" element={<SupplierProvider><ProcurementDetailWrapper /></SupplierProvider>} />
+        <Route path="/procurement" element={<ProtectedRoute requireRole="SUPPLIER"><SupplierPortalPage /></ProtectedRoute>} />
+        <Route path="/procurement/:id" element={<ProcurementDetailWrapper />} />
 
         {/* Route NCC — cần đăng nhập với role SUPPLIER */}
         <Route path="/supplier-portal" element={
           <ProtectedRoute requireRole="SUPPLIER"><SupplierPortalPage /></ProtectedRoute>
+          
         } />
 
         {/* Route công khai — khách quét QR xác nhận nhận hàng / đổi trả (không cần login) */}

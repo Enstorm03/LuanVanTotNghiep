@@ -114,13 +114,6 @@ const AdminSidebar = () => {
                 Đấu thầu
               </NavLink>
             )}
-            {/* {isStoreManager() && (
-              <NavLink to="/admin/suppliers" className={navLinkClasses}>
-                <span className="material-symbols-outlined">business</span>
-                Nhà cung cấp
-              </NavLink>
-            )} */}
-
             {/* Đánh giá — STORE_MANAGER trở lên */}
             {isStoreManager() && (
               <NavLink to="/admin/reviews" className={navLinkClasses}>
