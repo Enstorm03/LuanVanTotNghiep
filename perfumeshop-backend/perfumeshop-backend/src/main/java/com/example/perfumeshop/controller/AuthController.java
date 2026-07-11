@@ -11,7 +11,9 @@ import com.example.perfumeshop.repository.NhanVienRepository;
 import com.example.perfumeshop.security.JwtUtil;
 import com.example.perfumeshop.service.AdminUserService;
 import com.example.perfumeshop.service.EmailVerificationService;
+import com.example.perfumeshop.service.LoginLogService;
 import com.example.perfumeshop.service.PasswordService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,12 +42,29 @@ public class AuthController {
     private EmailVerificationService emailVerificationService;
 
     @Autowired
+    private LoginLogService loginLogService;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
+    /** Lấy IP thật ngay cả khi đứng sau reverse proxy */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.split(",")[0].trim();
+        }
+        ip = request.getHeader("X-Real-IP");
+        if (ip != null && !ip.isBlank()) return ip;
+        return request.getRemoteAddr();
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
-        String username = req.getTenDangNhap();
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req,
+                                                     HttpServletRequest httpRequest) {
+        String username   = req.getTenDangNhap();
         String rawPassword = req.getMatKhau();
+        String ip         = getClientIp(httpRequest);
+        String userAgent  = httpRequest.getHeader("User-Agent");
 
         // Bước 1: Thử tìm trong bảng Nhân viên (Admin/Staff/Supplier)
         var nvOpt = nhanVienRepository.findByTenDangNhap(username);
@@ -56,6 +75,10 @@ public class AuthController {
                 // NCC login qua cùng bảng NhanVien nhưng type = "supplier"
                 String type = "SUPPLIER".equalsIgnoreCase(vaiTro) ? "supplier" : "employee";
                 String token = jwtUtil.generateEmployeeToken(nv.getIdNhanVien(), nv.getTenDangNhap(), vaiTro);
+
+                // Ghi log thành công
+                loginLogService.logSuccess(username, nv.getHoTen(), vaiTro, ip, userAgent);
+
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
                 body.put("type", type);
@@ -64,6 +87,10 @@ public class AuthController {
                 body.put("role", vaiTro);
                 body.put("token", token);
                 return ResponseEntity.ok(body);
+            } else {
+                // Sai mật khẩu nhân viên
+                loginLogService.logFailed(username, "Sai mật khẩu", ip, userAgent);
+                throw new BusinessException("Sai tài khoản hoặc mật khẩu");
             }
         }
 
@@ -74,6 +101,7 @@ public class AuthController {
             if (passwordService.matches(rawPassword, kh.getMatKhauBam())) {
                 // Kiểm tra email đã xác thực chưa
                 if (kh.getIsVerified() != null && !kh.getIsVerified()) {
+                    loginLogService.logFailed(username, "Email chưa xác thực", ip, userAgent);
                     throw new BusinessException("Vui lòng xác thực email trước khi đăng nhập. Kiểm tra hộp thư của bạn.");
                 }
 
@@ -81,6 +109,12 @@ public class AuthController {
                 // NCC được duyệt từ customer → type = "supplier", token mang đúng role
                 String type = "SUPPLIER".equalsIgnoreCase(vaiTro) ? "supplier" : "customer";
                 String token = jwtUtil.generateCustomerToken(kh.getIdNguoiDung(), kh.getTenDangNhap(), vaiTro);
+
+                // Ghi log thành công (chỉ ghi log cho nhân viên / NCC; khách hàng bình thường bỏ qua)
+                if (!"CUSTOMER".equalsIgnoreCase(vaiTro)) {
+                    loginLogService.logSuccess(username, kh.getHoTen(), vaiTro, ip, userAgent);
+                }
+
                 Map<String, Object> body = new HashMap<>();
                 body.put("success", true);
                 body.put("type", type);
@@ -89,10 +123,14 @@ public class AuthController {
                 body.put("role", vaiTro);
                 body.put("token", token);
                 return ResponseEntity.ok(body);
+            } else {
+                loginLogService.logFailed(username, "Sai mật khẩu", ip, userAgent);
+                throw new BusinessException("Sai tài khoản hoặc mật khẩu");
             }
         }
 
-        // Bước 3: Không khớp
+        // Bước 3: Tài khoản không tồn tại
+        loginLogService.logFailed(username, "Tài khoản không tồn tại", ip, userAgent);
         throw new BusinessException("Sai tài khoản hoặc mật khẩu");
     }
 

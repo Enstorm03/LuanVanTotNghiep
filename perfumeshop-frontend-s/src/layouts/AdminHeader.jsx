@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 const AdminHeader = () => {
   
-  const { isAdmin, isStoreManager, isWarehouseStaff, isSalesStaff, getRole, getRoleLabel } = useAuth();
+  const { isAdmin, isStoreManager, isWarehouseStaff, getRole, getRoleLabel } = useAuth();
   const [pendingOrders, setPendingOrders] = useState(0);
   const [lowStockItems, setLowStockItems] = useState(0);
   const [loading, setLoading] = useState(true);

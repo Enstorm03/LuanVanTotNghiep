@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/don-hang")
@@ -41,11 +40,6 @@ public class DonHangController {
     public ResponseEntity<List<DonHangHistoryDto>> historyDto(@RequestParam("userId") Integer userId,
                                                               @RequestParam(value = "trangThai", required = false) String trangThai) {
         return ResponseEntity.ok(donHangService.historyDtoByUser(userId, trangThai));
-    }
-
-    @GetMapping("/gio-hang-dto")
-    public ResponseEntity<List<DonHangHistoryDto>> cartDto(@RequestParam("userId") Integer userId) {
-        return ResponseEntity.ok(donHangService.historyDtoByUser(userId, "Giỏ hàng"));
     }
 
 

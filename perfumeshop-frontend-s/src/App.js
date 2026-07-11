@@ -44,7 +44,7 @@ import AdminKhoPage from './pages/admin/AdminKhoPage';
 import AdminNearExpiryProductsPage from './pages/admin/AdminNearExpiryProductsPage';
 import AdminProcurementPage from './pages/admin/AdminProcurementPage';
 import AdminProcurementDetailPage from './pages/admin/AdminProcurementDetailPage';
-import AdminSuppliersPage from './pages/admin/AdminSuppliersPage';
+import AdminLoginLogsPage from './pages/admin/AdminLoginLogsPage';
 import ProcurementPortalPage, { ProcurementDetailPage } from './pages/public/ProcurementPortalPage';
 import SupplierPortalPage from './pages/public/SupplierPortalPage';
 
@@ -170,8 +170,9 @@ function App() {
           <Route path="procurement/:id" element={
             <ProtectedRoute requireRole="STORE_MANAGER"><AdminProcurementDetailPage /></ProtectedRoute>
           } />
-          <Route path="suppliers" element={
-            <ProtectedRoute requireRole="STORE_MANAGER"><AdminSuppliersPage /></ProtectedRoute>
+          {/* Log đăng nhập — ADMIN + DIRECTOR */}
+          <Route path="login-logs" element={
+            <ProtectedRoute requireRole="DIRECTOR"><AdminLoginLogsPage /></ProtectedRoute>
           } />
         </Route>
       </Routes>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -115,12 +114,12 @@ const AdminSidebar = () => {
                 Đấu thầu
               </NavLink>
             )}
-            {isStoreManager() && (
+            {/* {isStoreManager() && (
               <NavLink to="/admin/suppliers" className={navLinkClasses}>
                 <span className="material-symbols-outlined">business</span>
                 Nhà cung cấp
               </NavLink>
-            )}
+            )} */}
 
             {/* Đánh giá — STORE_MANAGER trở lên */}
             {isStoreManager() && (
@@ -151,6 +150,14 @@ const AdminSidebar = () => {
               <NavLink to="/admin/users" className={navLinkClasses}>
                 <span className="material-symbols-outlined">manage_accounts</span>
                 Tài khoản
+              </NavLink>
+            )}
+
+            {/* Log đăng nhập — ADMIN + DIRECTOR (Giám đốc) */}
+            {isDirector() && (
+              <NavLink to="/admin/login-logs" className={navLinkClasses}>
+                <span className="material-symbols-outlined">manage_history</span>
+                Log đăng nhập
               </NavLink>
             )}
 

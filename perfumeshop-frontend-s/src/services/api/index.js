@@ -15,6 +15,7 @@ import procurementApi from './procurementApi.js';
 import dashboardApi from './dashboardApi.js';
 import reportApi from './reportApi.js';
 import userApi from './userApi.js';
+import loginLogApi from './loginLogApi.js';
 
 // Combined API object for backward compatibility
 const api = {
@@ -206,5 +207,6 @@ export {
   procurementApi,
   dashboardApi,
   reportApi,
-  userApi
+  userApi,
+  loginLogApi
 };

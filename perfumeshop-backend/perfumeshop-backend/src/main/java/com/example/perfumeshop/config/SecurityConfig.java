@@ -80,6 +80,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/procurement/*/bao-gia").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/procurement/*/de-xuat-san-pham").permitAll()
 
+                // ======== CHỈ ADMIN ROOT + DIRECTOR ========
+                // Log đăng nhập — giám đốc giám sát
+                .requestMatchers("/api/admin/login-logs/**").hasAnyRole("ADMIN", "DIRECTOR")
+
                 // ======== CHỈ ADMIN ROOT ========
                 .requestMatchers("/api/admin/nhan-vien/**").hasRole("ADMIN")
                 // Xóa sản phẩm / danh mục / thương hiệu / campaign — chỉ ADMIN
