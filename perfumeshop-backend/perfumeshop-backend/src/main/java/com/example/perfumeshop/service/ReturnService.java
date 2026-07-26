@@ -28,6 +28,7 @@ public class ReturnService {
     @Autowired private PhieuDoiTraRepository phieuDoiTraRepository;
     @Autowired private DonHangRepository donHangRepository;
     @Autowired private SanPhamRepository sanPhamRepository;
+    @Autowired private KhoService khoService;
 
     public PhieuDoiTra findByOrderAndUser(Integer orderId, Integer userId) {
         List<PhieuDoiTra> list = phieuDoiTraRepository.findByIdDonHangAndIdNguoiDung(orderId, userId);
@@ -99,9 +100,26 @@ public class ReturnService {
             for (ChiTietDonHang item : items) {
                 SanPham sp = item.getSanPham();
                 if (sp == null) continue;
-                int hangLoi = sp.getSoLuongHangLoi() == null ? 0 : sp.getSoLuongHangLoi();
-                sp.setSoLuongHangLoi(hangLoi + item.getSoLuong());
+                
+                int hangLoiCu = sp.getSoLuongHangLoi() == null ? 0 : sp.getSoLuongHangLoi();
+                int hangLoiMoi = hangLoiCu + item.getSoLuong();
+                sp.setSoLuongHangLoi(hangLoiMoi);
                 sanPhamRepository.save(sp);
+                
+                // Ghi log BienDongKho (loai="HANG_LOI", ly_do="Doi tra")
+                // Tồn kho KHÔNG thay đổi (vì hàng lỗi tách riêng), chỉ tăng soLuongHangLoi
+                Integer tonKho = sp.getSoLuongTonKho();
+                khoService.ghiBienDong(
+                    sp.getIdSanPham(),
+                    sp.getTenSanPham(),
+                    "HANG_LOI",
+                    item.getSoLuong(),
+                    tonKho, // Tồn kho không đổi
+                    "Đổi trả - Phiếu #" + p.getIdDoiTra() + " (Đơn #" + dh.getIdDonHang() + ") - " + (p.getLyDo() != null ? p.getLyDo() : "Không rõ lý do"),
+                    dh.getIdDonHang(),
+                    null, // idPhieuNhap = null
+                    nhanVienId
+                );
             }
         }
 

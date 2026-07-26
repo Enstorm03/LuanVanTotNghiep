@@ -115,6 +115,9 @@ public class DonHangService {
     @Autowired
     private FEFOService fefoService;
 
+    @Autowired
+    private KhoService khoService;
+
     @Transactional
     public DonHang confirm(Integer id, Integer nhanVienId) {
         DonHang dh = getById(id);
@@ -151,6 +154,25 @@ public class DonHangService {
                     log.warn("FEFO deduct thất bại cho đơn #{} SP #{}: {}",
                         dh.getIdDonHang(), sp.getIdSanPham(), e.getMessage());
                 }
+
+                // 3. Ghi log BienDongKho (loai="XUAT", ly_do="Ban hang")
+                // Query lại từ database để lấy số tồn kho MỚI sau khi đã trừ
+                sanPhamRepository.flush(); // Đảm bảo UPDATE được commit vào database
+                SanPham spUpdated = sanPhamRepository.findById(sp.getIdSanPham())
+                    .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại"));
+                Integer tonKhoSau = spUpdated.getSoLuongTonKho();
+                
+                khoService.ghiBienDong(
+                    sp.getIdSanPham(),
+                    sp.getTenSanPham(),
+                    "XUAT",
+                    ct.getSoLuong(),
+                    tonKhoSau,
+                    "Bán hàng - Đơn #" + dh.getIdDonHang() + " (" + dh.getMaVanDon() + ")",
+                    dh.getIdDonHang(),
+                    null, // idPhieuNhap = null khi xuất bán hàng
+                    nhanVienId
+                );
             }
         }
 
@@ -232,10 +254,13 @@ public class DonHangService {
         for (ChiTietDonHang item : items) {
             SanPham sp = item.getSanPham();
             if (sp == null) continue;
+            
             // Hoàn tồn kho bảng san_pham
             Integer soLuongTon = sp.getSoLuongTonKho() == null ? 0 : sp.getSoLuongTonKho();
-            sp.setSoLuongTonKho(soLuongTon + item.getSoLuong());
+            int tonKhoSau = soLuongTon + item.getSoLuong();
+            sp.setSoLuongTonKho(tonKhoSau);
             sanPhamRepository.save(sp);
+            
             // Hoàn soLuongConLai bảng chi_tiet_phieu_nhap (FEFO batch)
             if (item.getIdPhieuNhap() != null) {
                 try {
@@ -246,6 +271,19 @@ public class DonHangService {
                         dh.getIdDonHang(), sp.getIdSanPham(), e.getMessage());
                 }
             }
+            
+            // Ghi log BienDongKho khi hoàn kho (loai="NHAP", ly_do="Huy don hang")
+            khoService.ghiBienDong(
+                sp.getIdSanPham(),
+                sp.getTenSanPham(),
+                "NHAP",
+                item.getSoLuong(),
+                tonKhoSau,
+                "Hoàn kho - Hủy đơn #" + dh.getIdDonHang() + " (" + (dh.getLyDoHuy() != null ? dh.getLyDoHuy() : "Không rõ lý do") + ")",
+                dh.getIdDonHang(),
+                null, // idPhieuNhap = null
+                dh.getIdNhanVien() // nhanVienId từ đơn hàng
+            );
         }
     }
 

@@ -1,0 +1,279 @@
+@startuml ERD_PHYSICAL
+' Sơ đồ ERD Vật Lý - Hệ thống Enstorm Perfume (MySQL)
+' Hướng dẫn: Copy code này vào PlantUML Online
+
+title Sơ đồ ERD Vật Lý (Physical Model - MySQL)\nHệ thống Enstorm Perfume
+
+skinparam linetype ortho
+
+entity "nguoi_dung" as user {
+  * id_nguoi_dung : INT AUTO_INCREMENT <<PK>>
+  --
+  * ten_dang_nhap : VARCHAR(50) NOT NULL <<UK>>
+  * mat_khau_bam : VARCHAR(255) NOT NULL
+  * ho_ten : VARCHAR(100) NOT NULL
+  * email : VARCHAR(100) NOT NULL <<UK>>
+  so_dien_thoai : VARCHAR(15)
+  dia_chi : TEXT
+  * vai_tro : ENUM('CUSTOMER','SUPPLIER')
+    DEFAULT 'CUSTOMER'
+  is_verified : BOOLEAN DEFAULT FALSE
+  verification_token : VARCHAR(255)
+  token_expiry_time : DATETIME
+  created_at : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_email (email)
+  INDEX idx_vai_tro (vai_tro)
+}
+
+entity "nhan_vien" as employee {
+  * id_nhan_vien : INT AUTO_INCREMENT <<PK>>
+  --
+  * ten_dang_nhap : VARCHAR(50) NOT NULL <<UK>>
+  * mat_khau_bam : VARCHAR(255) NOT NULL
+  * ho_ten : VARCHAR(100) NOT NULL
+  * vai_tro : ENUM('ADMIN','DIRECTOR',
+    'STORE_MANAGER','WAREHOUSE_STAFF')
+  created_at : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_vai_tro (vai_tro)
+}
+
+entity "san_pham" as product {
+  * id_san_pham : INT AUTO_INCREMENT <<PK>>
+  --
+  * ten_san_pham : VARCHAR(200) NOT NULL
+  mo_ta : TEXT
+  url_hinh_anh : VARCHAR(500)
+  * gia_ban : DECIMAL(10,2) NOT NULL
+  dung_tich_ml : INT
+  nong_do : INT
+  so_luong_ton_kho : INT DEFAULT 0
+  so_luong_hang_loi : INT DEFAULT 0
+  phan_tram_giam : INT DEFAULT 0
+  ngay_bat_dau_giam : DATETIME
+  ngay_ket_thuc_giam : DATETIME
+  id_danh_muc : INT <<FK>>
+  id_thuong_hieu : INT <<FK>>
+  id_su_kien : INT <<FK>>
+  created_at : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_danh_muc (id_danh_muc)
+  INDEX idx_thuong_hieu (id_thuong_hieu)
+  INDEX idx_gia_ban (gia_ban)
+  FULLTEXT idx_ten (ten_san_pham)
+}
+
+entity "don_hang" as order {
+  * id_don_hang : INT AUTO_INCREMENT <<PK>>
+  --
+  id_nguoi_dung : INT <<FK>>
+  id_nhan_vien : INT <<FK>>
+  * trang_thai_van_hanh : VARCHAR(50) NOT NULL
+  * trang_thai_thanh_toan : VARCHAR(50) NOT NULL
+  * tong_tien : DECIMAL(15,2) NOT NULL
+  * ma_van_don : VARCHAR(100) NOT NULL <<UK>>
+  * so_dien_thoai : VARCHAR(15) NOT NULL
+  * phuong_thuc_thanh_toan : VARCHAR(50) NOT NULL
+  * ten_nguoi_nhan : VARCHAR(100) NOT NULL
+  * dia_chi_giao_hang : TEXT NOT NULL
+  * ngay_dat_hang : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ly_do_huy : TEXT
+  ghi_chu : TEXT
+  ngay_hoan_thanh : DATETIME
+  id_su_kien : INT <<FK>>
+  giam_gia_hang_loat : DECIMAL(15,2) DEFAULT 0
+  ..
+  INDEX idx_nguoi_dung (id_nguoi_dung)
+  INDEX idx_trang_thai (trang_thai_van_hanh)
+  INDEX idx_ngay_dat (ngay_dat_hang)
+}
+
+entity "chi_tiet_don_hang" as orderDetail {
+  * id_chi_tiet_don_hang : INT AUTO_INCREMENT <<PK>>
+  --
+  * id_don_hang : INT NOT NULL <<FK>>
+  * id_san_pham : INT NOT NULL <<FK>>
+  * so_luong : INT NOT NULL
+  * gia_tai_thoi_diem_mua : DECIMAL(15,2) NOT NULL
+  id_phieu_nhap : INT <<FK>>
+  ..
+  INDEX idx_don_hang (id_don_hang)
+  INDEX idx_san_pham (id_san_pham)
+}
+
+entity "danh_muc" as category {
+  * id_danh_muc : INT AUTO_INCREMENT <<PK>>
+  --
+  * ten_danh_muc : VARCHAR(100) NOT NULL
+}
+
+entity "thuong_hieu" as brand {
+  * id_thuong_hieu : INT AUTO_INCREMENT <<PK>>
+  --
+  * ten_thuong_hieu : VARCHAR(100) NOT NULL <<UK>>
+  url_hinh_anh : VARCHAR(500)
+}
+
+entity "su_kien" as event {
+  * id_su_kien : INT AUTO_INCREMENT <<PK>>
+  --
+  * ten_su_kien : VARCHAR(200) NOT NULL
+  banner_url : TEXT
+  * ngay_bat_dau : DATETIME NOT NULL
+  * ngay_ket_thuc : DATETIME NOT NULL
+  trang_thai_active : BOOLEAN DEFAULT TRUE
+  giam_gia_hang_loat : DECIMAL(5,2) DEFAULT 0
+  ..
+  INDEX idx_active (trang_thai_active)
+  INDEX idx_ngay (ngay_bat_dau, ngay_ket_thuc)
+}
+
+entity "phieu_nhap_kho" as po {
+  * id_phieu : INT AUTO_INCREMENT <<PK>>
+  --
+  * ma_phieu : VARCHAR(50) NOT NULL <<UK>>
+  * id_nhan_vien : INT NOT NULL <<FK>>
+  nha_cung_cap : VARCHAR(200)
+  * ngay_nhap : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ghi_chu : TEXT
+  gia_ban_chot : DECIMAL(15,2)
+  * trang_thai : VARCHAR(30) NOT NULL
+  ..
+  INDEX idx_trang_thai (trang_thai)
+  INDEX idx_ngay_nhap (ngay_nhap)
+}
+
+entity "chi_tiet_phieu_nhap" as poDetail {
+  * id_chi_tiet_phieu_nhap : INT AUTO_INCREMENT <<PK>>
+  --
+  * id_phieu_nhap : INT NOT NULL <<FK>>
+  * id_san_pham : INT NOT NULL <<FK>>
+  * han_su_dung : DATE NOT NULL
+  * so_lo : VARCHAR(50) NOT NULL
+  * so_luong_con_lai : INT NOT NULL DEFAULT 0
+  * gia_nhap : DECIMAL(10,2) NOT NULL
+  ..
+  INDEX idx_phieu (id_phieu_nhap)
+  INDEX idx_san_pham (id_san_pham)
+  INDEX idx_hsd (han_su_dung)
+}
+
+entity "phieu_goi_thau" as tender {
+  * id_phieu_goi_thau : INT AUTO_INCREMENT <<PK>>
+  --
+  * ma_phieu : VARCHAR(50) NOT NULL <<UK>>
+  * trang_thai : ENUM('OPEN','CLOSED') NOT NULL
+  * ngay_tao : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ngay_het_han : DATETIME
+  id_nhan_vien_tao : INT <<FK>>
+  ..
+  INDEX idx_trang_thai (trang_thai)
+}
+
+entity "bao_gia_ncc" as quote {
+  * id_bao_gia : INT AUTO_INCREMENT <<PK>>
+  --
+  * id_phieu_goi_thau : INT NOT NULL <<FK>>
+  * id_nguoi_dung : INT NOT NULL <<FK>>
+  * id_san_pham : INT NOT NULL <<FK>>
+  * gia_nhap : DECIMAL(10,2) NOT NULL
+  han_su_dung : DATE
+  so_lo : VARCHAR(50)
+  * trang_thai : ENUM('CHO_DUYET','TRUNG_THAU',
+    'KHONG_TRUNG_THAU') NOT NULL
+  phan_tram_bien_do : DECIMAL(5,2)
+  gia_ban_chot : DECIMAL(10,2)
+  ngay_bao_gia : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_phieu (id_phieu_goi_thau)
+  INDEX idx_trang_thai (trang_thai)
+}
+
+entity "phieu_doi_tra" as return {
+  * id_doi_tra : INT AUTO_INCREMENT <<PK>>
+  --
+  * id_don_hang : INT NOT NULL <<FK>>
+  * id_nguoi_dung : INT NOT NULL <<FK>>
+  id_nhan_vien : INT <<FK>>
+  * ly_do : TEXT NOT NULL
+  ly_do_tu_choi : TEXT
+  ghi_chu_noi_bo : TEXT
+  so_tien_hoan : DECIMAL(15,2)
+  ngay_hoan_tien : DATETIME
+  * trang_thai : VARCHAR(50) NOT NULL
+  * ngay_tao : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_don_hang (id_don_hang)
+  INDEX idx_trang_thai (trang_thai)
+}
+
+entity "bien_dong_kho" as inventory {
+  * id_bien_dong : INT AUTO_INCREMENT <<PK>>
+  --
+  * id_san_pham : INT NOT NULL <<FK>>
+  * loai : ENUM('NHAP','XUAT','HANG_LOI') NOT NULL
+  * so_luong : INT NOT NULL
+  * ton_kho_sau : INT NOT NULL
+  ly_do : TEXT
+  * created_at : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_san_pham (id_san_pham)
+  INDEX idx_loai (loai)
+  INDEX idx_ngay (created_at)
+}
+
+entity "danh_gia_san_pham" as review {
+  * id_danh_gia : INT AUTO_INCREMENT <<PK>>
+  --
+  * id_san_pham : INT NOT NULL <<FK>>
+  * id_nguoi_dung : INT NOT NULL <<FK>>
+  * diem_danh_gia : INT NOT NULL
+    CHECK (diem_danh_gia BETWEEN 1 AND 5)
+  binh_luan : TEXT
+  * ngay_tao : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_san_pham (id_san_pham)
+}
+
+entity "login_log" as log {
+  * id_log : BIGINT AUTO_INCREMENT <<PK>>
+  --
+  ten_dang_nhap : VARCHAR(50)
+  loai_nguoi_dung : ENUM('CUSTOMER','SUPPLIER','EMPLOYEE')
+  trang_thai : ENUM('SUCCESS','FAIL')
+  ip_address : VARCHAR(45)
+  user_agent : TEXT
+  ly_do_that_bai : TEXT
+  * thoi_gian : DATETIME DEFAULT CURRENT_TIMESTAMP
+  ..
+  INDEX idx_thoi_gian (thoi_gian)
+  INDEX idx_trang_thai (trang_thai)
+}
+
+' ========== FOREIGN KEY CONSTRAINTS ==========
+
+user ||--o{ order : "FOREIGN KEY"
+employee ||--o{ order : "FOREIGN KEY"
+order ||--|{ orderDetail : "FOREIGN KEY"
+product ||--o{ orderDetail : "FOREIGN KEY"
+
+product }o--|| category : "FOREIGN KEY"
+product }o--|| brand : "FOREIGN KEY"
+product }o--o{ event : "Many-to-Many Table"
+
+po ||--|{ poDetail : "FOREIGN KEY"
+product ||--o{ poDetail : "FOREIGN KEY"
+
+product ||--o{ inventory : "FOREIGN KEY"
+
+employee ||--o{ tender : "FOREIGN KEY"
+tender ||--o{ quote : "FOREIGN KEY"
+user ||--o{ quote : "FOREIGN KEY (supplier)"
+
+order ||--o| return : "FOREIGN KEY"
+
+user ||--o{ review : "FOREIGN KEY"
+product ||--o{ review : "FOREIGN KEY"
+
+@enduml

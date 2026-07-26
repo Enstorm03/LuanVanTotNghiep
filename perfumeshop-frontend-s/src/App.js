@@ -107,14 +107,17 @@ function App() {
          <Route path="/verify-email" element={<VerifyEmailPage />} />
         
 
-        {/* Route NCC — procurement portal (public, NCC xem thầu và chào giá) */}
-        <Route path="/procurement" element={<ProtectedRoute requireRole="SUPPLIER"><SupplierPortalPage /></ProtectedRoute>} />
-        <Route path="/procurement/:id" element={<ProcurementDetailWrapper />} />
+        {/* Route NCC — procurement portal (yêu cầu đăng nhập SUPPLIER) */}
+        <Route path="/procurement" element={
+          <ProtectedRoute requireRole="SUPPLIER"><ProcurementPortalPage /></ProtectedRoute>
+        } />
+        <Route path="/procurement/:id" element={
+          <ProtectedRoute requireRole="SUPPLIER"><ProcurementDetailWrapper /></ProtectedRoute>
+        } />
 
-        {/* Route NCC — cần đăng nhập với role SUPPLIER */}
+        {/* Route NCC — Supplier Portal (chào hàng, xem đề xuất) */}
         <Route path="/supplier-portal" element={
           <ProtectedRoute requireRole="SUPPLIER"><SupplierPortalPage /></ProtectedRoute>
-          
         } />
 
         {/* Route công khai — khách quét QR xác nhận nhận hàng / đổi trả (không cần login) */}

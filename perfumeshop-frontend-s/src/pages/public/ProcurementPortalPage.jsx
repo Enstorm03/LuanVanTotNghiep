@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—';
 
@@ -10,6 +11,7 @@ const fmt = (n) => n != null ? Number(n).toLocaleString('vi-VN') + '₫' : '—'
    ════════════════════════════════════════════════════════════ */
 export const ProcurementDetailPage = ({ requestId }) => {
   const navigate = useNavigate();
+  const { user, isSupplier } = useAuth();
 
   const [request,    setRequest]    = useState(null);
   const [loading,    setLoading]    = useState(true);
@@ -46,6 +48,32 @@ export const ProcurementDetailPage = ({ requestId }) => {
   const setProposalField = (k, v) => setProposal(p => ({ ...p, [k]: v }));
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // ── Auto-fill supplier info khi đã đăng nhập ──
+  useEffect(() => {
+    const loadSupplierInfo = async () => {
+      if (user && isSupplier()) {
+        try {
+          const profile = await api.getProfile();
+          // Auto-fill form báo giá
+          setForm(f => ({
+            ...f,
+            supplierName: profile.ho_ten || '',
+            supplierContact: profile.email || profile.so_dien_thoai || ''
+          }));
+          // Auto-fill form đề xuất sản phẩm
+          setProposal(p => ({
+            ...p,
+            tenNCC: profile.ho_ten || '',
+            lienHeNCC: profile.email || profile.so_dien_thoai || ''
+          }));
+        } catch (error) {
+          console.error('Không thể tải thông tin nhà cung cấp:', error);
+        }
+      }
+    };
+    loadSupplierInfo();
+  }, [user, isSupplier]);
 
   useEffect(() => {
     api.procurementGetPublicDetail(requestId)

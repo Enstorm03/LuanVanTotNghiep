@@ -70,15 +70,18 @@ public class SecurityConfig {
                 .requestMatchers("/api/payment/webhook/**").permitAll()
                 // Campaign công khai (path thật: /api/public/campaigns/active)
                 .requestMatchers(HttpMethod.GET, "/api/public/campaigns/active").permitAll()
-                // Procurement: NCC xem phiếu gọi thầu công khai
-                .requestMatchers(HttpMethod.GET, "/api/procurement/public").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/procurement/public/**").permitAll()
-                // Procurement: NCC chào hàng — tất cả public, không cần login
-                .requestMatchers(HttpMethod.POST, "/api/procurement/bulk-preview").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/procurement/bulk-confirm").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/procurement/de-xuat-san-pham-doc-lap").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/procurement/*/bao-gia").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/procurement/*/de-xuat-san-pham").permitAll()
+
+                // Procurement: NCC xem phiếu gọi thầu — yêu cầu đăng nhập SUPPLIER hoặc nhân viên nội bộ
+
+                // ======== SUPPLIER + NỘI BỘ — procurement endpoints dành cho NCC ========
+                // NCC xem phiếu, gửi báo giá, đề xuất sản phẩm
+                .requestMatchers(HttpMethod.GET, "/api/procurement/public").hasAnyRole("SUPPLIER", "ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/api/procurement/public/**").hasAnyRole("SUPPLIER", "ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/bulk-preview").hasRole("SUPPLIER")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/bulk-confirm").hasRole("SUPPLIER")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/de-xuat-san-pham-doc-lap").hasRole("SUPPLIER")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/*/bao-gia").hasRole("SUPPLIER")
+                .requestMatchers(HttpMethod.POST, "/api/procurement/*/de-xuat-san-pham").hasRole("SUPPLIER")
 
                 // ======== CHỈ ADMIN ROOT + DIRECTOR ========
                 // Log đăng nhập — giám đốc giám sát

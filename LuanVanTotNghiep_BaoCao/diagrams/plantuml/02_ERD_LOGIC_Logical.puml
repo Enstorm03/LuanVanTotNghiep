@@ -1,0 +1,218 @@
+@startuml ERD_LOGIC_LOGICAL
+' Sơ đồ ERD Logic - Hệ thống Enstorm Perfume
+' Hướng dẫn: Copy code này vào PlantUML Online
+
+title Sơ đồ ERD Logic (Logical Model)\nHệ thống Enstorm Perfume
+
+skinparam linetype ortho
+
+entity "NguoiDung" as user {
+  * id_nguoi_dung : INT <<PK>>
+  --
+  * ten_dang_nhap : VARCHAR(50) <<UK>>
+  * mat_khau_bam : VARCHAR(255)
+  * ho_ten : VARCHAR(100)
+  * email : VARCHAR(100) <<UK>>
+  so_dien_thoai : VARCHAR(15)
+  dia_chi : TEXT
+  * vai_tro : ENUM
+  is_verified : BOOLEAN
+  verification_token : VARCHAR(255)
+  token_expiry_time : DATETIME
+  created_at : DATETIME
+}
+
+entity "NhanVien" as employee {
+  * id_nhan_vien : INT <<PK>>
+  --
+  * ten_dang_nhap : VARCHAR(50) <<UK>>
+  * mat_khau_bam : VARCHAR(255)
+  * ho_ten : VARCHAR(100)
+  * vai_tro : ENUM
+  created_at : DATETIME
+}
+
+entity "SanPham" as product {
+  * id_san_pham : INT <<PK>>
+  --
+  * ten_san_pham : VARCHAR(200)
+  mo_ta : TEXT
+  url_hinh_anh : VARCHAR(500)
+  * gia_ban : DECIMAL(10,2)
+  dung_tich_ml : INT
+  nong_do : INT
+  so_luong_ton_kho : INT
+  so_luong_hang_loi : INT
+  phan_tram_giam : INT
+  ngay_bat_dau_giam : DATETIME
+  ngay_ket_thuc_giam : DATETIME
+  id_danh_muc : INT <<FK>>
+  id_thuong_hieu : INT <<FK>>
+  id_su_kien : INT <<FK>>
+  created_at : DATETIME
+}
+
+entity "DonHang" as order {
+  * id_don_hang : INT <<PK>>
+  --
+  id_nguoi_dung : INT <<FK>>
+  id_nhan_vien : INT <<FK>>
+  * trang_thai_van_hanh : VARCHAR(50)
+  * trang_thai_thanh_toan : VARCHAR(50)
+  * tong_tien : DECIMAL(15,2)
+  * ma_van_don : VARCHAR(100) <<UK>>
+  * so_dien_thoai : VARCHAR(15)
+  * phuong_thuc_thanh_toan : VARCHAR(50)
+  * ten_nguoi_nhan : VARCHAR(100)
+  * dia_chi_giao_hang : TEXT
+  * ngay_dat_hang : DATETIME
+  ly_do_huy : TEXT
+  ghi_chu : TEXT
+  ngay_hoan_thanh : DATETIME
+  id_su_kien : INT <<FK>>
+  giam_gia_hang_loat : DECIMAL(15,2)
+}
+
+entity "ChiTietDonHang" as orderDetail {
+  * id_chi_tiet_don_hang : INT <<PK>>
+  --
+  * id_don_hang : INT <<FK>>
+  * id_san_pham : INT <<FK>>
+  * so_luong : INT
+  * gia_tai_thoi_diem_mua : DECIMAL(15,2)
+  id_phieu_nhap : INT <<FK>>
+}
+
+entity "DanhMuc" as category {
+  * id_danh_muc : INT <<PK>>
+  --
+  * ten_danh_muc : VARCHAR(100)
+}
+
+entity "ThuongHieu" as brand {
+  * id_thuong_hieu : INT <<PK>>
+  --
+  * ten_thuong_hieu : VARCHAR(100) <<UK>>
+  url_hinh_anh : VARCHAR(500)
+}
+
+entity "SuKien" as event {
+  * id_su_kien : INT <<PK>>
+  --
+  * ten_su_kien : VARCHAR(200)
+  banner_url : TEXT
+  * ngay_bat_dau : DATETIME
+  * ngay_ket_thuc : DATETIME
+  trang_thai_active : BOOLEAN
+  giam_gia_hang_loat : DECIMAL(5,2)
+}
+
+entity "PhieuNhapKho" as po {
+  * id_phieu : INT <<PK>>
+  --
+  * ma_phieu : VARCHAR(50) <<UK>>
+  * id_nhan_vien : INT <<FK>>
+  nha_cung_cap : VARCHAR(200)
+  * ngay_nhap : DATETIME
+  ghi_chu : TEXT
+  gia_ban_chot : DECIMAL(15,2)
+  * trang_thai : VARCHAR(30)
+}
+
+entity "ChiTietPhieuNhap" as poDetail {
+  * id_chi_tiet_phieu_nhap : INT <<PK>>
+  --
+  * id_phieu_nhap : INT <<FK>>
+  * id_san_pham : INT <<FK>>
+  * han_su_dung : DATE
+  * so_lo : VARCHAR(50)
+  * so_luong_con_lai : INT
+  * gia_nhap : DECIMAL(10,2)
+}
+
+entity "PhieuGoiThau" as tender {
+  * id_phieu_goi_thau : INT <<PK>>
+  --
+  * ma_phieu : VARCHAR(50) <<UK>>
+  * trang_thai : ENUM
+  * ngay_tao : DATETIME
+  ngay_het_han : DATETIME
+  id_nhan_vien_tao : INT <<FK>>
+}
+
+entity "BaoGiaNCC" as quote {
+  * id_bao_gia : INT <<PK>>
+  --
+  * id_phieu_goi_thau : INT <<FK>>
+  * id_nguoi_dung : INT <<FK>>
+  * id_san_pham : INT <<FK>>
+  * gia_nhap : DECIMAL(10,2)
+  han_su_dung : DATE
+  so_lo : VARCHAR(50)
+  * trang_thai : ENUM
+  phan_tram_bien_do : DECIMAL(5,2)
+  gia_ban_chot : DECIMAL(10,2)
+  ngay_bao_gia : DATETIME
+}
+
+entity "PhieuDoiTra" as return {
+  * id_doi_tra : INT <<PK>>
+  --
+  * id_don_hang : INT <<FK>>
+  * id_nguoi_dung : INT <<FK>>
+  id_nhan_vien : INT <<FK>>
+  * ly_do : TEXT
+  ly_do_tu_choi : TEXT
+  ghi_chu_noi_bo : TEXT
+  so_tien_hoan : DECIMAL(15,2)
+  ngay_hoan_tien : DATETIME
+  * trang_thai : VARCHAR(50)
+  * ngay_tao : DATETIME
+}
+
+entity "BienDongKho" as inventory {
+  * id_bien_dong : INT <<PK>>
+  --
+  * id_san_pham : INT <<FK>>
+  * loai : ENUM
+  * so_luong : INT
+  * ton_kho_sau : INT
+  ly_do : TEXT
+  * created_at : DATETIME
+}
+
+entity "DanhGiaSanPham" as review {
+  * id_danh_gia : INT <<PK>>
+  --
+  * id_san_pham : INT <<FK>>
+  * id_nguoi_dung : INT <<FK>>
+  * diem_danh_gia : INT
+  binh_luan : TEXT
+  * ngay_tao : DATETIME
+}
+
+' ========== RELATIONSHIPS ==========
+
+user ||--o{ order : "đặt"
+employee ||--o{ order : "xử lý"
+order ||--|{ orderDetail : "chứa"
+product ||--o{ orderDetail : "có trong"
+
+product }o--|| category : "thuộc"
+product }o--|| brand : "của"
+product }o--o{ event : "áp dụng"
+
+po ||--|{ poDetail : "chứa"
+product ||--o{ poDetail : "nhập"
+
+product ||--o{ inventory : "theo dõi"
+
+employee ||--o{ tender : "tạo"
+tender ||--o{ quote : "nhận"
+
+order ||--o| return : "trả"
+
+user ||--o{ review : "viết"
+product ||--o{ review : "được đánh giá"
+
+@enduml

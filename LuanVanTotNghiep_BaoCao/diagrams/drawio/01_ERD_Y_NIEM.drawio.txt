@@ -1,0 +1,74 @@
+# Sơ đồ ERD Ý Niệm (Conceptual Model) - Enstorm Perfume
+# Hướng dẫn: Copy toàn bộ nội dung từ dòng đầu đến cuối
+# Vào Draw.io → Arrange → Insert → Advanced → From Text... → Paste
+
+# Configuration
+# label: %label%
+# style: shape=%shape%;fillColor=%fill%;strokeColor=%stroke%;fontColor=%fontColor%
+# namespace: csvimport
+# connect: {"from":"refs","to":"id","invert":true,"style":"curved=1;endArrow=blockThin;endFill=1;"}
+# width: auto
+# height: auto
+# padding: 15
+# ignore: id,shape,fill,stroke,fontColor,refs
+# nodespacing: 50
+# levelspacing: 100
+# edgespacing: 40
+# layout: horizontaltree
+
+## ENTITIES (Thực thể)
+id,label,shape,fill,stroke,fontColor
+e1,NGƯỜI DÙNG,rectangle,#dae8fc,#6c8ebf,#000000
+e2,NHÂN VIÊN,rectangle,#dae8fc,#6c8ebf,#000000
+e3,SẢN PHẨM,rectangle,#dae8fc,#6c8ebf,#000000
+e4,ĐƠN HÀNG,rectangle,#dae8fc,#6c8ebf,#000000
+e5,CHI TIẾT ĐƠN HÀNG,rectangle,#dae8fc,#6c8ebf,#000000
+e6,DANH MỤC,rectangle,#dae8fc,#6c8ebf,#000000
+e7,THƯƠNG HIỆU,rectangle,#dae8fc,#6c8ebf,#000000
+e8,SỰ KIỆN,rectangle,#dae8fc,#6c8ebf,#000000
+e9,PHIẾU NHẬP KHO,rectangle,#dae8fc,#6c8ebf,#000000
+e10,CHI TIẾT PHIẾU NHẬP,rectangle,#dae8fc,#6c8ebf,#000000
+e11,PHIẾU GỌI THẦU,rectangle,#dae8fc,#6c8ebf,#000000
+e12,BÁO GIÁ NCC,rectangle,#dae8fc,#6c8ebf,#000000
+e13,SẢN PHẨM ĐỀ XUẤT,rectangle,#dae8fc,#6c8ebf,#000000
+e14,PHIẾU ĐỔI TRẢ,rectangle,#dae8fc,#6c8ebf,#000000
+e15,BIẾN ĐỘNG KHO,rectangle,#dae8fc,#6c8ebf,#000000
+e16,ĐÁNH GIÁ SẢN PHẨM,rectangle,#dae8fc,#6c8ebf,#000000
+e17,LOGIN LOG,rectangle,#dae8fc,#6c8ebf,#000000
+
+## RELATIONSHIPS (Mối quan hệ)
+id,label,shape,fill,stroke,fontColor,refs
+r1,ĐẶT (1:N),rhombus,#ffe6cc,#d79b00,#000000,e1
+r2,XỬ LÝ (1:N),rhombus,#ffe6cc,#d79b00,#000000,e2
+r3,CHỨA (1:N),rhombus,#ffe6cc,#d79b00,#000000,e4
+r4,CÓ TRONG (N:1),rhombus,#ffe6cc,#d79b00,#000000,e5
+r5,PHÂN LOẠI (N:1),rhombus,#ffe6cc,#d79b00,#000000,e3
+r6,CỦA HÃNG (N:1),rhombus,#ffe6cc,#d79b00,#000000,e3
+r7,ÁP DỤNG (M:N),rhombus,#ffe6cc,#d79b00,#000000,e3
+r8,NHẬP (1:N),rhombus,#ffe6cc,#d79b00,#000000,e9
+r9,CHI TIẾT (1:N),rhombus,#ffe6cc,#d79b00,#000000,e9
+r10,GỌI THẦU (1:N),rhombus,#ffe6cc,#d79b00,#000000,e11
+r11,BÁO GIÁ (N:1),rhombus,#ffe6cc,#d79b00,#000000,e11
+r12,ĐỀ XUẤT (1:N),rhombus,#ffe6cc,#d79b00,#000000,e11
+r13,TRẢ HÀNG (1:1),rhombus,#ffe6cc,#d79b00,#000000,e4
+r14,THEO DÕI (1:N),rhombus,#ffe6cc,#d79b00,#000000,e3
+r15,ĐÁNH GIÁ (1:N),rhombus,#ffe6cc,#d79b00,#000000,e3
+
+## CONNECTIONS (continued via relationship)
+e1,e4,refs
+e2,e4,refs
+e4,e5,refs
+e5,e3,refs
+e3,e6,refs
+e3,e7,refs
+e3,e8,refs
+e9,e10,refs
+e10,e3,refs
+e11,e12,refs
+e11,e13,refs
+e4,e14,refs
+e3,e15,refs
+e1,e16,refs
+e3,e16,refs
+e2,e11,refs
+e2,e9,refs

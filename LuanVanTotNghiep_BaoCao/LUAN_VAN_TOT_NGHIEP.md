@@ -45,11 +45,12 @@ Do kiến thức và kinh nghiệm còn hạn chế, luận văn không tránh k
   - 1.4 Kết quả cần đạt
 - Chương 2. PHƯƠNG PHÁP THỰC HIỆN
   - 2.1 Các hệ thống tương tự
-  - 2.2 Công nghệ sử dụng
-  - 2.3 Phân tích yêu cầu
-    - 2.3.1 Các quy trình nghiệp vụ
-    - 2.3.2 Sơ đồ chức năng
-    - 2.3.3 Sơ đồ Use case tổng quát
+  - 2.2 Cơ sở lý thuyết
+  - 2.3 Công nghệ sử dụng
+  - 2.4 Phân tích yêu cầu
+    - 2.4.1 Các quy trình nghiệp vụ
+    - 2.4.2 Sơ đồ chức năng
+    - 2.4.3 Sơ đồ Use case tổng quát
 - Chương 3. THIẾT KẾ
   - 3.1 Mô hình dữ liệu
   - 3.2 Mô hình xử lý
@@ -110,12 +111,16 @@ Xuất phát từ những vấn đề trên, đề tài **"Xây dựng Hệ th�
 - Cài đặt thuật toán FEFO (First Expired First Out) cho quản lý lô hàng
 - Xây dựng quy trình đấu thầu nhiều bước có trạng thái phức tạp
 - Đảm bảo tính nhất quán dữ liệu tồn kho trong môi trường đồng thời
+- Tự động điền thông tin NCC từ profile khi đã đăng nhập vào form báo giá
 
 **Về mặt nghiệp vụ:**
 - Mô hình hóa quy trình đổi trả hàng phức tạp (không hoàn kho thông thường, chuyển sang hàng lỗi)
-- Thiết kế cổng chào hàng cho NCC không cần tài khoản (public endpoint)
+- Thiết kế 2 cổng riêng cho nhà cung cấp:
+  - **Supplier Portal** (`/supplier-portal`): NCC đã đăng nhập xem trạng thái đề xuất, chào hàng độc lập
+  - **Procurement Portal** (`/procurement`): NCC đã đăng nhập xem phiếu thầu, báo giá với auto-fill
 - Tích hợp chiến dịch khuyến mại tự động cập nhật giao diện trang chủ
 - Xây dựng tính năng xác nhận đơn hàng qua QR không yêu cầu đăng nhập
+- Ghi log đăng nhập chi tiết cho giám sát hệ thống
 
 ## 1.3 Nội dung, phạm vi thực hiện
 
@@ -177,73 +182,80 @@ Hệ thống gồm hai thành phần chính:
 
 Hệ thống đề xuất kế thừa điểm mạnh của các giải pháp trên và bổ sung:
 - Quản lý lô hàng FEFO chuyên biệt cho sản phẩm có hạn sử dụng
-- Quy trình đấu thầu NCC tích hợp trong cùng hệ thống
+- Quy trình đấu thầu NCC tích hợp trong cùng hệ thống với 2 cổng riêng biệt (cả 2 đều yêu cầu SUPPLIER login):
+  - **Supplier Portal** (`/supplier-portal`): Chào hàng độc lập, đề xuất sản phẩm mới qua form hoặc CSV
+  - **Procurement Portal** (`/procurement`): Xem phiếu gọi thầu, gửi báo giá với thông tin tự động điền từ profile
 - Phân quyền chi tiết theo nghiệp vụ thực tế của cửa hàng nước hoa
 - Xác nhận đơn hàng qua QR code không cần đăng nhập
+- Ghi log đăng nhập chi tiết với IP, user-agent, trạng thái để giám sát hệ thống
 
-## 2.2 Công nghệ sử dụng
+## 2.2 Cơ sở lý thuyết
 
-### 2.2.1 Backend – Spring Boot 3 (Java 17)
+*Lưu ý: Đề tài này là luận văn ứng dụng, do đó phần cơ sở lý thuyết được bỏ qua theo hướng dẫn của Khoa CNTT. Nếu là đề tài nghiên cứu, phần này sẽ trình bày các lý thuyết, thuật toán, mô hình nền tảng.*
+
+## 2.3 Công nghệ sử dụng
+
+### 2.3.1 Backend – Spring Boot 3 (Java 17)
 
 Spring Boot là framework Java phổ biến cho xây dựng REST API. Phiên bản 3 hỗ trợ Jakarta EE 10, Spring Security 6 với cấu hình đơn giản hơn. Được chọn vì tính ổn định, hệ sinh thái phong phú (JPA, Security, Mail), và phù hợp với hệ thống có nghiệp vụ phức tạp.
 
-### 2.2.2 Frontend – React.js 18 + Tailwind CSS
+### 2.3.2 Frontend – React.js 18 + Tailwind CSS
 
 React.js cho phép xây dựng giao diện người dùng dạng SPA (Single Page Application) với hiệu năng cao nhờ Virtual DOM. Tailwind CSS cung cấp utility-first CSS giúp phát triển giao diện nhanh và nhất quán.
 
-### 2.2.3 Cơ sở dữ liệu – MySQL 8
+### 2.3.3 Cơ sở dữ liệu – MySQL 8
 
 MySQL là hệ quản trị CSDL quan hệ phổ biến, ổn định, hỗ trợ tốt các tính năng transaction ACID cần thiết cho nghiệp vụ quản lý tồn kho.
 
-### 2.2.4 Bảo mật – JWT (JSON Web Token)
+### 2.3.4 Bảo mật – JWT (JSON Web Token)
 
 JWT được dùng để xác thực stateless, phù hợp với kiến trúc REST API. Token chứa thông tin vai trò người dùng, được ký bằng HMAC-SHA256.
 
-### 2.2.5 Thanh toán – PayOS
+### 2.3.5 Thanh toán – PayOS
 
 PayOS là cổng thanh toán Việt Nam hỗ trợ thanh toán qua QR VietQR, liên kết ngân hàng. Tích hợp webhook để cập nhật trạng thái thanh toán bất đồng bộ.
 
-### 2.2.6 Email – JavaMail + SMTP Gmail
+### 2.3.6 Email – JavaMail + SMTP Gmail
 
 Dùng để gửi email xác thực tài khoản, thông báo thanh toán thành công, thông báo hủy đơn hàng.
 
-### 2.2.7 Xuất dữ liệu – Apache POI + Apache Commons CSV
+### 2.3.7 Xuất dữ liệu – Apache POI + Apache Commons CSV
 
 Apache POI xử lý file Excel (.xlsx/.xls), Apache Commons CSV xử lý file CSV. Dùng cho tính năng import nhập kho và đề xuất sản phẩm hàng loạt từ NCC.
 
-## 2.3 Phân tích yêu cầu
+## 2.4 Phân tích yêu cầu
 
-### 2.3.1 Các quy trình nghiệp vụ
+### 2.4.1 Các quy trình nghiệp vụ
 
-#### 2.3.1.1 Quy trình đăng ký và xác thực tài khoản
+#### 2.4.1.1 Quy trình đăng ký và xác thực tài khoản
 
 Khách hàng điền form đăng ký (tên đăng nhập, mật khẩu, họ tên, email). Hệ thống tạo tài khoản với trạng thái chưa xác thực và gửi email kèm link xác thực có token (thời hạn 24 giờ). Khách nhấn link, hệ thống kiểm tra token hợp lệ, kích hoạt tài khoản. Nếu token hết hạn, khách có thể yêu cầu gửi lại email.
 
-#### 2.3.1.2 Quy trình mua hàng và thanh toán
+#### 2.4.1.2 Quy trình mua hàng và thanh toán
 
 Khách duyệt sản phẩm → thêm vào giỏ → checkout (điền địa chỉ, chọn phương thức thanh toán). Nếu chọn COD: đơn tạo ngay, trạng thái "Đang chờ xác nhận". Nếu chọn PayOS: hệ thống tạo link thanh toán, redirect khách sang PayOS. Sau khi thanh toán, PayOS gửi webhook cập nhật trạng thái. Kho chỉ bị trừ khi admin xác nhận đơn (không trừ kho tại thời điểm đặt).
 
-#### 2.3.1.3 Quy trình xử lý đơn hàng
+#### 2.4.1.3 Quy trình xử lý đơn hàng
 
 Admin xem danh sách đơn → xác nhận đơn (trừ kho FEFO) → chuyển trạng thái giao hàng → cập nhật mã vận đơn. Khách quét QR hoặc vào web xác nhận đã nhận hàng → đơn hoàn thành.
 
-#### 2.3.1.4 Quy trình đổi trả hàng
+#### 2.4.1.4 Quy trình đổi trả hàng
 
 Khách tạo yêu cầu (qua web hoặc QR) → Admin duyệt: toàn bộ sản phẩm chuyển sang "hàng lỗi" (soLuongHangLoi), đơn chuyển "Chờ hoàn tiền" → Admin xác nhận đã hoàn tiền → đơn "Đã hoàn trả". Hàng lỗi được theo dõi riêng, khi đủ số lượng admin xuất trả NCC.
 
-#### 2.3.1.5 Quy trình đấu thầu và nhập kho
+#### 2.4.1.5 Quy trình đấu thầu và nhập kho
 
-Admin tạo phiếu gọi thầu (chọn sản phẩm cần nhập từ danh sách sắp hết kho, hệ thống gợi ý số lượng theo sales velocity) → NCC xem phiếu công khai, gửi báo giá → Admin so sánh, chốt thầu (thiết lập % biên lợi nhuận) → Hệ thống tự sinh PO trạng thái "Chờ kho kiểm tra" → Nhân viên kho kiểm hàng thực tế (số lượng, HSD, số lô, ảnh) → Cửa hàng trưởng duyệt cuối → Kho cộng tồn, giá bán cập nhật.
+Admin tạo phiếu gọi thầu (chọn sản phẩm cần nhập từ danh sách sắp hết kho, hệ thống gợi ý số lượng theo sales velocity) → NCC đăng nhập tài khoản SUPPLIER xem phiếu công khai tại `/procurement`, hệ thống tự động điền thông tin công ty/email/SĐT từ profile vào form báo giá → NCC gửi báo giá → Admin so sánh, chốt thầu (thiết lập % biên lợi nhuận) → Hệ thống tự sinh PO trạng thái "Chờ kho kiểm tra" → Nhân viên kho kiểm hàng thực tế (số lượng, HSD, số lô, ảnh) → Cửa hàng trưởng duyệt cuối → Kho cộng tồn, giá bán cập nhật.
 
-#### 2.3.1.6 Quy trình NCC đề xuất sản phẩm độc lập
+#### 2.4.1.6 Quy trình NCC đề xuất sản phẩm độc lập
 
-NCC vào cổng `/supplier-portal` (không cần đăng nhập hoặc dùng tài khoản SUPPLIER) → Đề xuất sản phẩm đơn lẻ (form) hoặc hàng loạt (upload Excel/CSV với preview validate) → Admin xem theo nhóm NCC → Duyệt từng sản phẩm (thiết lập % biên lợi nhuận, gán danh mục/thương hiệu) hoặc duyệt hàng loạt → Hệ thống tạo sản phẩm mới + PO vào luồng kiểm kho.
+NCC đăng nhập vào cổng `/supplier-portal` với tài khoản SUPPLIER → Đề xuất sản phẩm đơn lẻ (form) hoặc hàng loạt (upload Excel/CSV với preview validate) → Admin xem theo nhóm NCC → Duyệt từng sản phẩm (thiết lập % biên lợi nhuận, gán danh mục/thương hiệu) hoặc duyệt hàng loạt → Hệ thống tạo sản phẩm mới + PO vào luồng kiểm kho.
 
-#### 2.3.1.7 Quy trình quản lý chiến dịch khuyến mại
+#### 2.4.1.7 Quy trình quản lý chiến dịch khuyến mại
 
 Admin tạo chiến dịch (tên, banner URL, thời gian, % giảm giá) → Gán sản phẩm vào chiến dịch → Bật chiến dịch. Trang chủ tự động hiển thị banner và sản phẩm của chiến dịch đang hoạt động. Khi đặt hàng trong chiến dịch, % giảm áp dụng vào tổng tiền.
 
-### 2.3.2 Sơ đồ chức năng
+### 2.4.2 Sơ đồ chức năng
 
 **Hình 2-1: Sơ đồ chức năng hệ thống**
 
@@ -304,16 +316,16 @@ graph TD
     C4 --> C4f[Xem danh sách sản phẩm bán chậm]
     C4 --> C4g[Xem danh sách sản phẩm gần hết kho]
 
-    %% NCC - hai nhóm endpoint
-    D --> D1[PUBLIC - Xem phiếu gọi thầu đang mở]
-    D --> D2[PUBLIC - Gửi báo giá cho phiếu gọi thầu]
-    D --> D3[PUBLIC - Đề xuất sản phẩm đơn lẻ form]
-    D --> D4[PUBLIC - Upload đề xuất hàng loạt Excel/CSV]
-    D --> D5[SUPPLIER login - Supplier Portal xem trạng thái đề xuất]
+    %% NCC - yêu cầu đăng nhập SUPPLIER
+    D --> D1[SUPPLIER login - Xem phiếu gọi thầu đang mở]
+    D --> D2[SUPPLIER login - Gửi báo giá với thông tin tự động điền]
+    D --> D3[SUPPLIER login - Đề xuất sản phẩm đơn lẻ form]
+    D --> D4[SUPPLIER login - Upload đề xuất hàng loạt Excel/CSV]
+    D --> D5[PUBLIC - Supplier Portal chào hàng không cần login]
 ```
 
 
-### 2.3.3 Sơ đồ Use case tổng quát
+### 2.4.3 Sơ đồ Use case tổng quát
 
 **Mô tả các Actor:**
 
@@ -324,8 +336,8 @@ graph TD
 | Giám đốc (DIRECTOR) | Giám sát tổng quan, xem báo cáo | Báo cáo, log đăng nhập, dashboard, quản lý KH, tất cả quyền vận hành |
 | Cửa hàng trưởng (STORE_MANAGER) | Quản lý vận hành hàng ngày | Đơn hàng, sản phẩm, đấu thầu, chiến dịch, duyệt PO cuối |
 | Nhân viên kho (WAREHOUSE_STAFF) | Quản lý nhập xuất kho | Kiểm hàng PO, import kho, lô hàng FEFO, cảnh báo HSD |
-| NCC không login (public) | Nhà cung cấp chưa có tài khoản | Xem thầu công khai, gửi báo giá, đề xuất SP qua form/CSV |
-| NCC đã login (SUPPLIER) | Nhà cung cấp có tài khoản trong hệ thống | Tất cả quyền public + thông tin NCC tự động điền trong portal |
+| Nhà cung cấp (SUPPLIER) | NCC đã có tài khoản trong hệ thống | Xem phiếu thầu, báo giá (thông tin tự động điền), đề xuất SP |
+| NCC chưa login (public) | Nhà cung cấp truy cập Supplier Portal chào hàng | Chỉ được truy cập /supplier-portal để đề xuất sản phẩm mới |
 
 **Hình 2-2: Sơ đồ Use case tổng quát**
 
@@ -377,16 +389,12 @@ graph LR
     NVK --> UC34[Cảnh báo lô cận hết hạn]
     NVK --> UC35[Xem sản phẩm bán chậm]
 
-    NCC_PUBLIC(NCC - Không login) --> UC36[Xem phiếu gọi thầu đang mở]
-    NCC_PUBLIC --> UC37[Gửi báo giá cho phiếu gọi thầu]
-    NCC_PUBLIC --> UC38[Đề xuất SP đơn lẻ qua form]
-    NCC_PUBLIC --> UC39[Upload đề xuất hàng loạt Excel/CSV]
+    NCC_SUPPLIER(NCC - SUPPLIER login) --> UC40[Xem phiếu gọi thầu đang mở]
+    NCC_SUPPLIER --> UC41[Gửi báo giá - thông tin tự động điền từ profile]
+    NCC_SUPPLIER --> UC42[Đề xuất SP đơn lẻ qua form - thông tin tự động điền]
+    NCC_SUPPLIER --> UC43[Upload đề xuất hàng loạt Excel/CSV]
 
-    NCC_LOGIN(NCC - SUPPLIER login) --> UC40[Supplier Portal - xem & gửi đề xuất với thông tin tự động điền]
-    NCC_LOGIN --> UC36
-    NCC_LOGIN --> UC37
-    NCC_LOGIN --> UC38
-    NCC_LOGIN --> UC39
+    NCC_PUBLIC(NCC - Không login) --> UC44[Supplier Portal - Chào hàng sản phẩm mới]
 ```
 
 ---
@@ -520,6 +528,22 @@ erDiagram
         int so_luong_con_lai
     }
 
+    PhieuNhapTam {
+        int id PK
+        string id_session
+        string ten_san_pham_csv
+        int id_san_pham FK
+        int so_luong
+        decimal gia_nhap
+        string ghi_chu
+        date han_su_dung
+        string so_lo
+        string trang_thai
+        string loi
+        int dong_so
+        datetime ngay_tao
+    }
+
     BienDongKho {
         int id PK
         int id_san_pham FK
@@ -542,6 +566,17 @@ erDiagram
         date han_chot
         int id_nhan_vien_tao FK
         datetime ngay_tao
+    }
+
+    ChiTietGoiThau {
+        int id_chi_tiet PK
+        int id_phieu_goi_thau FK
+        int id_san_pham FK
+        string ten_san_pham_snapshot
+        int so_luong_can_nhap
+        int ton_kho_hien_tai
+        decimal gia_ban_hien_tai
+        string ghi_chu
     }
 
     BaoGiaNCC {
@@ -615,7 +650,10 @@ erDiagram
     ThuongHieu ||--o{ SanPham : "thuộc"
     DonHang ||--o| PhieuDoiTra : "có"
     PhieuNhapKho ||--|{ ChiTietPhieuNhap : "gồm"
+    SanPham ||--o{ PhieuNhapTam : "map tới"
     SanPham ||--o{ BienDongKho : "theo dõi"
+    PhieuGoiThau ||--|{ ChiTietGoiThau : "gồm"
+    SanPham ||--o{ ChiTietGoiThau : "được yêu cầu"
     PhieuGoiThau ||--o{ BaoGiaNCC : "nhận"
     PhieuGoiThau ||--o{ SanPhamDeXuat : "có"
     SuKien }o--o{ SanPham : "gán"
@@ -734,10 +772,15 @@ sequenceDiagram
     DB-->>BE: PhieuGoiThau
     BE-->>FE_ADMIN: { maPhieu, idPhieuGoiThau }
 
+    NCC->>FE_NCC: Đăng nhập tài khoản SUPPLIER
     NCC->>FE_NCC: Xem danh sách phiếu đang mở
-    FE_NCC->>BE: GET /api/procurement/public
+    FE_NCC->>BE: GET /api/procurement/public (với JWT token)
     BE-->>FE_NCC: [PhieuGoiThau đang OPEN]
-    NCC->>FE_NCC: Gửi báo giá (giá nhập, HSD, số lô)
+    NCC->>FE_NCC: Mở phiếu chi tiết
+    FE_NCC->>BE: GET /api/users/profile (lấy thông tin NCC)
+    BE-->>FE_NCC: { ho_ten, email, so_dien_thoai }
+    FE_NCC->>FE_NCC: Auto-fill form báo giá với thông tin NCC
+    NCC->>FE_NCC: Nhập giá nhập, HSD, số lô, gửi báo giá
     FE_NCC->>BE: POST /api/procurement/{id}/bao-gia
     BE->>DB: INSERT BaoGiaNCC (trangThai=CHO_DUYET)
     DB-->>BE: BaoGiaNCC
@@ -957,7 +1000,9 @@ Hệ thống gồm hai giao diện riêng biệt:
 
 **Giao diện quản trị (Admin CMS):** Dashboard, quản lý sản phẩm/danh mục/thương hiệu, quản lý đơn hàng, quản lý kho, đấu thầu, đổi trả, chiến dịch, báo cáo, tài khoản, log đăng nhập.
 
-**Cổng NCC (Supplier Portal):** Trang chào hàng công khai, form đề xuất sản phẩm, upload Excel/CSV.
+| Cổng NCC (Supplier Portal):** Dành cho NCC đã đăng nhập, chào hàng sản phẩm mới, đề xuất form/CSV.
+
+**Cổng đấu thầu (Procurement):** Dành cho NCC đã đăng nhập, xem phiếu gọi thầu, gửi báo giá với thông tin tự động điền từ profile.
 
 ### 3.3.2 Mô tả các màn hình chính
 
@@ -971,6 +1016,8 @@ Hệ thống gồm hai giao diện riêng biệt:
 | Lịch sử đơn hàng | Xem đơn, hủy đơn, yêu cầu đổi trả | Đã đăng nhập (CUSTOMER) |
 | Xác nhận đơn QR | Bill receipt, xác nhận nhận hàng, form đổi trả | **Public (không cần login)** |
 | Hồ sơ cá nhân | Thông tin cá nhân, đổi mật khẩu | Đã đăng nhập |
+| Supplier Portal `/supplier-portal` | Chào hàng sản phẩm mới, đề xuất form/CSV | **SUPPLIER login** |
+| Procurement Portal `/procurement` | Xem phiếu thầu, gửi báo giá (auto-fill thông tin) | **SUPPLIER login** |
 | Dashboard Admin | Thống kê, đơn gần đây, cảnh báo tồn kho/HSD | **ADMIN + DIRECTOR** |
 | Quản lý đơn hàng | Danh sách, lọc, xem chi tiết, thao tác vận hành | **ADMIN + DIRECTOR + STORE_MANAGER** |
 | Quản lý sản phẩm | Xem sản phẩm, lọc | **Tất cả nhân viên nội bộ** |
