@@ -54,10 +54,9 @@ public class SanPhamService {
         return sanPhamRepository.save(existing);
     }
 
-    /**
-     * Xác nhận xuất trả nhà cung cấp một số lượng hàng lỗi.
-     * Trừ soLuongHangLoi đi soLuong (tối đa về 0).
-     */
+
+//     Xác nhận xuất trả nhà cung cấp một số lượng hàng lỗi.
+//     Trừ soLuongHangLoi đi soLuong (tối đa về 0).
     public SanPham xuatHangLoi(Integer id, int soLuong) {
         SanPham sp = sanPhamRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Sản phẩm không tồn tại"));

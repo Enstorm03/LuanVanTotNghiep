@@ -29,7 +29,7 @@ public class ReviewService {
     @Autowired
     private SanPhamRepository sanPhamRepository;
 
-    /** Lấy tất cả sản phẩm dưới dạng map id → tên để fill nhanh */
+//    Lấy tất cả sản phẩm dưới dạng map id  tên để fill nhanh
     private Map<Integer, String> buildProductNameMap() {
         return sanPhamRepository.findAll().stream()
                 .collect(Collectors.toMap(

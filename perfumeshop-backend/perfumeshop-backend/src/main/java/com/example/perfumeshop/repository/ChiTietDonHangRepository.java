@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface ChiTietDonHangRepository extends JpaRepository<ChiTietDonHang, Integer> {
 
-    /** Tổng số lượng đã bán của 1 SP từ 1 thời điểm, chỉ tính đơn ở trạng thái chỉ định */
+//     Tổng số lượng đã bán của 1 SP từ 1 thời điểm, chỉ tính đơn ở trạng thái chỉ định
     @Query("SELECT COALESCE(SUM(ct.soLuong), 0) FROM ChiTietDonHang ct " +
            "WHERE ct.sanPham.idSanPham = :idSanPham " +
            "AND ct.donHang.trangThaiVanHanh = :trangThai " +

@@ -47,7 +47,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    /** Lấy IP thật ngay cả khi đứng sau reverse proxy */
+//     Lấy IP thật ngay cả khi đứng sau reverse proxy
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
@@ -151,10 +151,10 @@ public class AuthController {
         return ResponseEntity.ok(created);
     }
 
-    /**
-     * Verify email với token từ link trong email
-     * GET /api/auth/verify-email?token=xxx
-     */
+
+//      Verify email với token từ link trong email
+//      GET /api/auth/verify-email?token=xxx
+
      @GetMapping("/verify-email")
      public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam String token) {
          try {
@@ -193,11 +193,11 @@ public class AuthController {
          }
      }
 
-    /**
-     * Resend verification email
-     * POST /api/auth/resend-verification-email
-     * Body: { "email": "user@example.com" }
-     */
+
+//      Resend verification email
+//      POST /api/auth/resend-verification-email
+//      Body: { "email": "user@example.com" }
+
     @PostMapping("/resend-verification-email")
     public ResponseEntity<Map<String, Object>> resendVerificationEmail(@RequestBody Map<String, String> body) {
         try {
@@ -238,10 +238,10 @@ public class AuthController {
         }
     }
 
-    /**
-     * Check verification status
-     * GET /api/auth/verification-status/{userId}
-     */
+
+//      Check verification status
+//      GET /api/auth/verification-status/{userId}
+
     @GetMapping("/verification-status/{userId}")
     public ResponseEntity<Map<String, Object>> getVerificationStatus(@PathVariable Integer userId) {
         try {

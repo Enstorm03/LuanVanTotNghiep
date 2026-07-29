@@ -23,13 +23,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    /**
-     * Tạo JWT token cho nhân viên (employee).
-     *
-     * @param userId   id_nhan_vien
-     * @param username ten_dang_nhap
-     * @param role     vai_tro: ADMIN | STORE_MANAGER | WAREHOUSE_STAFF | SALES_STAFF
-     */
+
+//     Tạo JWT token cho nhân viên (employee).
+
+//     @param userId   id_nhan_vien
+//     @param username ten_dang_nhap
+//     @param role     vai_tro: ADMIN | STORE_MANAGER | WAREHOUSE_STAFF | SALES_STAFF
+
     public String generateEmployeeToken(Integer userId, String username, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
@@ -38,14 +38,13 @@ public class JwtUtil {
         return buildToken(username, claims);
     }
 
-    /**
-     * Tạo JWT token cho khách hàng (customer).
-     * Nếu vaiTro = SUPPLIER thì type = "supplier", còn lại = "customer".
-     *
-     * @param userId   id_nguoi_dung
-     * @param username ten_dang_nhap
-     * @param vaiTro   vai_tro thực tế: CUSTOMER | SUPPLIER
-     */
+
+//     Tạo JWT token cho khách hàng (customer).
+//     Nếu vaiTro = SUPPLIER thì type = "supplier", còn lại = "customer".
+
+//     @param userId   id_nguoi_dung
+//     @param username ten_dang_nhap
+//     @param vaiTro   vai_tro thực tế: CUSTOMER | SUPPLIER
     public String generateCustomerToken(Integer userId, String username, String vaiTro) {
         String role = (vaiTro != null && !vaiTro.isBlank()) ? vaiTro.toUpperCase() : "CUSTOMER";
         String type = "SUPPLIER".equals(role) ? "supplier" : "customer";
@@ -68,7 +67,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    /** Lấy toàn bộ claims từ token */
+//     Lấy toàn bộ claims từ token
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())

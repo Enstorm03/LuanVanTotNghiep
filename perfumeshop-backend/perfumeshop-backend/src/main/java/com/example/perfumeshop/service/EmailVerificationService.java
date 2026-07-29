@@ -20,10 +20,10 @@ public class EmailVerificationService {
     @Autowired
     private EmailService emailService;
 
-    /**
-     * Gửi email xác thực cho người dùng mới
-     * Gọi khi user đăng ký
-     */
+
+//      Gửi email xác thực cho người dùng mới
+//      Gọi khi user đăng ký
+
     public void sendVerificationEmail(Integer userId, String email, String hoTen) {
         try {
             NguoiDung user = nguoiDungRepository.findById(userId).orElse(null);
@@ -61,9 +61,9 @@ public class EmailVerificationService {
         }
     }
 
-    /**
-     * Xác thực email bằng token
-     */
+
+//     Xác thực email bằng token
+
     public boolean verifyEmail(String token) {
         try {
             if (token == null || token.isBlank()) {
@@ -92,9 +92,9 @@ public class EmailVerificationService {
         }
     }
 
-    /**
-     * Xác thực email bằng token (trả về Map với chi tiết)
-     */
+
+//      Xác thực email bằng token (trả về Map với chi tiết)
+
     public Map<String, Object> verifyEmailWithDetails(String token) {
         Map<String, Object> response = new HashMap<>();
 
@@ -142,9 +142,9 @@ public class EmailVerificationService {
         return response;
     }
 
-    /**
-     * Gửi lại email xác thực
-     */
+
+//      Gửi lại email xác thực
+
     public void resendVerificationEmail(Integer userId, String email, String hoTen) {
         try {
             NguoiDung user = nguoiDungRepository.findById(userId).orElse(null);
@@ -162,9 +162,9 @@ public class EmailVerificationService {
         }
     }
 
-    /**
-     * Gửi lại email xác thực (overload - legacy)
-     */
+
+//      Gửi lại email xác thực (overload - legacy)
+
     public Map<String, Object> resendVerificationEmailLegacy(String email) {
         Map<String, Object> response = new HashMap<>();
 
@@ -189,18 +189,18 @@ public class EmailVerificationService {
         return response;
     }
 
-    /**
-     * Check if user is verified
-     */
+
+//      Check if user is verified
+
     public boolean isUserVerified(Integer userId) {
         return nguoiDungRepository.findById(userId)
                 .map(user -> Boolean.TRUE.equals(user.getIsVerified()))
                 .orElse(false);
     }
 
-    /**
-     * Get verification status
-     */
+
+//      Get verification status
+
     public Map<String, Object> getVerificationStatus(Integer userId) {
         Map<String, Object> status = new HashMap<>();
 

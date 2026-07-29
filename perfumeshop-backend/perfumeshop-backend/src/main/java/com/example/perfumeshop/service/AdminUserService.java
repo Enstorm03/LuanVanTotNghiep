@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class AdminUserService {
 
-    /** Danh sách vai trò hợp lệ cho nhân viên */
+
     private static final Set<String> VALID_ROLES = Set.of(
             "ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF",
             "SUPPLIER", "STAFF"
@@ -114,14 +114,14 @@ public class AdminUserService {
         nguoiDungRepository.deleteById(id);
     }
 
-    /** Giám đốc duyệt khách hàng thành NCC */
+//     Giám đốc duyệt khách hàng thành NCC
     public NguoiDungResponse duyetNCC(Integer id) {
         NguoiDung kh = getKhachHangEntity(id);
         kh.setVaiTro("SUPPLIER");
         return NguoiDungResponse.from(nguoiDungRepository.save(kh));
     }
 
-    /** Hủy vai trò NCC → trở lại CUSTOMER */
+//     Hủy vai trò NCC → trở lại CUSTOMER
     public NguoiDungResponse huyNCC(Integer id) {
         NguoiDung kh = getKhachHangEntity(id);
         kh.setVaiTro("CUSTOMER");
@@ -136,7 +136,7 @@ public class AdminUserService {
 
     // ================= Internal helpers =================
 
-    /** Trả về entity thô — chỉ dùng nội bộ trong service layer */
+//     Trả về entity thô — chỉ dùng nội bộ trong service layer
     public NguoiDung getKhachHangEntity(Integer id) {
         return nguoiDungRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Khách hàng không tồn tại"));

@@ -39,7 +39,7 @@ public class ProcurementService {
 
     // ── Giai đoạn 1: Admin tạo phiếu gọi thầu ─────────────────────────────
 
-    /** Lấy sản phẩm sắp hết kho để hiển thị trong modal tạo phiếu */
+//     Lấy sản phẩm sắp hết kho để hiển thị trong modal tạo phiếu
     public List<Map<String, Object>> getDanhSachSapHetKho(int nguong) {
         return sanPhamRepository.findBySoLuongTonKhoLessThanOrderBySoLuongTonKhoAsc(nguong).stream()
             .map(sp -> {

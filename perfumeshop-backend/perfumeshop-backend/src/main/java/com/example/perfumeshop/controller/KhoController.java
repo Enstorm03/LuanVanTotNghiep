@@ -22,22 +22,22 @@ public class KhoController {
 
     // ── PO Workflow: Kho xác nhận → Admin duyệt ──────────────────────────
 
-    /** GET /api/kho/po-cho-kiem-tra — PO đang chờ kho kiểm tra */
+//    GET /api/kho/po-cho-kiem-tra — PO đang chờ kho kiểm tra
     @GetMapping("/po-cho-kiem-tra")
     public ResponseEntity<List<PhieuNhapKho>> getPoChoKiemTra() {
         return ResponseEntity.ok(khoService.getPoChoKhoKiemTra());
     }
 
-    /** GET /api/kho/po-cho-admin-duyet — PO đang chờ admin duyệt cuối */
+//    GET /api/kho/po-cho-admin-duyet — PO đang chờ admin duyệt cuối
     @GetMapping("/po-cho-admin-duyet")
     public ResponseEntity<List<PhieuNhapKho>> getPoChoAdminDuyet() {
         return ResponseEntity.ok(khoService.getPoChoAdminDuyet());
     }
 
-    /**
-     * POST /api/kho/po/{id}/kho-xac-nhan
-     * Body: { nhanVienId, chiTiet: [{ idChiTiet, soLuongThucNhan, soLuongLoi, urlHinhAnhMoi, ghiChuKho }] }
-     */
+
+//      POST /api/kho/po/{id}/kho-xac-nhan
+//      Body: { nhanVienId, chiTiet: [{ idChiTiet, soLuongThucNhan, soLuongLoi, urlHinhAnhMoi, ghiChuKho }] }
+
     @PostMapping("/po/{id}/kho-xac-nhan")
     public ResponseEntity<PhieuNhapKho> khoXacNhan(
             @PathVariable Integer id,
@@ -49,10 +49,10 @@ public class KhoController {
         return ResponseEntity.ok(khoService.khoXacNhan(id, chiTiet, nhanVienId));
     }
 
-    /**
-     * POST /api/kho/po/{id}/admin-duyet-cuoi
-     * Body: { nhanVienId }
-     */
+
+//     POST /api/kho/po/{id}/admin-duyet-cuoi
+//      Body: { nhanVienId }
+
     @PostMapping("/po/{id}/admin-duyet-cuoi")
     public ResponseEntity<PhieuNhapKho> adminDuyetCuoi(
             @PathVariable Integer id,
@@ -62,10 +62,10 @@ public class KhoController {
         return ResponseEntity.ok(khoService.adminDuyetCuoi(id, nhanVienId));
     }
 
-    /**
-     * POST /api/kho/po/{id}/admin-tu-choi
-     * Body: { lyDo, nhanVienId }
-     */
+
+//      POST /api/kho/po/{id}/admin-tu-choi
+//      Body: { lyDo, nhanVienId }
+
     @PostMapping("/po/{id}/admin-tu-choi")
     public ResponseEntity<PhieuNhapKho> adminTuChoi(
             @PathVariable Integer id,
@@ -78,24 +78,23 @@ public class KhoController {
 
     // ── Import CSV/Excel → staging ─────────────────────────────────────────
 
-    /**
-     * POST /api/kho/import-preview
-     * Form-data: file (CSV hoặc xlsx)
-     * Trả về sessionId + danh sách dòng preview
-     */
+
+//      POST /api/kho/import-preview
+//      Form-data: file (CSV hoặc xlsx)
+//     Trả về sessionId + danh sách dòng preview
     @PostMapping("/import-preview")
     public ResponseEntity<Map<String, Object>> importPreview(
             @RequestParam("file") MultipartFile file) throws Exception {
         return ResponseEntity.ok(khoService.importPreview(file));
     }
 
-    /** GET /api/kho/import-preview/{sessionId} — lấy lại preview đã upload */
+//     GET /api/kho/import-preview/{sessionId} — lấy lại preview đã upload
     @GetMapping("/import-preview/{sessionId}")
     public ResponseEntity<List<PhieuNhapTam>> getPreview(@PathVariable String sessionId) {
         return ResponseEntity.ok(khoService.getPreview(sessionId));
     }
 
-    /** PUT /api/kho/import-preview/row/{rowId} — admin sửa tất cả field của dòng */
+//    PUT /api/kho/import-preview/row/{rowId} — admin sửa tất cả field của dòng
     @PutMapping("/import-preview/row/{rowId}")
     public ResponseEntity<PhieuNhapTam> updateRow(
             @PathVariable Integer rowId,
@@ -110,25 +109,25 @@ public class KhoController {
         return ResponseEntity.ok(khoService.updateRow(rowId, idSanPham, soLuong, giaNhap, tenSp, ghiChu, hanSuDung, soLo));
     }
 
-    /** DELETE /api/kho/import-preview/row/{rowId} — xóa dòng khỏi staging */
+//     DELETE /api/kho/import-preview/row/{rowId} — xóa dòng khỏi staging
     @DeleteMapping("/import-preview/row/{rowId}")
     public ResponseEntity<Void> deleteRow(@PathVariable Integer rowId) {
         khoService.deleteRow(rowId);
         return ResponseEntity.noContent().build();
     }
 
-    /** POST /api/kho/import-preview/{sessionId}/row — thêm dòng thủ công */
+//     POST /api/kho/import-preview/{sessionId}/row — thêm dòng thủ công
     @PostMapping("/import-preview/{sessionId}/row")
     public ResponseEntity<PhieuNhapTam> addRow(@PathVariable String sessionId,
                                                 @RequestBody Map<String, Object> body) {
         return ResponseEntity.ok(khoService.addRow(sessionId, body));
     }
 
-    /**
-     * POST /api/kho/import-confirm
-     * Body: { sessionId, nhanVienId, nhaCungCap, ghiChu }
-     * Duyệt → cộng kho + tạo phiếu chính thức + xóa staging
-     */
+
+//      POST /api/kho/import-confirm
+//      Body: { sessionId, nhanVienId, nhaCungCap, ghiChu }
+//      Duyệt → cộng kho + tạo phiếu chính thức + xóa staging
+
     @PostMapping("/import-confirm")
     public ResponseEntity<PhieuNhapKho> confirmImport(@RequestBody Map<String, Object> body) {
         String sessionId   = (String) body.get("sessionId");
@@ -152,7 +151,7 @@ public class KhoController {
 
     // ── Biến động kho ─────────────────────────────────────────────────────
 
-    /** GET /api/kho/bien-dong?idSanPham=1 — lịch sử 1 SP; bỏ param → tất cả */
+//     GET /api/kho/bien-dong?idSanPham=1 — lịch sử 1 SP; bỏ param  tất cả
     @GetMapping("/bien-dong")
     public ResponseEntity<List<BienDongKho>> getBienDong(
             @RequestParam(value = "idSanPham", required = false) Integer idSanPham) {
@@ -161,7 +160,7 @@ public class KhoController {
 
     // ── Thống kê bán chậm ─────────────────────────────────────────────────
 
-    /** GET /api/kho/ban-cham?days=30&limit=20 */
+//    /api/kho/ban-cham?days=30&limit=20
     @GetMapping("/ban-cham")
     public ResponseEntity<List<Map<String, Object>>> getBanCham(
             @RequestParam(value = "days",  defaultValue = "30")  int days,
@@ -171,21 +170,21 @@ public class KhoController {
 
     // ── Cảnh báo cận Date ──────────────────────────────────────────────────
 
-    /** GET /api/kho/cang-het-han?limit=10 — Top N lô sắp hết hạn */
+//     GET /api/kho/cang-het-han?limit=10 — Top N lô sắp hết hạn
     @GetMapping("/cang-het-han")
     public ResponseEntity<List<Map<String, Object>>> getNearExpiryBatches(
             @RequestParam(value = "limit", defaultValue = "10")  int limit) {
         return ResponseEntity.ok(khoService.getNearExpiryBatches(limit));
     }
 
-    /** GET /api/kho/near-expiry?limit=10 — Alias for getNearExpiryBatches */
+//     /api/kho/near-expiry?limit=10
     @GetMapping("/near-expiry")
     public ResponseEntity<List<Map<String, Object>>> getNearExpiryBatches2(
             @RequestParam(value = "limit", defaultValue = "10")  int limit) {
         return ResponseEntity.ok(khoService.getNearExpiryBatches(limit));
     }
 
-    /** POST /api/kho/validate-hsd — Kiểm tra HSD hợp lệ */
+//     POST /api/kho/validate-hsd — Kiểm tra HSD hợp lệ
     @PostMapping("/validate-hsd")
     public ResponseEntity<Map<String, Object>> validateHSD(@RequestBody Map<String, Object> body) {
         String hsdStr = (String) body.get("hanSuDung");
@@ -193,10 +192,10 @@ public class KhoController {
         return ResponseEntity.ok(khoService.validateHSD(hsd));
     }
 
-    /**
-     * GET /api/kho/lo-hang — Toàn bộ lô hàng, group theo sản phẩm
-     * Optional: ?idSanPham=1 để lọc 1 SP, ?conHang=true chỉ lấy lô còn tồn
-     */
+
+//     GET /api/kho/lo-hang — Toàn bộ lô hàng, group theo sản phẩm
+//      Optional: ?idSanPham=1 để lọc 1 SP, ?conHang=true chỉ lấy lô còn tồn
+
     @GetMapping("/lo-hang")
     public ResponseEntity<List<Map<String, Object>>> getLoHang(
             @RequestParam(value = "idSanPham", required = false) Integer idSanPham,

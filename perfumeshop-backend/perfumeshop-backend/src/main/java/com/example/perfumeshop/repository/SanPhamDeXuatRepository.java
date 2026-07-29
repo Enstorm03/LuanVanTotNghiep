@@ -16,9 +16,9 @@ public interface SanPhamDeXuatRepository extends JpaRepository<SanPhamDeXuat, In
     List<SanPhamDeXuat> findByPhieuGoiThau_IdPhieuGoiThauAndTrangThai(
         Integer idPhieuGoiThau, String trangThai);
 
-    /** Lấy tất cả đề xuất độc lập (không thuộc phiếu gọi thầu nào) */
+//     Lấy tất cả đề xuất độc lập (không thuộc phiếu gọi thầu nào)
     List<SanPhamDeXuat> findByPhieuGoiThauIsNullOrderByNgayTaoDesc();
 
-    /** Lấy đề xuất độc lập theo trạng thái */
+//     Lấy đề xuất độc lập theo trạng thái
     List<SanPhamDeXuat> findByPhieuGoiThauIsNullAndTrangThaiOrderByNgayTaoDesc(String trangThai);
 }

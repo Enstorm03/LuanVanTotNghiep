@@ -30,7 +30,6 @@ public class PhieuDoiTra {
     @Column(name = "ly_do_tu_choi")
     private String lyDoTuChoi;
 
-    /** Ghi chú nội bộ của nhân viên xử lý (VD: lý do không hoàn kho) — không hiển thị cho khách */
     @Column(name = "ghi_chu_noi_bo")
     private String ghiChuNoiBo;
 

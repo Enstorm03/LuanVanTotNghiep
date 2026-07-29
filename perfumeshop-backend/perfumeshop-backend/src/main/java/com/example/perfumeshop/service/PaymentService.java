@@ -45,10 +45,10 @@ public class PaymentService {
     @Value("${payos.cancel-url}")
     private String cancelUrl;
 
-    /**
-     * Tạo link thanh toán PayOS cho một đơn hàng.
-     * Trả về checkoutUrl để FE redirect khách sang.
-     */
+
+//     Tạo link thanh toán PayOS cho một đơn hàng.
+//     Trả về checkoutUrl để FE redirect khách sang.
+
     public String createPaymentLink(Integer idDonHang) throws Exception {
         DonHang dh = donHangRepository.findById(idDonHang)
                 .orElseThrow(() -> new BusinessException("Đơn hàng không tồn tại"));
@@ -98,10 +98,10 @@ public class PaymentService {
         return response.getCheckoutUrl();
     }
 
-    /**
-     * Xử lý webhook từ PayOS sau khi khách thanh toán xong.
-     * Cập nhật trạng thái thanh toán hoặc hủy đơn nếu thất bại.
-     */
+
+//     Xử lý webhook từ PayOS sau khi khách thanh toán xong.
+//     Cập nhật trạng thái thanh toán hoặc hủy đơn nếu thất bại.
+
     @Transactional
     public void handleWebhook(WebhookData data) {
         Long orderCode = data.getOrderCode();
@@ -146,9 +146,9 @@ public class PaymentService {
         }
     }
 
-    /**
-     * Kiểm tra trạng thái thanh toán của đơn hàng qua PayOS API.
-     */
+//
+//      Kiểm tra trạng thái thanh toán của đơn hàng qua PayOS API.
+//
     @Transactional
     public String checkPaymentStatus(Integer idDonHang) throws Exception {
         PaymentLink paymentInfo = payOS.paymentRequests().get(idDonHang.longValue());
@@ -194,9 +194,9 @@ public class PaymentService {
         return status;
     }
 
-    /**
-     * Gửi email thông báo thanh toán thành công
-     */
+
+//      Gửi email thông báo thanh toán thành công
+
     private void sendPaymentSuccessNotification(DonHang dh) {
         if (dh.getIdNguoiDung() == null) return;
         
@@ -218,9 +218,9 @@ public class PaymentService {
         }
     }
 
-    /**
-     * Gửi email thông báo hủy đơn hàng
-     */
+
+//     Gửi email thông báo hủy đơn hàng
+
     private void sendOrderCancelledNotification(DonHang dh) {
         if (dh.getIdNguoiDung() == null) return;
         

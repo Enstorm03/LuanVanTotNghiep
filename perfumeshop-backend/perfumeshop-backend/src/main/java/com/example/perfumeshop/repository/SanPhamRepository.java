@@ -42,11 +42,9 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
                                       @Param("excludeId") Integer excludeId,
                                       Pageable pageable);
 
-    /**
-     * Trừ kho atomic: chỉ update nếu còn đủ hàng (soLuongTonKho >= qty).
-     * Trả về số rows bị ảnh hưởng: 1 = thành công, 0 = không đủ hàng.
-     * Dùng thay cho đọc-rồi-ghi để tránh race condition khi nhiều đơn đặt cùng lúc.
-     */
+//     * Trừ kho atomic: chỉ update nếu còn đủ hàng (soLuongTonKho >= qty).
+//     * Trả về số rows bị ảnh hưởng: 1 = thành công, 0 = không đủ hàng.
+//     * Dùng thay cho đọc-rồi-ghi để tránh race condition khi nhiều đơn đặt cùng lúc.
      @Modifying
      @Query("UPDATE SanPham s SET s.soLuongTonKho = s.soLuongTonKho - :qty " +
             "WHERE s.idSanPham = :id AND s.soLuongTonKho >= :qty")

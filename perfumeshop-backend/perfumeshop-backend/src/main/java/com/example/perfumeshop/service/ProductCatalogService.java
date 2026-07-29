@@ -29,10 +29,8 @@ public class ProductCatalogService {
     @Autowired
     private ThuongHieuRepository thuongHieuRepository;
 
-    /**
-     * nongDoMin / nongDoMax: range lọc nồng độ (%).
-     * VD: EDP → min=15, max=20; Parfum → min=20, max=null
-     */
+//     nongDoMin / nongDoMax: range lọc nồng độ (%).
+//     VD: EDP → min=15, max=20; Parfum → min=20, max=null
     public PagedResponse<SanPham> searchWithPage(
             String kw, Integer danhMucId, Integer thuongHieuId,
             Integer nongDoMin, Integer nongDoMax, Integer dungTich,
@@ -69,7 +67,7 @@ public class ProductCatalogService {
         return sanPhamRepository.findRelatedProducts(current.getThuongHieu().getIdThuongHieu(), productId, pageable);
     }
 
-    // Compatibility method — gọi không có range nồng độ
+    // Compatibility method — gọi không nồng độ
     public List<SanPham> search(String kw, Integer danhMucId, Integer thuongHieuId, Integer nongDo, Integer dungTich) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
         return sanPhamRepository.searchWithPage(

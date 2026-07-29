@@ -37,23 +37,19 @@ public class SanPham {
     @Column(name = "so_luong_ton_kho")
     private Integer soLuongTonKho;
 
-    /**
-     * Số lượng hàng lỗi/hỏng từ đổi trả khách hàng — chờ trả nhà cung cấp.
-     * Tăng khi admin duyệt đổi trả với hoanKho=false.
-     * Giảm về 0 khi admin xác nhận đã xuất trả nhà cung cấp.
-     */
+
     @Column(name = "so_luong_hang_loi", columnDefinition = "INT DEFAULT 0")
     private Integer soLuongHangLoi = 0;
 
-    /** Phần trăm giảm giá (0–100). Null = không giảm giá. */
+
     @Column(name = "phan_tram_giam")
     private Integer phanTramGiam;
 
-    /** Thời điểm bắt đầu áp dụng giảm giá. */
+
     @Column(name = "ngay_bat_dau_giam")
     private LocalDateTime ngayBatDauGiam;
 
-    /** Thời điểm kết thúc giảm giá. */
+
     @Column(name = "ngay_ket_thuc_giam")
     private LocalDateTime ngayKetThucGiam;
 
@@ -66,10 +62,10 @@ public class SanPham {
     @JoinColumn(name = "id_thuong_hieu")
     private ThuongHieu thuongHieu;
 
-    /**
-     * Trả về giá hiện tại sau khi áp dụng giảm giá (nếu đang trong thời gian khuyến mãi).
-     * Field này KHÔNG lưu vào DB (@Transient), được tính động mỗi lần trả về.
-     */
+
+//      Trả về giá hiện tại sau khi áp dụng giảm giá (nếu đang trong thời gian khuyến mãi).
+//     Field này KHÔNG lưu vào DB (@Transient), được tính động mỗi lần trả về.
+
     @Transient
     public BigDecimal getGiaHienTai() {
         if (giaBan == null) return BigDecimal.ZERO;
@@ -79,9 +75,9 @@ public class SanPham {
         return giaBan.multiply(multiplier).setScale(0, java.math.RoundingMode.HALF_UP);
     }
 
-    /**
-     * Kiểm tra sản phẩm có đang trong thời gian giảm giá không.
-     */
+
+//      Kiểm tra sản phẩm có đang trong thời gian giảm giá không.
+
     @Transient
     public boolean isAngGiamGia() {
         if (phanTramGiam == null || phanTramGiam <= 0) return false;

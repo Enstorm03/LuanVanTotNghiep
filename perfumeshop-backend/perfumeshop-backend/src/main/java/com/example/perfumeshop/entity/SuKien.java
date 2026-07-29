@@ -30,11 +30,11 @@ public class SuKien {
     @Column(name = "ngay_ket_thuc")
     private LocalDateTime ngayKetThuc;
 
-    /** Công tắc bật/tắt khẩn cấp — false để ẩn sự kiện ngay lập tức */
+//    Công tắc bật/tắt khẩn cấp — false để ẩn sự kiện ngay lập tức
     @Column(name = "trang_thai_active", nullable = false)
     private Boolean trangThaiActive = true;
 
-    /** Giảm giá hàng loạt cho tất cả sản phẩm trong chiến dịch (%) */
+//     Giảm giá hàng loạt cho tất cả sản phẩm trong chiến dịch (%)
     @Column(name = "giam_gia_hang_loat", columnDefinition = "DECIMAL(5, 2) DEFAULT 0")
     private Double giamGiaHangLoat = 0.0;
 

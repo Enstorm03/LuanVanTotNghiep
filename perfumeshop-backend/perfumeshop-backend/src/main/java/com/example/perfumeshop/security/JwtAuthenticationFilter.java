@@ -16,11 +16,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Filter chạy 1 lần mỗi request.
- * Đọc JWT từ header Authorization: Bearer <token>
- * Nếu hợp lệ → set authentication vào SecurityContext.
- */
+// Filter chạy 1 lần mỗi request.
+// Đọc JWT từ header Authorization: Bearer <token>
+// Nếu hợp lệ → set authentication vào SecurityContext.
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

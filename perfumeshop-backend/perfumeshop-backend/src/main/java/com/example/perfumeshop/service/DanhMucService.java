@@ -14,24 +14,18 @@ public class DanhMucService {
     @Autowired
     private DanhMucRepository danhMucRepository;
 
-    /**
-     * Lấy tất cả danh mục
-     */
+
     public List<DanhMuc> getAll() {
         return danhMucRepository.findAll();
     }
 
-    /**
-     * Lấy danh mục theo ID
-     */
+
     public DanhMuc getById(Integer id) {
         return danhMucRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Danh mục không tồn tại"));
     }
 
-    /**
-     * Tạo danh mục mới
-     */
+
     public DanhMuc create(DanhMuc danhMuc) {
         if (danhMuc.getTenDanhMuc() == null || danhMuc.getTenDanhMuc().isBlank()) {
             throw new BusinessException("Tên danh mục không được để trống");
@@ -40,9 +34,7 @@ public class DanhMucService {
         return danhMucRepository.save(danhMuc);
     }
 
-    /**
-     * Cập nhật danh mục
-     */
+
     public DanhMuc update(Integer id, DanhMuc danhMuc) {
         danhMucRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Danh mục không tồn tại"));
@@ -55,9 +47,7 @@ public class DanhMucService {
         return danhMucRepository.save(danhMuc);
     }
 
-    /**
-     * Xóa danh mục
-     */
+
     public void delete(Integer id) {
         danhMucRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Danh mục không tồn tại"));

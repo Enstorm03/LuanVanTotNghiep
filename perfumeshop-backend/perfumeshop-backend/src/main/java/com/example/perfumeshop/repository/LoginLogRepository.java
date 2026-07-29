@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface LoginLogRepository extends JpaRepository<LoginLog, Long> {
 
-    /** Tìm kiếm + lọc log: theo tên đăng nhập, vai trò, trạng thái, khoảng thời gian */
+//   Tìm kiếm + lọc log: theo tên đăng nhập, vai trò, trạng thái, khoảng thời gian
     @Query("""
         SELECT l FROM LoginLog l
         WHERE (:tenDangNhap IS NULL OR LOWER(l.tenDangNhap) LIKE LOWER(CONCAT('%', :tenDangNhap, '%')))
@@ -32,7 +32,7 @@ public interface LoginLogRepository extends JpaRepository<LoginLog, Long> {
         Pageable pageable
     );
 
-    /** Đếm số lần đăng nhập thất bại trong N phút gần nhất (phát hiện brute force) */
+//     Đếm số lần đăng nhập thất bại trong N phút gần nhất (phát hiện brute force)
     @Query("""
         SELECT COUNT(l) FROM LoginLog l
         WHERE l.tenDangNhap = :tenDangNhap

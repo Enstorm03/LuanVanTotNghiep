@@ -26,9 +26,9 @@ public class UserProfileController {
     @Autowired
     private AdminUserService adminUserService;
 
-    /**
-     * Cập nhật thông tin cá nhân của user hiện tại
-     */
+
+//      Cập nhật thông tin cá nhân của user hiện tại
+
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody Map<String, Object> request) {
         try {
@@ -64,9 +64,9 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * Thay đổi mật khẩu của user
-     */
+
+//      Thay đổi mật khẩu của user
+
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
         try {
@@ -124,9 +124,9 @@ public class UserProfileController {
         }
     }
 
-    /**
-     * Lấy thông tin cá nhân của user hiện tại
-     */
+
+//    Lấy thông tin cá nhân của user hiện tại
+
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
         try {
@@ -152,9 +152,9 @@ public class UserProfileController {
     @Autowired
     private HttpServletRequest request;
 
-    /**
-     * Lấy ID của user từ JWT token trong SecurityContext
-     */
+
+//     Lấy ID của user từ JWT token trong SecurityContext
+
     private Integer getUserIdFromContext() {
         try {
             // Ưu tiên lấy từ JWT (SecurityContext)

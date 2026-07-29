@@ -19,9 +19,8 @@ public class UserProfileService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Lấy thông tin cá nhân của user
-     */
+//     * Lấy thông tin cá nhân của user
+
     public Map<String, Object> getProfile(Integer userId) {
         if (userId == null) {
             throw new BusinessException("Không tìm thấy user");
@@ -33,9 +32,9 @@ public class UserProfileService {
         return convertToResponse(user);
     }
 
-    /**
-     * Cập nhật thông tin cá nhân của user
-     */
+
+//      Cập nhật thông tin cá nhân của user
+
     public Map<String, Object> updateProfile(Integer userId, Map<String, Object> updateData) {
         if (userId == null) {
             throw new BusinessException("Không tìm thấy user");
@@ -59,9 +58,9 @@ public class UserProfileService {
         return convertToResponse(updated);
     }
 
-    /**
-     * Thay đổi mật khẩu của user
-     */
+
+//      Thay đổi mật khẩu của user
+
     public void changePassword(Integer userId, String matKhauCu, String matKhauMoi) {
         if (userId == null) {
             throw new BusinessException("Không tìm thấy user");
@@ -94,9 +93,9 @@ public class UserProfileService {
         nguoiDungRepository.save(user);
     }
 
-    /**
-     * Convert NguoiDung entity to response DTO
-     */
+
+//     * Convert NguoiDung entity to response DTO
+
     private Map<String, Object> convertToResponse(NguoiDung user) {
         Map<String, Object> response = new HashMap<>();
         response.put("id_nguoi_dung", user.getIdNguoiDung());

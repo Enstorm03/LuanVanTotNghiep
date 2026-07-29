@@ -24,7 +24,7 @@ public class SuKienService {
 
     // ── Public API ─────────────────────────────────────────────────────────
 
-    /** Trả về sự kiện đang diễn ra, hoặc null nếu không có. */
+//     Trả về sự kiện đang diễn ra, hoặc null nếu không có.
     public Optional<SuKien> getActiveCampaign() {
         return suKienRepository.findActiveCampaign();
     }
@@ -67,11 +67,11 @@ public class SuKienService {
         suKienRepository.deleteById(id);
     }
 
-    /**
-     * Gán danh sách sản phẩm vào sự kiện (replace toàn bộ).
-     * @param idSuKien  id sự kiện
-     * @param sanPhamIds danh sách id sản phẩm muốn gán
-     */
+//
+//     Gán danh sách sản phẩm vào sự kiện (replace toàn bộ).
+//     @param idSuKien  id sự kiện
+//     @param sanPhamIds danh sách id sản phẩm muốn gán
+//
     @Transactional
     public SuKien setProducts(Integer idSuKien, List<Integer> sanPhamIds) {
         SuKien sk = getById(idSuKien);
@@ -82,7 +82,7 @@ public class SuKienService {
 
     // ── Helpers ────────────────────────────────────────────────────────────
 
-    /** Tính trạng thái hiển thị: Đang chờ / Đang chạy / Đã kết thúc / Tắt */
+//   Tính trạng thái hiển thị: Đang chờ / Đang chạy / Đã kết thúc / Tắt
     public String computeStatus(SuKien sk) {
         if (!Boolean.TRUE.equals(sk.getTrangThaiActive())) return "Tắt";
         LocalDateTime now = LocalDateTime.now();

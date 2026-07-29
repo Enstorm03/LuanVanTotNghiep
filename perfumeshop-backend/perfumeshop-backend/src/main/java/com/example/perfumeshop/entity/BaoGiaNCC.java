@@ -9,9 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * Báo giá của Nhà Cung Cấp (NCC) cho một đợt gọi thầu.
- */
+
 @Entity
 @Table(name = "bao_gia_ncc")
 @Data
@@ -33,36 +31,26 @@ public class BaoGiaNCC {
     @Column(name = "lien_he_ncc")
     private String lienHeNCC; // SĐT / email
 
-    /**
-     * Trạng thái:
-     *   CHO_DUYET = chờ admin xem xét
-     *   TRUNG_THAU = được chọn
-     *   ROT_THAU  = bị từ chối
-     */
+
     @Column(name = "trang_thai", nullable = false, length = 20)
     private String trangThai = "CHO_DUYET";
 
-    /** Giá nhập NCC đề xuất (cho toàn lô) */
     @Column(name = "gia_nhap_de_xuat", precision = 15, scale = 2)
     private BigDecimal giaNhapDeXuat;
 
-    /** % biên độ lợi nhuận do admin thiết lập khi chốt thầu */
     @Column(name = "phan_tram_bien_do")
     private BigDecimal phanTramBienDo;
 
-    /** Giá bán ra = giaNhapDeXuat * (1 + phanTramBienDo / 100) */
     @Column(name = "gia_ban_chot", precision = 15, scale = 2)
     private BigDecimal giaBanChot;
 
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
     private String ghiChu;
 
-    /** Hạn sử dụng lô hàng NCC cung cấp */
     @Column(name = "han_su_dung")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate hanSuDung;
 
-    /** Số lô hàng */
     @Column(name = "so_lo", length = 100)
     private String soLo;
 

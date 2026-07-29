@@ -9,13 +9,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.util.List;
 
-/**
- * FEFO (First Expired, First Out) Service
- *
- * Khi đặt hàng  → gắn idPhieuNhap lô cận-date nhất (traceability), chưa trừ kho.
- * Khi admin xác nhận → multi-batch deduct:
- *   Lô 1 (HSD sớm nhất) có 36sp, mua 37sp → trừ hết 36, sang lô 2 trừ thêm 1, lô 2 còn 49.
- */
+
+// FEFO (First Expired, First Out) Service
+
+// Khi đặt hàng gắn idPhieuNhap lô cận-date nhất (traceability), chưa trừ kho.
+//  Khi admin xác nhận multi-batch deduct:
+//  Lô 1 (HSD sớm nhất) có 36sp, mua 37sp → trừ hết 36, sang lô 2 trừ thêm 1, lô 2 còn 49.
+
 @Service
 public class FEFOService {
 
@@ -27,10 +27,10 @@ public class FEFOService {
 
     // ── Giai đoạn 1: Đặt hàng — gắn lô cận-date nhất ──────────────────────
 
-    /**
-     * Chạy trong cùng transaction với placeOrder.
-     * Chỉ gán idPhieuNhap (traceability), chưa trừ soLuongConLai.
-     */
+
+//      Chạy trong cùng transaction với placeOrder.
+//      Chỉ gán idPhieuNhap (traceability), chưa trừ soLuongConLai.
+
     public void allocateOrderItemFromBatch(ChiTietDonHang chiTietDonHang,
                                            Integer idSanPham, Integer soLuongCan) {
         try {
@@ -43,11 +43,11 @@ public class FEFOService {
 
     // ── Giai đoạn 2: Admin xác nhận — multi-batch FEFO deduct ──────────────
 
-    /**
-     * Trừ soLuongConLai theo FEFO multi-batch.
-     * Ví dụ: mua 37sp, lô1=36 → trừ hết 36, lô2=50 → trừ thêm 1, lô2 còn 49.
-     * Ném BusinessException nếu tổng các lô không đủ.
-     */
+
+//     Trừ soLuongConLai theo FEFO multi-batch.
+//     Ví dụ: mua 37sp, lô1=36 → trừ hết 36, lô2=50  trừ thêm 1, lô2 còn 49.
+//     Ném BusinessException nếu tổng các lô không đủ.
+
     public void deductFEFOOnConfirm(Integer idSanPham, Integer soLuongCan) {
         // Lấy từng dòng lô của ĐÚNG sản phẩm này, sắp theo HSD sớm nhất (FEFO)
         String selectSql = "SELECT ct.id, ct.so_luong_con_lai " +
@@ -95,10 +95,10 @@ public class FEFOService {
 
     // ── Hoàn kho khi hủy đơn ───────────────────────────────────────────────
 
-    /**
-     * Hoàn soLuongConLai về lô được gán lúc đặt hàng.
-     * Chỉ hoàn vào dòng lô của ĐÚNG sản phẩm (1 PO có thể chứa nhiều sản phẩm).
-     */
+
+//      Hoàn soLuongConLai về lô được gán lúc đặt hàng.
+//     Chỉ hoàn vào dòng lô của ĐÚNG sản phẩm (1 PO có thể chứa nhiều sản phẩm).
+
     public void restoreBatchStock(Integer idPhieuNhap, Integer idSanPham, Integer soLuongHoan) {
         if (idPhieuNhap == null || idSanPham == null || soLuongHoan == null || soLuongHoan <= 0) return;
         // Tìm 1 dòng chi tiết đúng PO + đúng sản phẩm để hoàn

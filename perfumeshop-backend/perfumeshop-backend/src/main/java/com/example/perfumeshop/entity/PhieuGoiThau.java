@@ -9,10 +9,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Phiếu Gọi Thầu — Admin tạo khi cần nhập hàng, NCC vào chào giá cạnh tranh.
- * Tên bảng DB giữ tiếng Anh để tương thích với các hệ thống bên ngoài.
- */
+//  Phiếu Gọi Thầu — Admin tạo khi cần nhập hàng, NCC vào chào giá cạnh tranh.
+//  Tên bảng DB giữ tiếng Anh để tương thích với các hệ thống bên ngoài.
+
 @Entity
 @Table(name = "phieu_goi_thau")
 @Data
@@ -23,11 +22,9 @@ public class PhieuGoiThau {
     @Column(name = "id_phieu_goi_thau")
     private Integer idPhieuGoiThau;
 
-    /** Mã phiếu, VD: PRQ-20260617-001 */
     @Column(name = "ma_phieu", unique = true)
     private String maPhieu;
 
-    /** OPEN = đang nhận báo giá | CLOSED = đã chốt thầu */
     @Column(name = "trang_thai", nullable = false, length = 20)
     private String trangThai = "OPEN";
 

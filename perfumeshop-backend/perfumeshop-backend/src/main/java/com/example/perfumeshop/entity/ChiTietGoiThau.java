@@ -6,9 +6,6 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/**
- * Chi tiết sản phẩm cần nhập trong một đợt gọi thầu.
- */
 @Entity
 @Table(name = "chi_tiet_goi_thau")
 @Data
@@ -34,11 +31,9 @@ public class ChiTietGoiThau {
     @Column(name = "so_luong_can_nhap", nullable = false)
     private Integer soLuongCanNhap;
 
-    /** Tồn kho tại thời điểm tạo phiếu — để NCC tham khảo mức độ cần gấp */
     @Column(name = "ton_kho_hien_tai")
     private Integer tonKhoHienTai;
 
-    /** Giá bán hiện tại (snapshot) — để NCC tham khảo mức giá thị trường */
     @Column(name = "gia_ban_hien_tai", precision = 15, scale = 2)
     private BigDecimal giaBanHienTai;
 

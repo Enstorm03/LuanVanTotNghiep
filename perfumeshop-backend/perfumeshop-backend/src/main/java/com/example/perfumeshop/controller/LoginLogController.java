@@ -22,19 +22,19 @@ public class LoginLogController {
 
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-    /**
-     * GET /api/admin/login-logs
-     * Xem log đăng nhập — chỉ ADMIN root và DIRECTOR
-     *
-     * Query params:
-     *   tenDangNhap (optional)
-     *   vaiTro      (optional)  — ADMIN | DIRECTOR | STORE_MANAGER | ...
-     *   trangThai   (optional)  — SUCCESS | FAILED
-     *   tuNgay      (optional)  — yyyy-MM-ddTHH:mm:ss
-     *   denNgay     (optional)  — yyyy-MM-ddTHH:mm:ss
-     *   page        (default 0)
-     *   size        (default 20)
-     */
+
+//     GET /api/admin/login-logs
+//      Xem log đăng nhập — chỉ ADMIN root và DIRECTOR
+
+//     Query params:
+//       tenDangNhap (optional)
+//        vaiTro      (optional)  — ADMIN | DIRECTOR | STORE_MANAGER | ...
+//        trangThai   (optional)  — SUCCESS | FAILED
+//        tuNgay      (optional)  — yyyy-MM-ddTHH:mm:ss
+//        denNgay     (optional)  — yyyy-MM-ddTHH:mm:ss
+//        page        (default 0)
+//        size        (default 20)
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     public ResponseEntity<Map<String, Object>> getLogs(

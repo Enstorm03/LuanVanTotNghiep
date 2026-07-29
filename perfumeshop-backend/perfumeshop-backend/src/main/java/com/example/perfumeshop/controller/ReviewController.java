@@ -17,19 +17,19 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    /** Lấy đánh giá theo sản phẩm (public — hiển thị trên trang chi tiết SP) */
+//     Lấy đánh giá theo sản phẩm (public — hiển thị trên trang chi tiết SP)
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<DanhGiaSanPham>> getByProduct(@PathVariable Integer productId) {
         return ResponseEntity.ok(reviewService.getByProduct(productId));
     }
 
-    /** Lấy tất cả đánh giá (admin) */
+
     @GetMapping("/all")
     public ResponseEntity<List<DanhGiaSanPham>> getAll() {
         return ResponseEntity.ok(reviewService.getAll());
     }
 
-    /** Xóa đánh giá (admin) */
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         reviewService.delete(id);

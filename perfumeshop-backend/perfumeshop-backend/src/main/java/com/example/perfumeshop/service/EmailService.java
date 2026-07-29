@@ -18,9 +18,9 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    /**
-     * Gửi email chào mừng người dùng mới
-     */
+
+//      Gửi email chào mừng người dùng mới
+
     public void sendWelcomeEmail(String email, String hoTen) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -39,9 +39,9 @@ public class EmailService {
         }
     }
 
-    /**
-     * Gửi email xác thực đăng ký
-     */
+
+//     Gửi email xác thực đăng ký
+
     public void sendVerificationEmail(String email, String hoTen, String verificationToken, String verificationUrl) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -60,9 +60,9 @@ public class EmailService {
         }
     }
 
-    /**
-     * Gửi email thông báo thanh toán thành công
-     */
+
+//      Gửi email thông báo thanh toán thành công
+
     public void sendPaymentSuccessEmail(String email, String hoTen, Integer orderId, 
                                        BigDecimal totalAmount, String deliveryAddress,
                                        String recipientName, String phoneNumber) {
@@ -84,9 +84,9 @@ public class EmailService {
         }
     }
 
-    /**
-     * Gửi email thông báo hủy đơn hàng
-     */
+
+//      Gửi email thông báo hủy đơn hàng
+
     public void sendOrderCancelledEmail(String email, String hoTen, Integer orderId, String cancelReason) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -105,9 +105,9 @@ public class EmailService {
         }
     }
 
-    /**
-     * Template HTML cho email chào mừng
-     */
+
+//      Template HTML cho email chào mừng
+
     private String buildWelcomeEmailTemplate(String hoTen) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
@@ -160,9 +160,9 @@ public class EmailService {
                 "</html>";
     }
 
-    /**
-     * Template HTML cho email xác thực
-     */
+
+//     Template HTML cho email xác thực
+
     private String buildVerificationEmailTemplate(String hoTen, String verificationUrl) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
@@ -203,9 +203,9 @@ public class EmailService {
                 "</html>";
     }
 
-    /**
-     * Template HTML cho email thanh toán thành công
-     */
+
+//     Template HTML cho email thanh toán thành công
+
     private String buildPaymentSuccessEmailTemplate(String hoTen, Integer orderId, BigDecimal totalAmount,
                                                    String deliveryAddress, String recipientName, String phoneNumber) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -262,9 +262,9 @@ public class EmailService {
                 "</html>";
     }
 
-    /**
-     * Template HTML cho email hủy đơn hàng
-     */
+
+//      Template HTML cho email hủy đơn hàng
+
     private String buildOrderCancelledEmailTemplate(String hoTen, Integer orderId, String cancelReason) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         String cancelDate = LocalDateTime.now().format(formatter);
@@ -309,9 +309,9 @@ public class EmailService {
                 "</html>";
     }
 
-    /**
-     * Định dạng tiền tệ VND
-     */
+
+//      Định dạng tiền tệ VND
+
     private String formatCurrency(BigDecimal amount) {
         if (amount == null) return "0 ₫";
         long longValue = amount.longValue();

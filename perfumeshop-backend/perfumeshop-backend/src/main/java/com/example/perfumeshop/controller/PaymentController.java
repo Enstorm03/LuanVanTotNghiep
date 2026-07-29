@@ -22,12 +22,12 @@ public class PaymentController {
     @Autowired
     private PayOS payOS;
 
-    /**
-     * FE gọi để lấy link thanh toán PayOS.
-     * POST /api/payment/create-link
-     * Body: { "idDonHang": 123 }
-     * Response: { "checkoutUrl": "https://pay.payos.vn/..." }
-     */
+
+//      FE gọi để lấy link thanh toán PayOS.
+//      POST /api/payment/create-link
+//      Body: { "idDonHang": 123 }
+//      Response: { "checkoutUrl": "https://pay.payos.vn/..." }
+
     @PostMapping("/create-link")
     public ResponseEntity<Map<String, String>> createPaymentLink(
             @Valid @RequestBody CreatePaymentLinkRequest req) {
@@ -39,10 +39,10 @@ public class PaymentController {
         }
     }
 
-    /**
-     * PayOS gọi webhook sau khi khách thanh toán.
-     * POST /api/payment/webhook
-     */
+
+//      PayOS gọi webhook sau khi khách thanh toán.
+//      POST /api/payment/webhook
+
     @PostMapping("/webhook")
     public ResponseEntity<Map<String, String>> webhook(@RequestBody Map<String, Object> body) {
         try {
@@ -55,10 +55,10 @@ public class PaymentController {
         }
     }
 
-    /**
-     * FE poll để kiểm tra trạng thái thanh toán.
-     * GET /api/payment/status/{orderId}
-     */
+
+//      FE poll để kiểm tra trạng thái thanh toán.
+//      GET /api/payment/status/{orderId}
+
     @GetMapping("/status/{orderId}")
     public ResponseEntity<Map<String, String>> checkStatus(@PathVariable Integer orderId) {
         try {

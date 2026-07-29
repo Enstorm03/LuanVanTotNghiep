@@ -19,9 +19,9 @@ public class LoginLogService {
 
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    /**
-     * Ghi log đăng nhập thành công.
-     */
+
+//     Ghi log đăng nhập thành công.
+
     public void logSuccess(String tenDangNhap, String hoTen, String vaiTro,
                            String ipAddress, String userAgent) {
         LoginLog log = new LoginLog();
@@ -35,9 +35,9 @@ public class LoginLogService {
         loginLogRepository.save(log);
     }
 
-    /**
-     * Ghi log đăng nhập thất bại.
-     */
+
+//     Ghi log đăng nhập thất bại.
+
     public void logFailed(String tenDangNhap, String lyDo,
                           String ipAddress, String userAgent) {
         LoginLog log = new LoginLog();
@@ -50,9 +50,9 @@ public class LoginLogService {
         loginLogRepository.save(log);
     }
 
-    /**
-     * Phân trang + tìm kiếm log — dành cho ADMIN / DIRECTOR.
-     */
+
+//      Phân trang + tìm kiếm log — dành cho ADMIN / DIRECTOR.
+
     public Page<LoginLog> search(String tenDangNhap, String vaiTro, String trangThai,
                                   String tuNgayStr, String denNgayStr,
                                   int page, int size) {
@@ -79,7 +79,7 @@ public class LoginLogService {
                                          tuNgay, denNgay, pageable);
     }
 
-    /** Đếm số lần thất bại trong 15 phút gần nhất */
+//     Đếm số lần thất bại trong 15 phút gần nhất
     public long countRecentFailures(String tenDangNhap) {
         return loginLogRepository.countFailedAttempts(tenDangNhap,
                 LocalDateTime.now().minusMinutes(15));

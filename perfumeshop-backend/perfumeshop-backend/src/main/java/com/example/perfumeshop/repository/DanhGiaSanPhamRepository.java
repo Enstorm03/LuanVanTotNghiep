@@ -10,6 +10,6 @@ import java.util.List;
 public interface DanhGiaSanPhamRepository extends JpaRepository<DanhGiaSanPham, Integer> {
     List<DanhGiaSanPham> findByIdSanPham(Integer idSanPham);
 
-    /** Kiểm tra user đã review sản phẩm này chưa (dùng để chặn duplicate) */
+//    Kiểm tra user đã review sản phẩm này chưa (dùng để chặn duplicate)
     boolean existsByIdNguoiDungAndIdSanPham(Integer idNguoiDung, Integer idSanPham);
 }
