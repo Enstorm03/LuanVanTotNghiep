@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-
+// file này để lấy danh sách category và brand để dùng trong các component khác, tránh gọi API nhiều lần
 const useCategoryMetadata = () => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);

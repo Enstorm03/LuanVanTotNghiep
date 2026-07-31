@@ -17,9 +17,7 @@ const ShipOrderDialog = ({ show, onConfirm, onClose, orderId, maVanDon, processi
             <p className="font-mono font-semibold text-gray-800 dark:text-gray-100">{maVanDon}</p>
           </div>
         )}
-        {/* <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Mã vận đơn đã được tạo tự động. Bạn có thể cập nhật lại sau khi gửi hàng.
-        </p> */}
+     
         <div className="flex gap-3">
           <button
             onClick={onConfirm}

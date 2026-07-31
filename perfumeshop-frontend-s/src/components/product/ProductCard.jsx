@@ -54,6 +54,7 @@ const ProductCard = ({
     <Link to={`/product/${id_san_pham}`} className="flex flex-col gap-4 group">
       {/* Ảnh sản phẩm + badge giảm giá */}
       <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border border-border-light dark:border-border-dark">
+          
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           src={url_hinh_anh}
@@ -75,7 +76,7 @@ const ProductCard = ({
       <div className="px-2">
         <p className="text-base font-bold leading-normal line-clamp-2">{ten_san_pham}</p>
         <p className="text-text-subtle-light dark:text-text-subtle-dark text-sm leading-normal">{brandName}</p>
-
+        {/* kiểm tra giá hiển thị: nếu đang sale thì dùng gia_hien_tai, không thì dùng gia_ban */}
         {isOnSale ? (
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <p className="text-primary text-sm font-bold">

@@ -1,6 +1,6 @@
 import React from 'react';
 import PickListDisplay from './PickListDisplay';
-
+// file này để hiển thị thông tin sản phẩm trong đơn hàng trên trang chi tiết đơn hàng, tránh gọi API nhiều lần
 const OrderProductItem = ({ item, productDetails, brandDetails, discountPercent = 0, pickListData = [] }) => {
   // Extract product info based on data structure
   let productInfo = {};

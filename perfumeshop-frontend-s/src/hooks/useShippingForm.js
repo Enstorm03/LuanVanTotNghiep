@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import userApi from '../services/api/userApi';
-
+// file này để lấy dữ liệu thông tin giao hàng, tránh gọi API nhiều lần
 const useShippingForm = (user) => {
   const [shippingInfo, setShippingInfo] = useState({
     tenNguoiNhan: '',

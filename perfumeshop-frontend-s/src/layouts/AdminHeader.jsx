@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-
+// file này để hiển thị thông tin header admin, tránh gọi API nhiều lần
 const AdminHeader = () => {
   
   const { isAdmin, isStoreManager, isWarehouseStaff, getRole, getRoleLabel } = useAuth();
@@ -48,7 +48,7 @@ const AdminHeader = () => {
         
       </div>
         <div className="px-4 py-2">
-          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+          {/* <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
             isAdmin()        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
             isStoreManager() ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
             isWarehouseStaff() && role === 'WAREHOUSE_STAFF' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
@@ -56,7 +56,7 @@ const AdminHeader = () => {
           }`}>
             <span className="material-symbols-outlined text-sm">badge</span>
             {getRoleLabel(role)}
-          </span>
+          </span> */}
         </div>
       <div className="flex items-center gap-4">
         {/* Dashboard Alerts - Only show if there are alerts */}

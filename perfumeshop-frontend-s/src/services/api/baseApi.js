@@ -53,7 +53,17 @@ class BaseApi {
     }
 
     if (!response.ok) throw new Error(await this._getErrorMessage(response));
-    return response.json();
+    
+    // Xử lý 204 No Content (DELETE thành công không có body)
+    if (response.status === 204) return null;
+    
+    // Kiểm tra có content để parse JSON
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+    
+    return null;
   }
 
   // Lấy thông báo lỗi từ response
@@ -89,7 +99,7 @@ class BaseApi {
       gia_hien_tai: giaHienTai,                 // Giá thực tế khách trả
       url_hinh_anh: product.urlHinhAnh,
       id_thuong_hieu: product.thuongHieu?.idThuongHieu || product.idThuongHieu || null,
-      id_danh_muc: product.danhMuc?.idDanhMuc || product.idDanhMuc || 1,
+      id_danh_muc: product.danhMuc?.idDanhMuc || product.idDanhMuc || null,
       so_luong_ton_kho: product.soLuongTonKho,
       mo_ta: product.moTa,
       dung_tich_ml: product.dungTichMl,

@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-
+// file này để hiển thị layout public, tránh gọi API nhiều lần
 const PublicLayout = () => {
   return (
     <>

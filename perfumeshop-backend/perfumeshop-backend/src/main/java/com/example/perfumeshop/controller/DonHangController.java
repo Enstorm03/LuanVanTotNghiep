@@ -3,6 +3,7 @@ package com.example.perfumeshop.controller;
 import com.example.perfumeshop.dto.*;
 import com.example.perfumeshop.entity.DonHang;
 import com.example.perfumeshop.service.DonHangService;
+import com.example.perfumeshop.service.FEFOService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,15 +19,22 @@ public class DonHangController {
     @Autowired
     private DonHangService donHangService;
 
+    @Autowired
+    private FEFOService fefoService;
+
     @GetMapping
     public ResponseEntity<?> list(
             @RequestParam(value = "trangThai", required = false) String trangThai,
             @RequestParam(value = "search", required = false) String search,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        if (search != null || page > 0 || size != 10) {
-            return ResponseEntity.ok(donHangService.listWithPage(trangThai, search, page, size));
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size) {
+       
+        if (page != null || size != null || search != null) {
+            int pageNum = page != null ? page : 0;
+            int pageSize = size != null ? size : 10;
+            return ResponseEntity.ok(donHangService.listWithPage(trangThai, search, pageNum, pageSize));
         }
+        // Fallback: không có params → trả toàn bộ (dùng cho API cũ)
         return ResponseEntity.ok(donHangService.listByTrangThai(trangThai));
     }
 
@@ -74,7 +82,12 @@ public class DonHangController {
         return ResponseEntity.ok(donHangService.cancel(id, req.getLyDo()));
     }
 
-    @PostMapping("/{id}/hoan-tien")
+
+    @GetMapping("/{id}/pick-list")
+    public ResponseEntity<List<PickListDTO>> getPickList(@PathVariable Integer id) {
+        List<PickListDTO> pickList = fefoService.generatePickList(id);
+        return ResponseEntity.ok(pickList);
+    }    @PostMapping("/{id}/hoan-tien")
     public ResponseEntity<DonHang> markRefunded(@PathVariable Integer id) {
         return ResponseEntity.ok(donHangService.markRefunded(id));
     }

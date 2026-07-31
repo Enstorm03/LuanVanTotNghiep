@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+// file này để hiển thị modal thêm/chỉnh sửa thương hiệu, tránh gọi API nhiều lần
 const BrandModal = ({ brand, onClose, onSave, saving }) => {
   const [formData, setFormData] = useState({
     tenThuongHieu: '',

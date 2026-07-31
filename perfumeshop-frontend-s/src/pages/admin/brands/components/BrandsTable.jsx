@@ -1,6 +1,6 @@
 import React from 'react';
 import BrandRow from './BrandRow';
-
+// file này để hiển thị bảng danh sách thương hiệu, tránh gọi API nhiều lần
 const BrandsTable = ({ brands, onEdit, onDelete }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark">

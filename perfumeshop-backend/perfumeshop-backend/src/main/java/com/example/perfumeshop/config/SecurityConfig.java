@@ -89,11 +89,11 @@ public class SecurityConfig {
 
                 // ======== CHỈ ADMIN ROOT ========
                 .requestMatchers("/api/admin/nhan-vien/**").hasRole("ADMIN")
-                // Xóa sản phẩm / danh mục / thương hiệu / campaign — chỉ ADMIN
-                .requestMatchers(HttpMethod.DELETE, "/api/san-pham/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/danh-muc/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/thuong-hieu/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/campaigns/**").hasRole("ADMIN")
+                // Xóa sản phẩm / danh mục / thương hiệu / campaign — ADMIN + DIRECTOR + STORE_MANAGER
+                .requestMatchers(HttpMethod.DELETE, "/api/san-pham/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/danh-muc/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/thuong-hieu/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers(HttpMethod.DELETE, "/api/admin/campaigns/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
 
                 // ======== ADMIN + DIRECTOR ========
                 .requestMatchers("/api/admin/khach-hang/**").hasAnyRole("ADMIN", "DIRECTOR")

@@ -35,13 +35,13 @@ const useAdminBrands = () => {
     fetchBrands();
   }, [fetchBrands]);
 
-  // Filter and sort brands
+  // Tìm kiếm thương hiệu dựa trên searchTerm, không phân biệt hoa thường
   const filteredBrands = brands.filter(brand => {
     const matchesSearch = brand.tenThuongHieu?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   }).sort((a, b) => b.id - a.id); // Sort by ID descending
 
-  // Pagination
+  // Phân trang: tính toán các thương hiệu hiển thị dựa trên currentPage và itemsPerPage
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentBrands = filteredBrands.slice(indexOfFirstItem, indexOfLastItem);
@@ -49,7 +49,7 @@ const useAdminBrands = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Modal handlers
+  // Quản lý modal cho thêm/sửa thương hiệu
   const handleOpenModal = (brand = null) => {
     setEditingBrand(brand);
     setIsModalOpen(true);
@@ -66,7 +66,7 @@ const useAdminBrands = () => {
     try {
       setSaving(true);
       if (editingBrand) {
-        // SỬA Ở ĐÂY: Lấy đúng tên ID từ database là idThuongHieu (hoặc id để phòng hờ)
+        //  Lấy đúng tên ID từ database là idThuongHieu (hoặc id để phòng hờ)
         const brandId = editingBrand.idThuongHieu || editingBrand.id; 
         await api.updateBrand(brandId, brandData);
       } else {

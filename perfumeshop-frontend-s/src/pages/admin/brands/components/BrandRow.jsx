@@ -1,5 +1,5 @@
 import React from 'react';
-
+// file này để hiển thị từng hàng của bảng danh sách thương hiệu, tránh gọi API nhiều lần
 const BrandRow = ({ brand, onEdit, onDelete }) => {
   return (
     <tr className="border-b transition-colors hover:bg-surface-hover-light dark:hover:bg-surface-hover-dark data-[state=selected]:bg-gray-100 border-border-light dark:border-border-dark text-text-light dark:text-text-dark">
@@ -22,7 +22,7 @@ const BrandRow = ({ brand, onEdit, onDelete }) => {
         </div>
       </td>
       <td className="p-4 align-middle font-medium">
-        {brand.tenThuongHieu}
+        {brand.tenThuongHieu} 
       </td>
      
       <td className="p-4 align-middle text-right">

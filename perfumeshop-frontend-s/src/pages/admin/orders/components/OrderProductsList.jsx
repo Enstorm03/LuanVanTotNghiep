@@ -1,7 +1,7 @@
 import React from 'react';
 import OrderProductItem from './OrderProductItem';
-
-const OrderProductsList = ({ order, productDetails, brandDetails }) => {
+// file này để hiển thị danh sách sản phẩm trong đơn hàng trên trang chi tiết đơn hàng, tránh gọi API nhiều lần
+const OrderProductsList = ({ order, productDetails, brandDetails, pickList = [] }) => {
   // Determine which data structure to use
   let itemsToDisplay = [];
 
@@ -10,6 +10,24 @@ const OrderProductsList = ({ order, productDetails, brandDetails }) => {
   } else if (order.chiTietDonHangs && order.chiTietDonHangs.length > 0) {
     itemsToDisplay = order.chiTietDonHangs;
   }
+
+  // Helper function to find pick list for a product
+  const findPickListForProduct = (sanPhamId) => {
+    if (!pickList || pickList.length === 0) return [];
+    const found = pickList.find(p => p.idSanPham === sanPhamId);
+    if (!found) return [];
+    
+    // Transform to match PickListDisplay expected format
+    return [{
+      tenSanPham: found.tenSanPham,
+      details: (found.batchItems || []).map(batch => ({
+        soLuong: batch.soLuongLay,
+        soLo: batch.soLo,
+        hanSuDung: batch.hanSuDung,
+        ghiChu: batch.ghiChu
+      }))
+    }];
+  };
 
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">
@@ -40,9 +58,8 @@ const OrderProductsList = ({ order, productDetails, brandDetails }) => {
 
         {itemsToDisplay.length > 0 ? (
           itemsToDisplay.map((item, index) => {
-            const pickListForItem = order.pickListData && order.pickListData.length > 0
-              ? [order.pickListData[index]].filter(Boolean)
-              : [];
+            const sanPhamId = item.sanPhamId || item.idSanPham;
+            const pickListForItem = findPickListForProduct(sanPhamId);
             
             return (
               <OrderProductItem

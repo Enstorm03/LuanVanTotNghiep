@@ -56,4 +56,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
      // Sản phẩm sắp hết kho (tồn < ngưỡng), sắp theo tồn kho tăng dần
      List<SanPham> findBySoLuongTonKhoLessThanOrderBySoLuongTonKhoAsc(Integer nguong);
+
+     // Đếm số sản phẩm thuộc danh mục
+     long countByDanhMuc_IdDanhMuc(Integer idDanhMuc);
 }

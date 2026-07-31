@@ -1,5 +1,6 @@
 package com.example.perfumeshop.service;
 
+import com.example.perfumeshop.dto.PickListDTO;
 import com.example.perfumeshop.entity.ChiTietDonHang;
 import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.PhieuNhapKhoRepository;
@@ -7,7 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 // FEFO (First Expired, First Out) Service
@@ -120,4 +125,86 @@ public class FEFOService {
         q.setParameter("rowId", ids.get(0));
         q.executeUpdate();
     }
+
+    // ── Generate Pick List cho đơn hàng ────────────────────────────────────
+
+
+    public List<PickListDTO> generatePickList(Integer idDonHang) {
+        // Query lấy thông tin chi tiết từng sản phẩm trong đơn và lô hàng FEFO
+        String sql = 
+            "SELECT " +
+            "  sp.ten_san_pham, " +
+            "  sp.id_san_pham, " +
+            "  ctdh.so_luong, " +
+            "  ct.so_lo, " +
+            "  ct.han_su_dung, " +
+            "  ct.id AS id_batch, " +
+            "  ct.so_luong_con_lai " +
+            "FROM Chi_Tiet_Don_Hang ctdh " +
+            "JOIN San_Pham sp ON ctdh.id_san_pham = sp.id_san_pham " +
+            "LEFT JOIN Chi_Tiet_Phieu_Nhap ct ON ct.id_san_pham = sp.id_san_pham " +
+            "WHERE ctdh.id_don_hang = :idDonHang " +
+            "  AND ct.so_luong_con_lai >= 0 " +  // Chỉ lấy lô còn hàng hoặc đã trừ
+            "ORDER BY sp.id_san_pham, ct.han_su_dung ASC, ct.id ASC";
+        
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("idDonHang", idDonHang);
+        
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = query.getResultList();
+        
+        if (rows == null || rows.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // Group by sản phẩm và tính toán phân bổ theo FEFO
+        Map<Integer, PickListDTO> pickListMap = new HashMap<>();
+        Map<Integer, Integer> remainingMap = new HashMap<>(); // Số lượng còn cần lấy cho mỗi SP
+        
+        for (Object[] row : rows) {
+            String tenSanPham = (String) row[0];
+            Integer idSanPham = ((Number) row[1]).intValue();
+            Integer soLuongDat = ((Number) row[2]).intValue();
+            String soLo = (String) row[3];
+            java.sql.Date hanSuDungSql = (java.sql.Date) row[4];
+            LocalDate hanSuDung = hanSuDungSql != null ? hanSuDungSql.toLocalDate() : null;
+            Integer idBatch = row[5] != null ? ((Number) row[5]).intValue() : null;
+            Integer soLuongConLai = row[6] != null ? ((Number) row[6]).intValue() : 0;
+            
+            // Khởi tạo pick list item nếu chưa có
+            if (!pickListMap.containsKey(idSanPham)) {
+                PickListDTO pickItem = new PickListDTO();
+                pickItem.setIdSanPham(idSanPham);
+                pickItem.setTenSanPham(tenSanPham);
+                pickItem.setSoLuongCanLay(soLuongDat);
+                pickItem.setBatchItems(new ArrayList<>());
+                pickListMap.put(idSanPham, pickItem);
+                remainingMap.put(idSanPham, soLuongDat);
+            }
+            
+            PickListDTO pickItem = pickListMap.get(idSanPham);
+            int remaining = remainingMap.get(idSanPham);
+            
+            // Chỉ thêm batch item nếu còn cần lấy và có thông tin lô
+            if (remaining > 0 && soLo != null && idBatch != null) {
+                // Tính số lượng lấy từ lô này (min của remaining và soLuongConLai + đã lấy)
+                int soLuongLay = Math.min(remaining, soLuongConLai + soLuongDat);
+                
+                PickListDTO.BatchPickItemDTO batchItem = new PickListDTO.BatchPickItemDTO();
+                batchItem.setIdBatch(idBatch);
+                batchItem.setSoLo(soLo);
+                batchItem.setHanSuDung(hanSuDung);
+                batchItem.setSoLuongLay(soLuongLay);
+                batchItem.setGhiChu("FEFO: Lấy từ lô HSD sớm nhất");
+                
+                pickItem.getBatchItems().add(batchItem);
+                
+                // Giảm remaining
+                remainingMap.put(idSanPham, remaining - soLuongLay);
+            }
+        }
+        
+        return new ArrayList<>(pickListMap.values());
+    }
 }
+

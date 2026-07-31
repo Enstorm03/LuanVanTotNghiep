@@ -3,6 +3,7 @@ package com.example.perfumeshop.service;
 import com.example.perfumeshop.entity.DanhMuc;
 import com.example.perfumeshop.exception.BusinessException;
 import com.example.perfumeshop.repository.DanhMucRepository;
+import com.example.perfumeshop.repository.SanPhamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,9 @@ public class DanhMucService {
 
     @Autowired
     private DanhMucRepository danhMucRepository;
+
+    @Autowired
+    private SanPhamRepository sanPhamRepository;
 
 
     public List<DanhMuc> getAll() {
@@ -48,9 +52,17 @@ public class DanhMucService {
     }
 
 
+
     public void delete(Integer id) {
-        danhMucRepository.findById(id)
+        DanhMuc dm = danhMucRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Danh mục không tồn tại"));
+        
+        // Kiểm tra xem có sản phẩm nào thuộc danh mục này không
+        long count = sanPhamRepository.countByDanhMuc_IdDanhMuc(id);
+        if (count > 0) {
+            throw new BusinessException("Không thể xóa danh mục vì đang có " + count + " sản phẩm thuộc danh mục này");
+        }
+        
         danhMucRepository.deleteById(id);
     }
 }

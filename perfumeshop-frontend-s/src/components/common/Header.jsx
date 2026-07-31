@@ -71,13 +71,15 @@ const Header = () => {
         </label>
         
         <Link to="/cart" className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-background-light dark:bg-background-dark gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-primary/10 transition-colors">
-          <span className="material-symbols-outlined">shopping_bag</span>
+          {/* giỏ hàng */}
+          <span className="material-symbols-outlined">shopping_bag</span> 
         </Link>
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-background-light dark:bg-background-dark gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-primary/10 transition-colors"
           >
+            {/* tài khoản */}
             <span className="material-symbols-outlined">person</span>
           </button>
           {showUserMenu && (

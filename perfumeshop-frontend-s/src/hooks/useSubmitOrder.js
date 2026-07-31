@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import { validateShippingForm } from '../utils/checkoutUtils';
-
+// file này để xử lý logic gửi yêu cầu đặt hàng, tránh gọi API nhiều lần
 const useSubmitOrder = () => {
   const { user } = useAuth();
   const navigate = useNavigate();

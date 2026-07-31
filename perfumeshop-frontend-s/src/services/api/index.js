@@ -70,6 +70,7 @@ const api = {
   checkOrderReturnStatus: orderApi.checkOrderReturnStatus.bind(orderApi),
   createPaymentLink: orderApi.createPaymentLink.bind(orderApi),
   checkPaymentStatus: orderApi.checkPaymentStatus.bind(orderApi),
+  getPickList: orderApi.getPickList.bind(orderApi),
 
   // Brand methods
   getAllBrands: brandApi.getAllBrands.bind(brandApi),

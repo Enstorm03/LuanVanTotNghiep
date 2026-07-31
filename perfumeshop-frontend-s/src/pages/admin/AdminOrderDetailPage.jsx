@@ -7,11 +7,9 @@ import OrderInfoCard from './orders/components/OrderInfoCard';
 import OrderActions from './orders/components/OrderActions';
 import ConfirmOrderDialog from './orders/dialogs/ConfirmOrderDialog';
 import ShipOrderDialog from './orders/dialogs/ShipOrderDialog';
-import UpdateTrackingDialog from './orders/dialogs/UpdateTrackingDialog';
 import CancelOrderDialog from './orders/dialogs/CancelOrderDialog';
-import UpdateRecipientDialog from './orders/dialogs/UpdateRecipientDialog';
+
 import MoveToPendingDialog from './orders/dialogs/MoveToPendingDialog';
-import PaymentCollectedDialog from './orders/dialogs/PaymentCollectedDialog';
 import QRDialog from './orders/dialogs/QRDialog';
 
 const AdminOrderDetailPage = () => {
@@ -23,37 +21,30 @@ const AdminOrderDetailPage = () => {
     processing,
     productDetails,
     brandDetails,
+    pickList,
     showConfirmDialog,
     showShipDialog,
-    showTrackingDialog,
     showCancelDialog,
     showMoveToPendingDialog,
-    showUpdateRecipientDialog,
-    showPaymentCollectedDialog,
-    trackingNumber,
+ 
     cancelReason,
     recipientName,
     recipientAddress,
     setShowConfirmDialog,
     setShowShipDialog,
-    setShowTrackingDialog,
     setShowCancelDialog,
     setShowMoveToPendingDialog,
-    setShowUpdateRecipientDialog,
-    setShowPaymentCollectedDialog,
-    setTrackingNumber,
+
     setCancelReason,
     setRecipientName,
     setRecipientAddress,
     fetchOrderDetails,
     handleConfirmOrder,
     handleShipOrder,
-    handleUpdateTracking,
     handleCompleteOrder,
     handleCancelOrder,
     handleMoveToPending,
-    handleUpdateRecipient,
-    handlePaymentCollected,
+
     handleUpdatePaymentStatus,
     handleMarkRefunded
   } = useOrderDetail();
@@ -112,6 +103,7 @@ const AdminOrderDetailPage = () => {
             order={order}
             productDetails={productDetails}
             brandDetails={brandDetails}
+            pickList={pickList}
           />
         </div>
 
@@ -124,19 +116,16 @@ const AdminOrderDetailPage = () => {
             processing={processing}
             onConfirmOrder={handleConfirmOrder}
             onShipOrder={handleShipOrder}
-            onUpdateTracking={handleUpdateTracking}
             onCompleteOrder={handleCompleteOrder}
             onCancelOrder={handleCancelOrder}
-            onUpdateRecipient={handleUpdateRecipient}
-            onPaymentCollected={handlePaymentCollected}
+            onMoveToPending={handleMoveToPending}
+       
             onUpdatePaymentStatus={handleUpdatePaymentStatus}
             onMarkRefunded={handleMarkRefunded}
             setShowConfirmDialog={setShowConfirmDialog}
             setShowShipDialog={setShowShipDialog}
-            setShowTrackingDialog={setShowTrackingDialog}
             setShowCancelDialog={setShowCancelDialog}
-            setShowUpdateRecipientDialog={setShowUpdateRecipientDialog}
-            setShowPaymentCollectedDialog={setShowPaymentCollectedDialog}
+        
             setRecipientName={setRecipientName}
             setRecipientAddress={setRecipientAddress}
           />
@@ -161,32 +150,12 @@ const AdminOrderDetailPage = () => {
         processing={processing}
       />
 
-      <UpdateTrackingDialog
-        show={showTrackingDialog}
-        onConfirm={handleUpdateTracking}
-        onClose={() => setShowTrackingDialog(false)}
-        trackingNumber={trackingNumber}
-        onTrackingNumberChange={setTrackingNumber}
-        processing={processing}
-      />
-
       <CancelOrderDialog
         show={showCancelDialog}
         onConfirm={handleCancelOrder}
         onClose={() => setShowCancelDialog(false)}
         cancelReason={cancelReason}
         onCancelReasonChange={setCancelReason}
-        processing={processing}
-      />
-
-      <UpdateRecipientDialog
-        show={showUpdateRecipientDialog}
-        onConfirm={handleUpdateRecipient}
-        onClose={() => setShowUpdateRecipientDialog(false)}
-        recipientName={recipientName}
-        recipientAddress={recipientAddress}
-        onRecipientNameChange={setRecipientName}
-        onRecipientAddressChange={setRecipientAddress}
         processing={processing}
       />
 
@@ -198,13 +167,7 @@ const AdminOrderDetailPage = () => {
         processing={processing}
       />
 
-      <PaymentCollectedDialog
-        show={showPaymentCollectedDialog}
-        onConfirm={handlePaymentCollected}
-        onClose={() => setShowPaymentCollectedDialog(false)}
-        order={order}
-        processing={processing}
-      />
+  
 
       <QRDialog
         show={showQRDialog}

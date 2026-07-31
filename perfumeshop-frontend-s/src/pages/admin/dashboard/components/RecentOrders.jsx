@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getStatusBadgeColor } from '../../../../utils/dashboardStatus';
-
+// file này để hiển thị các đơn hàng gần đây trên dashboard admin, tránh gọi API nhiều lần
 const RecentOrders = ({ recentOrders }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark">

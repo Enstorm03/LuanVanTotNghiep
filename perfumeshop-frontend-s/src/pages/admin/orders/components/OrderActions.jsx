@@ -1,5 +1,5 @@
 import React from 'react';
-
+// file này để hiển thị các thao tác trên đơn hàng, tránh gọi API nhiều lần
 const OrderActions = ({
   order,
   processing,
@@ -16,8 +16,7 @@ const OrderActions = ({
   setShowShipDialog,
   setShowTrackingDialog,
   setShowCancelDialog,
-  setShowUpdateRecipientDialog,
-  setShowPaymentCollectedDialog,
+
   setRecipientName,
   setRecipientAddress
 }) => {
@@ -32,7 +31,7 @@ const OrderActions = ({
               onClick={() => {
                 setRecipientName(order.tenNguoiNhan || '');
                 setRecipientAddress(order.diaChiGiaoHang || '');
-                setShowUpdateRecipientDialog(true);
+        
               }}
               disabled={processing}
               className="w-full bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50"
@@ -40,15 +39,7 @@ const OrderActions = ({
               Cập nhật thông tin nhận hàng
             </button>
 
-            {order.trangThaiThanhToan === 'Đã cọc' && (
-              <button
-                onClick={() => setShowPaymentCollectedDialog(true)}
-                disabled={processing}
-                className="w-full bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
-              >
-                Đã thu đủ tiền còn lại
-              </button>
-            )}
+           
           </>
         )}
 

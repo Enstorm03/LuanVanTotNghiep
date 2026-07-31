@@ -60,7 +60,8 @@ const useAdminCategories = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Xóa danh mục này? Các sản phẩm thuộc danh mục sẽ mất liên kết.')) return;
+    if (!window.confirm('Xóa danh mục này?')) return;
+
     try {
       await api.deleteCategory(id);
       await fetchCategories();
@@ -68,7 +69,6 @@ const useAdminCategories = () => {
       alert('Không thể xóa: ' + err.message);
     }
   };
-
   return {
     categories: filtered,
     loading, error, searchTerm, setSearchTerm,

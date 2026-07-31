@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
+// file này để hiển thị sidebar admin, tránh gọi API nhiều lần
 const AdminSidebar = () => {
   const { isAdmin, isDirector, isStoreManager, isWarehouseStaff, getRole, getRoleLabel } = useAuth();
 
@@ -101,9 +101,9 @@ const AdminSidebar = () => {
               </NavLink>
             )}
             {isWarehouseStaff() && (
-              <NavLink to="/admin/near-expiry-products" className={navLinkClasses}>
-                <span className="material-symbols-outlined">warning</span>
-                Cảnh báo cận Date
+              <NavLink to="/admin/orders" className={navLinkClasses}>
+                <span className="material-symbols-outlined">receipt_long</span>
+                 Đơn hàng
               </NavLink>
             )}
 

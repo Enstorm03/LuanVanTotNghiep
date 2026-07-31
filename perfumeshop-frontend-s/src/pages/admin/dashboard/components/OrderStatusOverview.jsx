@@ -1,6 +1,6 @@
 import React from 'react';
 import { getStatusIcon, getStatusColor } from '../../../../utils/dashboardStatus';
-
+// file này để hiển thị tổng quan trạng thái đơn hàng, tránh gọi API nhiều lần
 const OrderStatusOverview = ({ stats, recentOrders }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -21,6 +21,7 @@ const OrderStatusOverview = ({ stats, recentOrders }) => {
       <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">
         <div className="flex items-center justify-between">
           <div>
+            
             <p className="text-sm font-medium text-text-subtle-light dark:text-text-subtle-dark">Đã xác nhận</p>
             <p className={`text-2xl font-bold ${getStatusColor('Đã xác nhận')}`}>{stats.confirmedOrders || 2}
             </p>

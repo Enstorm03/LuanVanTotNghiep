@@ -232,6 +232,16 @@ class OrderApi extends BaseApi {
       throw error;
     }
   }
+
+  // Lấy FEFO Pick List cho đơn hàng (dùng trong Admin Order Detail)
+  async getPickList(orderId) {
+    try {
+      return await this._fetch(`${API_BASE_URL}/don-hang/${orderId}/pick-list`);
+    } catch (error) {
+      console.error('Lỗi lấy pick list:', error);
+      return [];
+    }
+  }
 }
 
 const orderApi = new OrderApi();

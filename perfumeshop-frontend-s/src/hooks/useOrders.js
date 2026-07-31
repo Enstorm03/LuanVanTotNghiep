@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-
+// file này để lấy dữ liệu danh sách đơn hàng, tránh gọi API nhiều lần
 const useOrders = (isAdmin = false) => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);

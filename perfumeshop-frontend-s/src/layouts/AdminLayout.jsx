@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
-
+// file này để hiển thị layout admin, tránh gọi API nhiều lần
 const AdminLayout = () => {
   
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import OrderRow from './OrderRow';
-
+// file này để hiển thị bảng danh sách đơn hàng trên trang danh sách đơn hàng admin, tránh gọi API nhiều lần
 const OrdersTable = ({ orders }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark">
@@ -16,7 +16,7 @@ const OrdersTable = ({ orders }) => {
               <th className="h-12 px-4 text-right align-middle font-medium">Tổng tiền</th>
             </tr>
           </thead>
-          <tbody className="[&_tr:last-child]:border-0">
+          <tbody className="[&_tr:last-child]:border-0"> 
             {orders.length > 0 ? (
               orders.map((order) => (
                 <OrderRow key={order.idDonHang || order.id_don_hang || Math.random()} order={order} />

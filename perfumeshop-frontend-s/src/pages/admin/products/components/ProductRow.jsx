@@ -1,6 +1,6 @@
 import React from 'react';
 import ProductStockBadge from './ProductStockBadge';
-
+//file này để hiển thị từng dòng sản phẩm trong bảng danh sách sản phẩm admin, tránh gọi API nhiều lần
 const ProductRow = ({ product, onEdit, onDelete }) => {
   return (
     <tr className="border-b border-border-light dark:border-border-dark transition-colors hover:bg-background-light dark:hover:bg-background-dark">
@@ -8,7 +8,7 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
       <td className="p-4 align-middle hidden md:table-cell">
         <ProductStockBadge stockQuantity={product.so_luong_ton_kho || 0} />
       </td>
-      <td className="p-4 align-middle hidden md:table-cell">
+      <td className="p-4 align-middle hidden md:table-cell"> 
         {product.ang_giam_gia ? (
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1.5">

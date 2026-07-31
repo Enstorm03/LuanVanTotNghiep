@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+// file này để hiển thị các thao tác nhanh trên dashboard admin, tránh gọi API nhiều lần
 const QuickActions = () => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">

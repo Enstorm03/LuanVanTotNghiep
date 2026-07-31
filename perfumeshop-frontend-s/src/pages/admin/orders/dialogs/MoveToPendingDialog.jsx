@@ -1,5 +1,5 @@
 import React from 'react';
-
+// file này để hiển thị dialog xác nhận đơn hàng trên trang chi tiết đơn hàng admin, tránh gọi API nhiều lần
 const MoveToPendingDialog = ({ show, onConfirm, onClose, orderId, processing }) => {
   if (!show) return null;
 

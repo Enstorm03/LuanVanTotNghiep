@@ -1,10 +1,6 @@
 import React from 'react';
 
-/**
- * PickListDisplay - Shows FEFO pick list for an order item
- * Displays which batches/lots should be picked to fulfill the order
- * Format: "Product A - Lấy 2 chai (Lô HSD: 12/2026), Lấy 1 chai (Lô HSD: 05/2027)"
- */
+// file này để hiển thị thông tin FEFO pick list trên trang chi tiết đơn hàng admin, tránh gọi API nhiều lần
 const PickListDisplay = ({ pickList = [] }) => {
   if (!pickList || pickList.length === 0) {
     return (
@@ -32,7 +28,7 @@ const PickListDisplay = ({ pickList = [] }) => {
                         {detail.soLuong}x
                       </span>
                       <span className="text-gray-700 dark:text-gray-300">chai/ml</span>
-                      <span className="text-gray-500">từ</span>
+                      <span className="text-gray-500">từ </span>
                       <span className="font-semibold text-blue-700 dark:text-blue-300">
                         Lô {detail.soLo || 'N/A'}
                       </span>

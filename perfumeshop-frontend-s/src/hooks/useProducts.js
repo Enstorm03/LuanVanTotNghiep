@@ -54,8 +54,20 @@ const useProducts = () => {
     }
   };
 
-  const handleOpenModal = (product = null) => {
-    setEditingProduct(product);
+  const handleOpenModal = async (product = null) => {
+    if (product) {
+      // Force fetch fresh data from API when editing
+      try {
+        const freshProduct = await api.getProductById(product.id_san_pham);
+        setEditingProduct(freshProduct);
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+        // Fallback to stale data if fetch fails
+        setEditingProduct(product);
+      }
+    } else {
+      setEditingProduct(null);
+    }
     setIsModalOpen(true);
   };
 
@@ -70,8 +82,8 @@ const useProducts = () => {
 
       const payload = {
         ...productData,
-        danhMuc:     productData.idDanhMuc    ? { idDanhMuc: productData.idDanhMuc }       : (productData.danhMuc || null),
-        thuongHieu:  productData.idThuongHieu ? { idThuongHieu: productData.idThuongHieu } : (productData.thuongHieu || null),
+        danhMuc:     productData.idDanhMuc    ? { idDanhMuc: parseInt(productData.idDanhMuc) }       : (productData.danhMuc || null),
+        thuongHieu:  productData.idThuongHieu ? { idThuongHieu: parseInt(productData.idThuongHieu) } : (productData.thuongHieu || null),
         version:     editingProduct ? editingProduct.version : null,
         // Giảm giá
         phanTramGiam:    productData.phanTramGiam    ?? null,
@@ -91,7 +103,7 @@ const useProducts = () => {
       }
 
       handleCloseModal();
-      fetchData();
+      await fetchData();
     } catch (error) {
       console.error('Error saving product:', error);
       alert('Lỗi: ' + (error.message || 'Vui lòng kiểm tra lại dữ liệu'));
@@ -121,6 +133,7 @@ const useProducts = () => {
       product.ten_san_pham?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCategory = categoryFilter === 'All' ||
       String(product.id_danh_muc) === String(categoryFilter);
+    
     return matchSearch && matchCategory;
   });
 

@@ -24,15 +24,9 @@ class CategoryApi extends BaseApi {
   }
 
   async deleteCategory(id) {
-    const response = await fetch(`${API_BASE_URL}/danh-muc/${id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
+    return this._fetch(`${API_BASE_URL}/danh-muc/${id}`, {
+      method: 'DELETE'
     });
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || 'Lỗi xóa danh mục');
-    }
-    return null;
   }
 }
 

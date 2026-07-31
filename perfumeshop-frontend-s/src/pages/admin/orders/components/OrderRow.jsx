@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import OrderStatusBadge from './OrderStatusBadge';
-
+// file này để hiển thị một hàng đơn hàng trong danh sách đơn hàng admin, tránh gọi API nhiều lần
 const OrderRow = ({ order }) => {
   const isOnlinePaid =
     (order.phuongThucThanhToan || '').toLowerCase() === 'online' &&
@@ -21,7 +21,7 @@ const OrderRow = ({ order }) => {
             </span>
           )}
           <Link to={`/admin/orders/${order.idDonHang || order.id_don_hang}`} className="text-primary hover:underline">
-            #{order.idDonHang || order.id_don_hang || 'N/A'}
+            #{order.idDonHang || order.id_don_hang || 'N/A'} 
           </Link>
         </div>
       </td>

@@ -1,5 +1,5 @@
 import React from 'react';
-
+// file này để hiển thị header dashboard, tránh gọi API nhiều lần
 const DashboardHeader = ({ onRefresh }) => {
   return (
     <div className="flex items-center justify-between">

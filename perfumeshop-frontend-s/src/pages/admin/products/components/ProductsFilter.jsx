@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ProductsFilter = ({ searchTerm, onSearchChange, categoryFilter, onCategoryFilterChange }) => {
+const ProductsFilter = ({ searchTerm, onSearchChange, categoryFilter, onCategoryFilterChange, categories = [] }) => {
   return (
     <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
       <input
@@ -16,9 +16,11 @@ const ProductsFilter = ({ searchTerm, onSearchChange, categoryFilter, onCategory
         className="form-select w-full sm:w-auto rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark"
       >
         <option value="All">Tất cả danh mục</option>
-        <option value="Nước hoa nữ">Nước hoa nữ</option>
-        <option value="Nước hoa nam">Nước hoa nam</option>
-        <option value="Nước hoa Unisex">Nước hoa Unisex</option>
+        {categories.map((category) => (
+          <option key={category.idDanhMuc || category.id} value={category.idDanhMuc || category.id}>
+            {category.tenDanhMuc || category.name}
+          </option>
+        ))}
       </select>
     </div>
   );

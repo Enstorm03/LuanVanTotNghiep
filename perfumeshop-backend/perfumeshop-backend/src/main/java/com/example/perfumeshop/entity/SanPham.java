@@ -86,4 +86,16 @@ public class SanPham {
         if (ngayKetThucGiam != null && now.isAfter(ngayKetThucGiam)) return false;
         return true;
     }
+
+
+    @Transient
+    public Integer getIdDanhMuc() {
+        return danhMuc != null ? danhMuc.getIdDanhMuc() : null;
+    }
+
+
+    @Transient
+    public Integer getIdThuongHieu() {
+        return thuongHieu != null ? thuongHieu.getIdThuongHieu() : null;
+    }
 }

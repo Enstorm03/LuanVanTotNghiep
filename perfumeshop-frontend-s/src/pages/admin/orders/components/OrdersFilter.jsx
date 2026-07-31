@@ -1,5 +1,5 @@
 import React from 'react';
-
+// file này để hiển thị bộ lọc đơn hàng trên trang danh sách đơn hàng admin, tránh gọi API nhiều lần
 const OrdersFilter = ({ searchTerm, onSearchChange, statusFilter, onStatusFilterChange }) => {
   return (
     <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">

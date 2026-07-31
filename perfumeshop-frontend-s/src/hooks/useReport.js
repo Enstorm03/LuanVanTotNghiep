@@ -2,17 +2,14 @@ import { useState, useEffect } from 'react';
 import { getDefaultDateRange } from '../utils/dateRange';
 import api from '../services/api';
 
-/**
- * Map fields from BE response to FE structure.
- * Supports both English camelCase and Vietnamese camelCase field naming.
- */
+// file này để lấy dữ liệu báo cáo, tránh gọi API nhiều lần
 const mapReportData = (summaryDataRaw, topProductsDataRaw, revenueByStatusDataRaw) => {
   // Unwrap 'data' if backend uses a wrapper like { data: { ... } } or { result: { ... } }
   const summaryData = summaryDataRaw?.data || summaryDataRaw?.result || summaryDataRaw || {};
   const topProductsData = topProductsDataRaw?.data || topProductsDataRaw?.result || topProductsDataRaw || [];
   const revenueByStatusData = revenueByStatusDataRaw?.data || revenueByStatusDataRaw?.result || revenueByStatusDataRaw || [];
 
-  // Helper to safely get value from multiple possible field names
+  // lấy giá trị từ nhiều key khác nhau để đảm bảo tương thích với các phiên bản backend khác nhau
   const getField = (obj, ...keys) => {
     if (!obj) return undefined;
     for (const key of keys) {
@@ -41,7 +38,7 @@ const mapReportData = (summaryDataRaw, topProductsDataRaw, revenueByStatusDataRa
     repeatCustomers: getField(customerStats, 'repeatCustomers', 'khachHangQuayLai', 'repeatCustomersCount') ?? 0
   };
 
-  // Map top products - ensure each product has name, revenue, quantity
+  // sử dụng getField để lấy dữ liệu từ nhiều key khác nhau, đảm bảo tương thích với các phiên bản backend khác nhau
   const mappedTopProducts = Array.isArray(topProductsData) 
     ? topProductsData.map(p => ({
         id: getField(p, 'id', 'idSanPham', 'id_san_pham', 'productId'),
@@ -51,7 +48,7 @@ const mapReportData = (summaryDataRaw, topProductsDataRaw, revenueByStatusDataRa
       }))
     : [];
 
-  // Map revenue by status
+  // sử dụng getField để lấy dữ liệu từ nhiều key khác nhau, đảm bảo tương thích với các phiên bản backend khác nhau
   let mappedRevenueByStatus = [];
   if (Array.isArray(revenueByStatusData)) {
     mappedRevenueByStatus = revenueByStatusData.map(item => ({

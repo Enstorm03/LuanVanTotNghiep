@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import khoApi from '../../../../services/api/khoApi';
-
+// file này để hiển thị widget lô hàng sắp hết hạn, tránh gọi API nhiều lần
 const NearExpiryWidget = () => {
   const navigate = useNavigate();
   const [batches, setBatches] = useState([]);

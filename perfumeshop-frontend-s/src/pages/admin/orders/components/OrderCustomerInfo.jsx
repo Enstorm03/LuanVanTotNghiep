@@ -1,5 +1,5 @@
 import React from 'react';
-
+// file này để hiển thị thông tin khách hàng trên trang chi tiết đơn hàng, tránh gọi API nhiều lần
 const OrderCustomerInfo = ({ order }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">

@@ -19,8 +19,8 @@ const ProductForm = ({ product, categories, brands, onSubmit, onCancel, saving }
       moTa:           product.mo_ta || '',
       dungTichMl:     product.dung_tich_ml || '',
       nongDo:         product.nong_do || '',
-      idDanhMuc:      product.id_danh_muc || '',
-      idThuongHieu:   product.id_thuong_hieu || '',
+      idDanhMuc:      String(product.id_danh_muc || ''),
+      idThuongHieu:   String(product.id_thuong_hieu || ''),
       // Giảm giá
       phanTramGiam:       product.phan_tram_giam || '',
       ngayBatDauGiam:     toDatetimeLocal(product.ngay_bat_dau_giam),
@@ -55,8 +55,8 @@ const ProductForm = ({ product, categories, brands, onSubmit, onCancel, saving }
       }
     }
 
-    const selectedCategory = categories?.find(c => c.idDanhMuc === parseInt(formData.idDanhMuc));
-    const selectedBrand    = brands?.find(b => b.idThuongHieu === parseInt(formData.idThuongHieu));
+    const selectedCategory = categories?.find(c => String(c.idDanhMuc) === String(formData.idDanhMuc));
+    const selectedBrand    = brands?.find(b => String(b.idThuongHieu) === String(formData.idThuongHieu));
 
     const productData = {
       ...formData,
@@ -111,14 +111,14 @@ const ProductForm = ({ product, categories, brands, onSubmit, onCancel, saving }
           <label className={labelCls}>Danh mục</label>
           <select name="idDanhMuc" value={formData.idDanhMuc} onChange={handleChange} className={inputCls} required>
             <option value="">Chọn danh mục</option>
-            {categories?.map(c => <option key={c.idDanhMuc} value={c.idDanhMuc}>{c.tenDanhMuc}</option>)}
+            {categories?.map(c => <option key={c.idDanhMuc} value={String(c.idDanhMuc)}>{c.tenDanhMuc}</option>)}
           </select>
         </div>
         <div>
           <label className={labelCls}>Thương hiệu</label>
           <select name="idThuongHieu" value={formData.idThuongHieu} onChange={handleChange} className={inputCls} required>
             <option value="">Chọn thương hiệu</option>
-            {brands?.map(b => <option key={b.idThuongHieu} value={b.idThuongHieu}>{b.tenThuongHieu}</option>)}
+            {brands?.map(b => <option key={b.idThuongHieu} value={String(b.idThuongHieu)}>{b.tenThuongHieu}</option>)}
           </select>
         </div>
       </div>

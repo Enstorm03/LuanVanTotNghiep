@@ -1,6 +1,6 @@
 import React from 'react';
 import OrderStatusBadge from './OrderStatusBadge';
-
+// file này để hiển thị thông tin đơn hàng trên trang chi tiết đơn hàng, tránh gọi API nhiều lần
 const OrderInfoCard = ({ order }) => {
   return (
     <div className="rounded-xl border bg-surface-light text-card-foreground shadow border-border-light dark:border-border-dark dark:bg-surface-dark p-6">

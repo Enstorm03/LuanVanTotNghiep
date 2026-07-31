@@ -76,6 +76,7 @@ const AdminProductsPage = () => {
           onSearchChange={(value) => { setSearchTerm(value); setCurrentPage(1); }}
           categoryFilter={categoryFilter}
           onCategoryFilterChange={(value) => { setCategoryFilter(value); setCurrentPage(1); }}
+          categories={categories}
         />
 
         <ProductsTable

@@ -3,7 +3,7 @@ import api from '../services/api';
 
 export const SORT_OPTIONS = [
   'Mới nhất',
-  'Bán chạy nhất',
+  // 'Bán chạy nhất',
   'Giá: Tăng dần',
   'Giá: Giảm dần'
 ];
@@ -61,13 +61,6 @@ const useCategoryProducts = (categoryId, brandId, searchQuery) => {
             break;
         }
 
-        // Map concentrations — mỗi lựa chọn là { min, max } range nồng độ
-        // Nếu chọn nhiều → dùng range rộng nhất (min nhỏ nhất, max lớn nhất)
-        // Định nghĩa range theo label trong categoryHelpers:
-        //   Parfum >= 20%        → min=20, max=null
-        //   EDP    15–20%        → min=15, max=20
-        //   EDT    5–15%         → min=5,  max=15
-        //   EDC    2–4%          → min=2,  max=5
         const CONCENTRATION_RANGES = { 20: { min: 20, max: null }, 15: { min: 15, max: 20 }, 5: { min: 5, max: 15 }, 2: { min: 2, max: 5 } };
         let nongDoMin = undefined;
         let nongDoMax = undefined;

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-
+// file này để lấy dữ liệu giỏ hàng và chiến dịch giảm giá cho trang checkout, tránh gọi API nhiều lần
 const useCheckoutData = () => {
   const { user } = useAuth();
   const navigate = useNavigate();

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-
+// file này để lấy dữ liệu chi tiết đơn hàng, tránh gọi API nhiều lần
 const useOrderDetail = () => {
   const { orderId } = useParams();
   const { user } = useAuth();
@@ -13,16 +13,14 @@ const useOrderDetail = () => {
   const [processing, setProcessing] = useState(false);
   const [productDetails, setProductDetails] = useState({});
   const [brandDetails, setBrandDetails] = useState({});
+  const [pickList, setPickList] = useState([]); // FEFO Pick List data
 
   // Action states
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showShipDialog, setShowShipDialog] = useState(false);
-  const [showTrackingDialog, setShowTrackingDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showMoveToPendingDialog, setShowMoveToPendingDialog] = useState(false);
-  const [showUpdateRecipientDialog, setShowUpdateRecipientDialog] = useState(false);
-  const [showPaymentCollectedDialog, setShowPaymentCollectedDialog] = useState(false);
-  const [trackingNumber, setTrackingNumber] = useState('');
+
   const [cancelReason, setCancelReason] = useState('');
 
   // Recipient info for editing
@@ -49,7 +47,7 @@ const useOrderDetail = () => {
 
     return () => clearInterval(interval);
   }, [order, orderId]);
-
+// Fetch chi tiết đơn hàng từ backend
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
@@ -74,6 +72,19 @@ const useOrderDetail = () => {
       }
 
       setOrder(orderData);
+
+      // Fetch FEFO Pick List nếu đơn đã xác nhận
+      if (orderData.trangThaiVanHanh !== 'Đang chờ' && orderData.trangThaiVanHanh !== 'Đã hủy') {
+        try {
+          const pickListData = await api.getPickList(parseInt(orderId));
+          setPickList(Array.isArray(pickListData) ? pickListData : []);
+        } catch (pickListError) {
+          console.error('Error fetching pick list:', pickListError);
+          setPickList([]);
+        }
+      } else {
+        setPickList([]);
+      }
     } catch (err) {
       setError('Không thể tải chi tiết đơn hàng');
       console.error('Error fetching order details:', err);
@@ -110,25 +121,7 @@ const useOrderDetail = () => {
     }
   };
 
-  const handleUpdateTracking = async () => {
-    if (!trackingNumber.trim()) {
-      alert('Vui lòng nhập mã vận đơn');
-      return;
-    }
-
-    try {
-      setProcessing(true);
-      const updatedOrder = await api.updateTracking(parseInt(orderId), trackingNumber.trim());
-      setOrder(updatedOrder);
-      setShowTrackingDialog(false);
-      setTrackingNumber('');
-      alert('Mã vận đơn đã được cập nhật!');
-    } catch (error) {
-      alert('Không thể cập nhật mã vận đơn: ' + error.message);
-    } finally {
-      setProcessing(false);
-    }
-  };
+  
 
   const handleCompleteOrder = async () => {
     try {
@@ -177,44 +170,8 @@ const useOrderDetail = () => {
     }
   };
 
-  const handleUpdateRecipient = async () => {
-    if (!recipientName.trim() || !recipientAddress.trim()) {
-      alert('Vui lòng nhập đầy đủ tên người nhận và địa chỉ giao hàng');
-      return;
-    }
+  
 
-    try {
-      setProcessing(true);
-      const recipientData = {
-        tenNguoiNhan: recipientName.trim(),
-        diaChiGiaoHang: recipientAddress.trim()
-      };
-      const updatedOrder = await api.updateOrderRecipient(parseInt(orderId), recipientData);
-      setOrder(updatedOrder);
-      setShowUpdateRecipientDialog(false);
-      setRecipientName('');
-      setRecipientAddress('');
-      alert('Thông tin người nhận đã được cập nhật!');
-    } catch (error) {
-      alert('Không thể cập nhật thông tin người nhận: ' + error.message);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handlePaymentCollected = async () => {
-    try {
-      setProcessing(true);
-      const updatedOrder = await api.markPaymentCollected(parseInt(orderId));
-      setOrder(updatedOrder);
-      setShowPaymentCollectedDialog(false);
-      alert('Đã xác nhận thu đủ tiền còn lại!');
-    } catch (error) {
-      alert('Không thể cập nhật trạng thái thanh toán: ' + error.message);
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   const handleUpdatePaymentStatus = async () => {
     try {
@@ -249,37 +206,32 @@ const useOrderDetail = () => {
     processing,
     productDetails,
     brandDetails,
+    pickList,
     showConfirmDialog,
     showShipDialog,
-    showTrackingDialog,
     showCancelDialog,
     showMoveToPendingDialog,
-    showUpdateRecipientDialog,
-    showPaymentCollectedDialog,
-    trackingNumber,
+
+
     cancelReason,
     recipientName,
     recipientAddress,
     setShowConfirmDialog,
     setShowShipDialog,
-    setShowTrackingDialog,
     setShowCancelDialog,
     setShowMoveToPendingDialog,
-    setShowUpdateRecipientDialog,
-    setShowPaymentCollectedDialog,
-    setTrackingNumber,
+ 
+ 
     setCancelReason,
     setRecipientName,
     setRecipientAddress,
     fetchOrderDetails,
     handleConfirmOrder,
     handleShipOrder,
-    handleUpdateTracking,
     handleCompleteOrder,
     handleCancelOrder,
     handleMoveToPending,
-    handleUpdateRecipient,
-    handlePaymentCollected,
+
     handleUpdatePaymentStatus,
     handleMarkRefunded
   };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../../../services/api';
-
+// file này để hiển thị phân tích sản phẩm trên dashboard admin, tránh gọi API nhiều lần
 const ProductInsights = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

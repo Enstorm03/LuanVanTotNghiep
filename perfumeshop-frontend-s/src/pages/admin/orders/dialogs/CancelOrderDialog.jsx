@@ -1,5 +1,5 @@
 import React from 'react';
-
+//file này để hiển thị dialog hủy đơn hàng trên trang chi tiết đơn hàng admin, tránh gọi API nhiều lần
 const CancelOrderDialog = ({
   show,
   onConfirm,

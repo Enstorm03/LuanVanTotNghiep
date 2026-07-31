@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
-
+// file này để lấy dữ liệu đổi trả đơn hàng, tránh gọi API nhiều lần
 const useReturns = () => {
   const { user } = useAuth();
   const [returns, setReturns] = useState([]);
