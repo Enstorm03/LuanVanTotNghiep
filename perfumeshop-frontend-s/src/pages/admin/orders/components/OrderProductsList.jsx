@@ -38,22 +38,7 @@ const OrderProductsList = ({ order, productDetails, brandDetails, pickList = [] 
       
       <div className="space-y-4">
          
-<div className="flex items-center mb-2">
-  <h1 className="flex-1 text-sm text-text-subtle-light dark:text-text-subtle-dark">
-    hinh anh san pham 
-  </h1>
-  <h1 className="flex-1 text-sm text-text-subtle-light dark:text-text-subtle-dark">
-    ten san pham
-  </h1>
 
-  <h1 className="w-24 text-center text-sm text-text-subtle-light dark:text-text-subtle-dark">
-    sl
-  </h1>
-
-  <h1 className="w-32 text-right text-sm text-text-subtle-light dark:text-text-subtle-dark">
-    gia
-  </h1>
-</div>
   
 
         {itemsToDisplay.length > 0 ? (

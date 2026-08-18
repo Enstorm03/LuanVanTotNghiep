@@ -4,19 +4,19 @@
 export const PAYMENT_METHODS = {
   COD: 'cod',
   ONLINE: 'online',
-  CARD: 'card'
+  // CARD: 'card'
 };
 
 export const PAYMENT_METHOD_LABELS = {
   [PAYMENT_METHODS.COD]: '💵 Thanh toán khi nhận hàng (COD)',
   [PAYMENT_METHODS.ONLINE]: '📱 Ví điện tử/ZaloPay/MoMo',
-  [PAYMENT_METHODS.CARD]: '💳 Thẻ tín dụng/ghi nợ'
+  // [PAYMENT_METHODS.CARD]: '💳 Thẻ tín dụng/ghi nợ'
 };
 
 export const PAYMENT_METHOD_DESCRIPTIONS = {
   [PAYMENT_METHODS.COD]: 'Thanh toán bằng tiền mặt khi nhận hàng',
   [PAYMENT_METHODS.ONLINE]: 'Thanh toán online an toàn',
-  [PAYMENT_METHODS.CARD]: 'Thanh toán bằng thẻ'
+  // [PAYMENT_METHODS.CARD]: 'Thanh toán bằng thẻ'
 };
 
 export const validatePhoneNumber = (phone) => {

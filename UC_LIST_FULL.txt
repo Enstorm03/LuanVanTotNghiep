@@ -1,0 +1,295 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  DANH SÁCH ĐẦY ĐỦ 112 USE CASES                            ║
+║                    HỆ THỐNG PERFUME SHOP                                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+════════════════════════════════════════════════════════════════════════════════
+  DIAGRAM 1: KHÁCH HÀNG (32 UC)
+════════════════════════════════════════════════════════════════════════════════
+
+Actor: Khách hàng | External: PayOS
+
+A. XÁC THỰC & TÀI KHOẢN
+├─ UC1: Đăng ký tài khoản
+│   └─ include → UC1.1: Gửi email xác thực
+├─ UC2: Xác thực email (từ link)
+├─ UC3: Gửi lại email xác thực
+├─ UC4: Kiểm tra trạng thái xác thực
+├─ UC5: Đăng nhập
+└─ UC6: Quản lý tài khoản cá nhân
+    ├─ include → UC6.1: Xem thông tin
+    ├─ include → UC6.2: Cập nhật thông tin
+    └─ include → UC6.3: Đổi mật khẩu
+
+B. DUYỆT SẢN PHẨM
+├─ UC9: Tìm kiếm sản phẩm
+│   ├─ extend → Lọc danh mục
+│   ├─ extend → Lọc thương hiệu
+│   ├─ extend → Lọc nồng độ
+│   ├─ extend → Lọc giá
+│   └─ extend → Sắp xếp
+├─ UC10: Xem danh sách danh mục
+├─ UC11: Xem danh sách thương hiệu
+├─ UC12: Xem chi tiết sản phẩm
+│   └─ include → UC14: Xem đánh giá
+└─ UC13: Xem sản phẩm liên quan
+
+C. GIỎ HÀNG
+└─ UC15: Quản lý giỏ hàng
+    ├─ include → UC16: Thêm SP
+    ├─ include → UC17: Cập nhật SL
+    ├─ include → UC18: Xóa SP
+    └─ include → UC19: Xóa toàn bộ
+
+D. ĐẶT HÀNG & THANH TOÁN
+├─ UC20: Đặt hàng (Checkout)
+│   └─ include → Chọn phương thức TT
+├─ UC21: Thanh toán PayOS [→ Actor PayOS]
+│   ├─ include → Webhook xác nhận
+│   └─ include → Polling kiểm tra
+└─ UC22: Cập nhật trạng thái thanh toán
+
+E. QUẢN LÝ ĐƠN HÀNG
+├─ UC23: Xem lịch sử đơn hàng
+├─ UC24: Xem chi tiết đơn
+├─ UC25: Hủy đơn hàng
+└─ UC26: Tra cứu mã vận đơn
+
+F. ĐỔI TRẢ
+├─ UC27: Kiểm tra trạng thái đổi trả
+├─ UC28: Tạo yêu cầu đổi trả
+└─ UC29: Xem chi tiết phiếu
+
+G. ĐÁNH GIÁ
+├─ UC30: Viết đánh giá SP
+└─ UC31: Xem đánh giá của mình
+
+H. KHUYẾN MÃI
+└─ UC32: Xem chiến dịch KM active
+
+════════════════════════════════════════════════════════════════════════════════
+  DIAGRAM 2: ADMIN/STORE MANAGER (39 UC)
+════════════════════════════════════════════════════════════════════════════════
+
+Actor: Admin/Store Manager
+
+A. QUẢN LÝ SẢN PHẨM
+├─ UC33: Xem danh sách SP
+├─ UC34: Tạo SP mới
+├─ UC35: Cập nhật SP
+├─ UC36: Xóa SP
+├─ UC37: Quản lý danh mục (CRUD)
+└─ UC38: Quản lý thương hiệu (CRUD)
+
+B. QUẢN LÝ ĐƠN HÀNG
+├─ UC39: Xem danh sách đơn
+│   └─ include → Lọc theo trạng thái
+├─ UC40: Xem chi tiết đơn
+├─ UC41: Xác nhận đơn hàng ⭐
+│   ├─ include → Trừ kho FEFO
+│   └─ include → Ghi log biến động
+├─ UC42: Giao hàng (Ship)
+│   └─ extend → UC47: Xem Pick List
+├─ UC43: Cập nhật mã vận đơn
+├─ UC44: Hoàn thành đơn
+├─ UC45: Hủy đơn hàng
+│   └─ include → Hoàn kho (nếu đã trừ)
+├─ UC46: Đánh dấu đã hoàn tiền
+└─ UC47: Xem Pick List FEFO ⭐
+
+C. QUẢN LÝ ĐỔI TRẢ
+├─ UC48: Xem DS chờ duyệt
+├─ UC49: Xem tất cả phiếu
+├─ UC50: Duyệt đổi trả
+│   └─ include → Chuyển sang hàng lỗi
+├─ UC51: Xác nhận đã hoàn tiền
+└─ UC52: Từ chối đổi trả
+
+D. QUẢN LÝ KHUYẾN MÃI
+├─ UC53: Xem DS chiến dịch
+├─ UC54: Tạo chiến dịch
+├─ UC55: Cập nhật chiến dịch
+├─ UC56: Xóa chiến dịch
+└─ UC57: Gán SP vào chiến dịch
+    └─ include → Transaction
+
+E. QUẢN LÝ NGƯỜI DÙNG
+├─ UC58: Xem DS khách hàng
+├─ UC59: Tạo khách hàng
+├─ UC60: Cập nhật khách hàng
+├─ UC61: Xóa khách hàng
+├─ UC62: Reset MK khách hàng
+├─ UC63: ⭐ Duyệt KH thành NCC
+├─ UC64: ⭐ Hủy vai trò NCC
+├─ UC65: Xem DS nhân viên
+├─ UC66: Tạo nhân viên
+├─ UC67: Cập nhật vai trò NV
+├─ UC68: Reset MK nhân viên
+└─ UC69: Xóa nhân viên
+
+F. QUẢN LÝ ĐÁNH GIÁ
+├─ UC70: Xem tất cả đánh giá
+└─ UC71: Xóa đánh giá
+
+════════════════════════════════════════════════════════════════════════════════
+  DIAGRAM 3: NHÂN VIÊN KHO (16 UC)
+════════════════════════════════════════════════════════════════════════════════
+
+Actor: Nhân viên kho | Optional: Cửa hàng/Admin
+
+A. QUẢN LÝ KHO CƠ BẢN
+├─ UC72: Xem tồn kho
+├─ UC73: Nhập kho qua CSV/Excel
+│   ├─ include → UC73.1: Upload & preview
+│   ├─ include → UC73.2: Sửa dòng
+│   ├─ include → UC73.3: Xóa dòng
+│   ├─ include → UC73.4: Thêm dòng
+│   └─ include → UC73.5: Xác nhận nhập
+├─ UC74: Xem biến động kho
+├─ UC75: Xem cảnh báo HSD ⭐
+│   ├─ extend → Lọc gần hết hạn
+│   └─ extend → Lọc hết hạn
+├─ UC76: Validate HSD ⭐
+├─ UC77: Xem lô hàng (batch)
+└─ UC78: Xem SP bán chậm ⭐
+
+B. QUẢN LÝ PHIẾU NHẬP
+├─ UC79: Xem lịch sử phiếu nhập
+└─ UC80: Xem chi tiết phiếu
+
+C. QUẢN LÝ HÀNG LỖI
+├─ UC81: Xem hàng lỗi ⭐
+└─ UC82: Xuất hàng lỗi trả NCC ⭐
+
+D. QUẢN LÝ PO (Purchase Order) ⭐⭐⭐
+├─ UC83: Xem PO chờ kho kiểm tra ⭐
+├─ UC84: Kho xác nhận PO ⭐
+│   ├─ include → Cập nhật SL thực nhận
+│   ├─ include → Ghi nhận hàng lỗi
+│   └─ include → Upload hình ảnh
+├─ UC85: Xem PO chờ Admin duyệt ⭐
+├─ UC86: Admin duyệt PO cuối ⭐
+│   ├─ include → Cộng kho
+│   └─ include → Ghi log biến động
+└─ UC87: Admin từ chối PO ⭐
+
+════════════════════════════════════════════════════════════════════════════════
+  DIAGRAM 4: NHÀ CUNG CẤP (8 UC)
+════════════════════════════════════════════════════════════════════════════════
+
+Actor: Nhà cung cấp | Admin (phía duyệt)
+
+A. ĐẤU THẦU
+├─ UC88: Xem phiếu gợi thầu
+├─ UC89: Xem chi tiết phiếu
+├─ UC90: Gửi báo giá
+└─ UC91: ⭐ Xem lịch sử báo giá (THIẾU)
+
+B. ĐỀ XUẤT SẢN PHẨM
+├─ UC92: Xem trạng thái đề xuất
+├─ UC93: Đề xuất SP đơn lẻ
+├─ UC94: ⭐ Tải template CSV (THIẾU)
+└─ UC95: Đề xuất SP qua CSV
+    ├─ include → Upload file
+    ├─ include → Xem preview
+    └─ include → Xác nhận
+
+C. ADMIN DUYỆT ĐỀ XUẤT
+├─ UC96: Xem tất cả đề xuất
+├─ UC97: Duyệt đề xuất
+│   └─ include → Thêm vào san_pham
+└─ UC98: Từ chối đề xuất
+
+════════════════════════════════════════════════════════════════════════════════
+  DIAGRAM 5: GIÁM ĐỐC/DIRECTOR (9 UC)
+════════════════════════════════════════════════════════════════════════════════
+
+Actor: Giám đốc | Shared: Admin
+
+A. DASHBOARD
+├─ UC99: Xem dashboard tổng quan
+│   ├─ include → Thống kê
+│   └─ include → Cảnh báo hệ thống
+├─ UC100: Xem đơn gần nhất
+└─ UC101: Xem cảnh báo (alerts)
+
+B. BÁO CÁO
+├─ UC102: Báo cáo tổng hợp
+│   ├─ include → Tổng doanh thu
+│   ├─ include → Tổng đơn hàng
+│   ├─ include → Tổng KH
+│   └─ extend → Lọc thời gian
+├─ UC103: Báo cáo SP bán chạy (Top N)
+├─ UC104: Báo cáo DT theo trạng thái
+├─ UC105: Xuất CSV
+│   ├─ extend → Từ UC102
+│   ├─ extend → Từ UC103
+│   └─ extend → Từ UC104
+└─ UC107: ⭐ Báo cáo biến động kho (THIẾU)
+
+C. LOG & BẢO MẬT
+└─ UC106: Xem log đăng nhập
+    ├─ extend → Lọc tên đăng nhập
+    ├─ extend → Lọc vai trò
+    ├─ extend → Lọc trạng thái
+    └─ extend → Lọc thời gian
+
+════════════════════════════════════════════════════════════════════════════════
+  DIAGRAM 6: QUẢN LÝ ĐẤU THẦU NCC (5 UC)
+════════════════════════════════════════════════════════════════════════════════
+
+Actor: Admin/Store Manager | Reference: NCC
+
+UC108: Tạo phiếu gợi thầu
+
+UC109: ⭐ Xem DS đấu thầu (THIẾU)
+
+UC110: So sánh báo giá
+
+UC111: Chốt thầu ⭐⭐⭐
+    ├─ include → ⭐ UPDATE gia_ban (THIẾU)
+    ├─ include → Tính DSV (Q = V×T + V×5 - I)
+    └─ extend → UC86: Sinh PO
+
+UC112: ⭐ Hủy phiếu đấu thầu (THIẾU)
+
+════════════════════════════════════════════════════════════════════════════════
+  TỔNG KẾT
+════════════════════════════════════════════════════════════════════════════════
+
+Tổng số Use Case: 112
+- Khách hàng: 32 UC
+- Admin/Store Manager: 39 UC
+- Nhân viên kho: 16 UC
+- Nhà cung cấp: 8 UC
+- Giám đốc: 9 UC
+- Quản lý đấu thầu: 5 UC (overlap với Admin)
+- Shared UC: 3 UC (giữa các actor)
+
+Ký hiệu:
+⭐ = Use case quan trọng, cần đặc biệt chú ý
+⭐⭐⭐ = Use case cực kỳ quan trọng, phức tạp
+(THIẾU) = Use case bị thiếu trong hình vẽ hiện tại của bạn
+
+════════════════════════════════════════════════════════════════════════════════
+  CÁC UC BỊ THIẾU TRONG HÌNH VẼ HIỆN TẠI
+════════════════════════════════════════════════════════════════════════════════
+
+1. UC4: Kiểm tra trạng thái xác thực email
+2. UC13: Xem sản phẩm liên quan
+3. UC22: Cập nhật trạng thái thanh toán (manual)
+4. UC26: Tra cứu theo mã vận đơn
+5. UC47: Xem Pick List FEFO
+6. UC63-64: Duyệt/Hủy NCC từ khách hàng ⭐
+7. UC76: Validate HSD
+8. UC78: Xem sản phẩm bán chậm
+9. UC81-82: Quản lý hàng lỗi
+10. UC83-87: Toàn bộ quy trình PO workflow ⭐⭐⭐
+11. UC91: Xem lịch sử báo giá (NCC)
+12. UC94: Tải template CSV (NCC)
+13. UC107: Báo cáo biến động kho (Director)
+14. UC109: Xem danh sách đấu thầu
+15. UC111 (phần thiếu): UPDATE gia_ban khi chốt thầu ⭐
+16. UC112: Hủy phiếu đấu thầu
+
+════════════════════════════════════════════════════════════════════════════════

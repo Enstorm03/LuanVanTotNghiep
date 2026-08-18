@@ -161,9 +161,9 @@ function App() {
           <Route path="kho" element={
             <ProtectedRoute requireRole="WAREHOUSE_STAFF"><AdminKhoPage /></ProtectedRoute>
           } />
-          {/* <Route path="near-expiry-products" element={
+          <Route path="near-expiry-products" element={
             <ProtectedRoute requireRole="WAREHOUSE_STAFF"><AdminNearExpiryProductsPage /></ProtectedRoute>
-          } /> */}
+          } />
           {/* Đấu thầu — ADMIN + DIRECTOR + STORE_MANAGER */}
           <Route path="procurement" element={
             <ProtectedRoute requireRole="STORE_MANAGER"><AdminProcurementPage /></ProtectedRoute>

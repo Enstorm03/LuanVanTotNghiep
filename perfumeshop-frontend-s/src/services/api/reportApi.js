@@ -31,13 +31,44 @@ class ReportApi extends BaseApi {
     }
   }
   
-  async exportReport(startDate, endDate, format = 'csv') {
-     const params = new URLSearchParams({ startDate, endDate, format }).toString();
-     // Export usually requires blob response or downloading directly.
-     // In baseApi _fetch usually parses json. If it's a file download, it should be handled specifically.
-     // We will just return the URL for now or fetch as blob.
-     window.open(`${API_BASE_URL}/admin/reports/export?${params}`, '_blank');
+async exportReport(startDate, endDate, format = 'csv') {
+  try {
+    const params = new URLSearchParams({ startDate, endDate, format }).toString();
+    const token = this._getToken();
+    
+    const response = await fetch(`${API_BASE_URL}/admin/reports/export?${params}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'ngrok-skip-browser-warning': 'true',
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Lỗi khi xuất báo cáo');
+    }
+
+    // Lấy nội dung CSV
+    const blob = await response.blob();
+    
+    // Tạo link download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bao-cao-${startDate}-${endDate}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Lỗi xuất báo cáo:', error);
+    throw error;
   }
+}
+
 }
 
 const reportApi = new ReportApi();

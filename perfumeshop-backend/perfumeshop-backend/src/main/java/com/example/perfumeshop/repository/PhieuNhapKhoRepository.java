@@ -10,15 +10,18 @@ import java.util.List;
 public interface PhieuNhapKhoRepository extends JpaRepository<PhieuNhapKho, Integer> {
     List<PhieuNhapKho> findAllByOrderByNgayNhapDesc();
     List<PhieuNhapKho> findByTrangThaiOrderByNgayNhapDesc(String trangThai);
-    
-    // Query to find active batches for a product sorted by expiry date (FEFO)
-    // Returns list of batch IDs with available stock, ordered by earliest expiry first
+
+    // Truy vấn để tìm các lô hàng đang khả dụng của một sản phẩm, sắp xếp theo ngày hết hạn (FEFO)
+    // Trả về danh sách các mã lô (batch ID) còn tồn kho, sắp xếp ưu tiên ngày hết hạn sớm nhất lên đầu
+    // ✅ CHỈ LẤY LÔ CHƯA HẾT HẠN (han_su_dung > CURDATE() HOẶC NULL)
     @Query(value = "SELECT DISTINCT ct.id_phieu FROM chi_tiet_phieu_nhap ct " +
-                   "WHERE ct.id_san_pham = :idSanPham AND ct.so_luong_con_lai > 0 " +
+                   "WHERE ct.id_san_pham = :idSanPham " +
+                   "  AND ct.so_luong_con_lai > 0 " +
+                   "  AND (ct.han_su_dung IS NULL OR ct.han_su_dung > CURDATE()) " +  // ✅ Không lấy lô hết hạn
                    "ORDER BY ct.han_su_dung ASC", nativeQuery = true)
     List<Integer> findActiveBatchesByProductFEFO(Integer idSanPham);
     
-    // Query to get top N near-expiry batches (for dashboard widget)
+    // Tìm các lô gần hết hạn (sắp xếp theo HSD tăng dần)
     @Query(value = "SELECT ct.id, ct.id_san_pham, sp.ten_san_pham, ct.so_lo, ct.han_su_dung, ct.so_luong_con_lai, sp.gia_nhap " +
                    "FROM chi_tiet_phieu_nhap ct " +
                    "JOIN san_pham sp ON ct.id_san_pham = sp.id " +

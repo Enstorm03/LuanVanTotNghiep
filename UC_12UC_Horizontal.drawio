@@ -1,0 +1,417 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z">
+  <diagram name="12UC-Horizontal" id="uc-horiz">
+    <mxGraphModel dx="2000" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1400">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- System Boundary -->
+        <mxCell id="system" value="Hệ thống quản lý cửa hàng nước hoa" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=14;startSize=35;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="2000" height="1200" as="geometry" />
+        </mxCell>
+        
+        <!-- CORE USE CASES (Main flow from left to right) -->
+        
+        <!-- UC-05: Đăng ký xác thực email -->
+        <mxCell id="uc05" value="Đăng ký và xác thực email" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="100" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-10: Tìm kiếm duyệt SP -->
+        <mxCell id="uc10" value="Tìm kiếm và&#xa;duyệt sản phẩm" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="350" y="200" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-11: Quản lý giỏ hàng -->
+        <mxCell id="uc11" value="Quản lý&#xa;giỏ hàng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="600" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-01: Đặt hàng (CENTER) -->
+        <mxCell id="uc01" value="Đặt hàng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontStyle=1" vertex="1" parent="system">
+          <mxGeometry x="820" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-02: Xác nhận đơn -->
+        <mxCell id="uc02" value="Xác nhận&#xa;đơn hàng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="1050" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-08: QR code -->
+        <mxCell id="uc08" value="QR code&#xa;đơn hàng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="1280" y="200" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- EXTEND BRANCHES (Above main flow) -->
+        
+        <!-- Thiên lưa phòng -->
+        <mxCell id="uc10-ext1" value="Thiên lưa phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="350" y="60" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Xóa lưa phòng -->
+        <mxCell id="uc10-ext2" value="Xóa lưa phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="500" y="60" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Sửa lưa phòng -->
+        <mxCell id="uc10-ext3" value="Sửa lưa phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="650" y="60" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Tìm sản phẩm theo trang thái -->
+        <mxCell id="uc10-ext4" value="Tìm sản phẩm&#xa;theo trang thái" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="250" y="300" width="130" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Cập nhật lưa phòng -->
+        <mxCell id="uc11-ext1" value="Cập nhật&#xa;lưa phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="520" y="300" width="120" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Xem chi tiết phòng -->
+        <mxCell id="uc01-ext1" value="Xem chi tiết&#xa;phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="720" y="300" width="120" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Cập nhật trang thái phòng -->
+        <mxCell id="uc02-ext1" value="Cập nhật&#xa;trang thái phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="950" y="70" width="130" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Lịch sử thuê phòng -->
+        <mxCell id="uc02-ext2" value="Lịch sử&#xa;thuê phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="1100" y="70" width="120" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Xóa phòng -->
+        <mxCell id="uc02-ext3" value="Xóa phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="1240" y="70" width="110" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Cập nhật trang thái phòng (right) -->
+        <mxCell id="uc02-ext4" value="Cập nhật&#xa;trang thái phòng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="1380" y="70" width="130" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- BOTTOM BRANCHES -->
+        
+        <!-- UC-04: Đổi trả -->
+        <mxCell id="uc04" value="Đổi trả hàng" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="820" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Hóa đơn giữ xe -->
+        <mxCell id="uc04-ext1" value="Hóa đơn giữ xe" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="650" y="480" width="120" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Chi tiết hóa đơn -->
+        <mxCell id="uc04-ext2" value="Chi tiết hóa đơn" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="810" y="510" width="120" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Xóa hóa đơn -->
+        <mxCell id="uc04-ext3" value="Xóa hóa đơn" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="810" y="590" width="110" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- LOWER SECTION -->
+        
+        <!-- UC-03: Chốt thầu -->
+        <mxCell id="uc03" value="Chốt thầu NCC" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="350" y="700" width="130" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-06: Duyệt phiếu nhập -->
+        <mxCell id="uc06" value="Duyệt phiếu&#xa;nhập kho" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="100" y="800" width="130" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-09: Khuyến mãi -->
+        <mxCell id="uc09" value="Quản lý&#xa;khuyến mãi" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="600" y="700" width="130" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Hóa đơn trả chính thức -->
+        <mxCell id="uc06-ext1" value="Hóa đơn trả&#xa;chính thức" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="100" y="920" width="120" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-07: NCC đề xuất -->
+        <mxCell id="uc07" value="NCC đề xuất&#xa;SP mới" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="350" y="900" width="130" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- UC-12: Báo cáo -->
+        <mxCell id="uc12" value="Báo cáo và&#xa;thống kê" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="600" y="900" width="130" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Xem quy luật hóa đơn -->
+        <mxCell id="uc12-ext1" value="Xem quy luật&#xa;hóa đơn" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="800" y="850" width="130" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Cập nhật -->
+        <mxCell id="uc12-ext2" value="Cập nhật" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="system">
+          <mxGeometry x="800" y="930" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        </mxCell>
+        
+        <!-- ACTORS -->
+        
+        <!-- Chủ lý (customer) -->
+        <mxCell id="actor-customer" value="Chủ lý (customer)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="150" y="400" width="50" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Quản lý phòng trọ -->
+        <mxCell id="actor-admin" value="Quản lý&#xa;phòng trọ" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="150" y="650" width="50" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Nhà cung cấp -->
+        <mxCell id="actor-supplier" value="Nhà cung cấp" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#ffffff;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="150" y="950" width="50" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- ASSOCIATIONS FROM ACTORS -->
+        
+        <!-- Customer associations -->
+        <mxCell id="assoc-cust-uc05" value="" style="endArrow=none;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-customer" target="uc05">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="assoc-cust-uc10" value="" style="endArrow=none;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-customer" target="uc10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="assoc-cust-uc04" value="" style="endArrow=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-customer" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Admin associations -->
+        <mxCell id="assoc-admin-uc02" value="" style="endArrow=none;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-admin" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="assoc-admin-uc03" value="" style="endArrow=none;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-admin" target="uc03">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="assoc-admin-uc06" value="" style="endArrow=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-admin" target="uc06">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="assoc-admin-uc09" value="" style="endArrow=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-admin" target="uc09">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Supplier associations -->
+        <mxCell id="assoc-supp-uc07" value="" style="endArrow=none;html=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-supplier" target="uc07">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="assoc-supp-uc12" value="" style="endArrow=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="actor-supplier" target="uc12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- RELATIONSHIPS (include, extend) -->
+        
+        <!-- UC-10 includes -->
+        <mxCell id="rel-10-ext1" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc10-ext1" target="uc10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-10-ext2" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc10-ext2" target="uc10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-10-ext3" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc10-ext3" target="uc10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-10-ext4" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc10-ext4" target="uc10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Main flow includes -->
+        <mxCell id="rel-10-11" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc10" target="uc11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-11-01" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc11" target="uc01">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-01-02" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc01" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-02-08" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc02" target="uc08">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-11 extends -->
+        <mxCell id="rel-11-ext1" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc11-ext1" target="uc11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-01 extends -->
+        <mxCell id="rel-01-ext1" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc01-ext1" target="uc01">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-02 extends (top) -->
+        <mxCell id="rel-02-ext1" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc02-ext1" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-02-ext2" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc02-ext2" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-02-ext3" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc02-ext3" target="uc02">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-02-ext4" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc02-ext4" target="uc08">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-04 extends (bottom) -->
+        <mxCell id="rel-04-ext1" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc04-ext1" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-04-ext2" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc04-ext2" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-04-ext3" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc04-ext3" target="uc04-ext2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-01 to UC-04 extend -->
+        <mxCell id="rel-01-04" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc01" target="uc04">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-06 extends -->
+        <mxCell id="rel-06-ext1" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc06-ext1" target="uc06">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-06 to UC-03 -->
+        <mxCell id="rel-06-03" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc06" target="uc03">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- UC-12 extends -->
+        <mxCell id="rel-12-ext1" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc12-ext1" target="uc12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="rel-12-ext2" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;endFill=0;" edge="1" parent="1" source="uc12-ext2" target="uc12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="500" as="sourcePoint" />
+            <mxPoint x="550" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -443,7 +443,7 @@ public class KhoService {
 
         return result;
     }
-
+ // lấy danh sách các lô sắp hết hạn trong 3 tháng tới
     public List<Map<String, Object>> getNearExpiryBatches(int limit) {
         LocalDate today = LocalDate.now();
         LocalDate threshold = today.plusMonths(3);
@@ -548,11 +548,8 @@ public class KhoService {
         return rows;
     }
 
-    private PhieuNhapTam buildRowFromValues(String sessionId, int dong,
-            String idSpStr, String tenSp, String slStr, String giaNhapStr, String ghiChu) {
-        return buildRowFromValues(sessionId, dong, idSpStr, tenSp, slStr, giaNhapStr, ghiChu, null, null);
-    }
 
+// lấy dữ liệu từ CSV/Excel và build thành PhieuNhapTam
     private PhieuNhapTam buildRowFromValues(String sessionId, int dong,
             String idSpStr, String tenSp, String slStr, String giaNhapStr, String ghiChu,
             String hanSuDungStr, String soLo) {

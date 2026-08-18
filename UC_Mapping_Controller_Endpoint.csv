@@ -1,0 +1,127 @@
+UC_ID,UC_Name,Actor,Controller,HTTP_Method,Endpoint,Status,Priority
+UC1,Đăng ký tài khoản,Khách hàng,AuthController,POST,/api/auth/register-customer,✅ Done,High
+UC1.1,Gửi email xác thực,System,EmailVerificationService,(internal),(internal),✅ Done,High
+UC2,Xác thực email,Khách hàng,AuthController,GET,/api/auth/verify-email?token=xxx,✅ Done,High
+UC3,Gửi lại email xác thực,Khách hàng,AuthController,POST,/api/auth/resend-verification-email,✅ Done,Medium
+UC4,Kiểm tra trạng thái xác thực,Khách hàng,AuthController,GET,/api/auth/verification-status/{userId},✅ Done,Medium
+UC5,Đăng nhập,Khách hàng,AuthController,POST,/api/auth/login,✅ Done,High
+UC6,Quản lý tài khoản cá nhân,Khách hàng,UserProfileController,GET/PUT,/api/users/profile,✅ Done,Medium
+UC6.1,Xem thông tin,Khách hàng,UserProfileController,GET,/api/users/profile,✅ Done,Medium
+UC6.2,Cập nhật thông tin,Khách hàng,UserProfileController,PUT,/api/users/profile,✅ Done,Medium
+UC6.3,Đổi mật khẩu,Khách hàng,UserProfileController,POST,/api/users/change-password,✅ Done,Medium
+UC9,Tìm kiếm sản phẩm,Khách hàng,CatalogController,GET,/api/catalog/san-pham/search,✅ Done,High
+UC10,Xem danh sách danh mục,Khách hàng,CatalogController,GET,/api/catalog/danh-muc,✅ Done,Medium
+UC11,Xem danh sách thương hiệu,Khách hàng,CatalogController,GET,/api/catalog/thuong-hieu,✅ Done,Medium
+UC12,Xem chi tiết sản phẩm,Khách hàng,SanPhamController,GET,/api/san-pham/{id},✅ Done,High
+UC13,Xem sản phẩm liên quan,Khách hàng,SanPhamController,GET,/api/san-pham/{id}/related,✅ Done,Low
+UC14,Xem đánh giá sản phẩm,Khách hàng,ReviewController,GET,/api/reviews/product/{productId},✅ Done,Medium
+UC15,Quản lý giỏ hàng,Khách hàng,CartController,GET,/api/cart/dto?userId=xxx,✅ Done,High
+UC16,Thêm sản phẩm vào giỏ,Khách hàng,CartController,POST,/api/cart/items,✅ Done,High
+UC17,Cập nhật số lượng trong giỏ,Khách hàng,CartController,PUT,/api/cart/items,✅ Done,High
+UC18,Xóa sản phẩm khỏi giỏ,Khách hàng,CartController,DELETE,/api/cart/items,✅ Done,Medium
+UC19,Xóa toàn bộ giỏ hàng,Khách hàng,CartController,DELETE,/api/cart,✅ Done,Low
+UC20,Đặt hàng (Checkout),Khách hàng,DatHangController,POST,/api/dat-hang,✅ Done,High
+UC21,Thanh toán PayOS,Khách hàng,PaymentController,POST,/api/payment/create-link,✅ Done,High
+UC21.1,Webhook xác nhận,PayOS System,PaymentController,POST,/api/payment/payos-webhook,✅ Done,High
+UC21.2,Polling kiểm tra,Khách hàng,PaymentController,GET,/api/payment/check-status/{orderId},✅ Done,High
+UC22,Cập nhật trạng thái thanh toán,Admin,DatHangController,POST,/api/don-hang/{id}/thanh-toan,✅ Done,Medium
+UC23,Xem lịch sử đơn hàng,Khách hàng,DonHangController,GET,/api/don-hang/history,✅ Done,High
+UC24,Xem chi tiết đơn hàng,Khách hàng,DonHangController,GET,/api/don-hang/{id},✅ Done,High
+UC25,Hủy đơn hàng,Khách hàng,DatHangController,POST,/api/don-hang/{id}/huy/khach,✅ Done,High
+UC26,Tra cứu theo mã vận đơn,Khách hàng,DonHangController,GET,/api/don-hang/tracking/{maVanDon},✅ Done,Medium
+UC27,Kiểm tra trạng thái đổi trả,Khách hàng,DoiTraController,GET,/api/doi-tra/kiem-tra,✅ Done,Medium
+UC28,Tạo yêu cầu đổi trả,Khách hàng,DoiTraController,POST,/api/doi-tra,✅ Done,High
+UC29,Xem chi tiết phiếu đổi trả,Khách hàng,DoiTraController,GET,/api/doi-tra/{id},✅ Done,Medium
+UC30,Viết đánh giá sản phẩm,Khách hàng,ReviewController,POST,/api/reviews,✅ Done,Medium
+UC31,Xem đánh giá của mình,Khách hàng,ReviewController,GET,/api/reviews/user/{userId},✅ Done,Low
+UC32,Xem chiến dịch KM active,Khách hàng,CampaignController,GET,/api/public/campaigns/active,✅ Done,Medium
+UC33,Xem danh sách sản phẩm,Admin,SanPhamController,GET,/api/san-pham,✅ Done,High
+UC34,Tạo sản phẩm mới,Admin,SanPhamController,POST,/api/san-pham,✅ Done,High
+UC35,Cập nhật sản phẩm,Admin,SanPhamController,PUT,/api/san-pham/{id},✅ Done,High
+UC36,Xóa sản phẩm,Admin,SanPhamController,DELETE,/api/san-pham/{id},✅ Done,Medium
+UC37,Quản lý danh mục (CRUD),Admin,DanhMucController,GET/POST/PUT/DELETE,/api/admin/danh-muc,✅ Done,Medium
+UC38,Quản lý thương hiệu (CRUD),Admin,ThuongHieuController,GET/POST/PUT/DELETE,/api/admin/thuong-hieu,✅ Done,Medium
+UC39,Xem danh sách đơn hàng,Admin,DonHangController,GET,/api/admin/don-hang,✅ Done,High
+UC40,Xem chi tiết đơn hàng,Admin,DonHangController,GET,/api/admin/don-hang/{id},✅ Done,High
+UC41,Xác nhận đơn hàng,Admin,DonHangController,POST,/api/admin/don-hang/{id}/confirm,✅ Done,Critical
+UC42,Giao hàng (Ship),Admin,DonHangController,POST,/api/admin/don-hang/{id}/ship,✅ Done,High
+UC43,Cập nhật mã vận đơn,Admin,DonHangController,POST,/api/admin/don-hang/{id}/tracking,✅ Done,Medium
+UC44,Hoàn thành đơn hàng,Admin,DonHangController,POST,/api/admin/don-hang/{id}/complete,✅ Done,High
+UC45,Hủy đơn hàng,Admin,DonHangController,POST,/api/admin/don-hang/{id}/cancel,✅ Done,High
+UC46,Đánh dấu đã hoàn tiền,Admin,DonHangController,POST,/api/admin/don-hang/{id}/refund,✅ Done,Medium
+UC47,Xem Pick List FEFO,Admin,FEFOService,(Frontend),PickListDisplay.jsx,✅ Done,High
+UC48,Xem DS đổi trả chờ duyệt,Admin,DoiTraController,GET,/api/doi-tra/cho-duyet,✅ Done,High
+UC49,Xem tất cả phiếu đổi trả,Admin,DoiTraController,GET,/api/doi-tra/all,✅ Done,Medium
+UC50,Duyệt đổi trả,Admin,DoiTraController,POST,/api/doi-tra/{id}/duyet,✅ Done,High
+UC51,Xác nhận đã hoàn tiền,Admin,DoiTraController,POST,/api/doi-tra/{id}/xac-nhan-hoan-tien,✅ Done,High
+UC52,Từ chối đổi trả,Admin,DoiTraController,POST,/api/doi-tra/{id}/tu-choi,✅ Done,Medium
+UC53,Xem danh sách chiến dịch,Admin,CampaignController,GET,/api/admin/campaigns,✅ Done,Medium
+UC54,Tạo chiến dịch,Admin,CampaignController,POST,/api/admin/campaigns,✅ Done,High
+UC55,Cập nhật chiến dịch,Admin,CampaignController,PUT,/api/admin/campaigns/{id},✅ Done,Medium
+UC56,Xóa chiến dịch,Admin,CampaignController,DELETE,/api/admin/campaigns/{id},✅ Done,Low
+UC57,Gán SP vào chiến dịch,Admin,CampaignController,PUT,/api/admin/campaigns/{id}/products,✅ Done,High
+UC58,Xem DS khách hàng,Admin,AdminKhachHangController,GET,/api/admin/khach-hang,✅ Done,Medium
+UC59,Tạo khách hàng,Admin,AdminKhachHangController,POST,/api/admin/khach-hang,✅ Done,Medium
+UC60,Cập nhật khách hàng,Admin,AdminKhachHangController,PUT,/api/admin/khach-hang/{id},✅ Done,Medium
+UC61,Xóa khách hàng,Admin,AdminKhachHangController,DELETE,/api/admin/khach-hang/{id},✅ Done,Low
+UC62,Reset MK khách hàng,Admin,AdminKhachHangController,POST,/api/admin/khach-hang/{id}/reset-password,✅ Done,Medium
+UC63,Duyệt KH thành NCC,Admin,AdminKhachHangController,POST,/api/admin/khach-hang/{id}/duyet-ncc,✅ Done,High
+UC64,Hủy vai trò NCC,Admin,AdminKhachHangController,POST,/api/admin/khach-hang/{id}/huy-ncc,✅ Done,Medium
+UC65,Xem DS nhân viên,Admin,AdminNhanVienController,GET,/api/admin/nhan-vien,✅ Done,Medium
+UC66,Tạo nhân viên,Admin,AdminNhanVienController,POST,/api/admin/nhan-vien,✅ Done,High
+UC67,Cập nhật vai trò NV,Admin,AdminNhanVienController,POST,/api/admin/nhan-vien/{id}/role,✅ Done,High
+UC68,Reset MK nhân viên,Admin,AdminNhanVienController,POST,/api/admin/nhan-vien/{id}/reset-password,✅ Done,Medium
+UC69,Xóa nhân viên,Admin,AdminNhanVienController,DELETE,/api/admin/nhan-vien/{id},✅ Done,Low
+UC70,Xem tất cả đánh giá,Admin,ReviewController,GET,/api/reviews/all,✅ Done,Medium
+UC71,Xóa đánh giá,Admin,ReviewController,DELETE,/api/reviews/{id},✅ Done,Low
+UC72,Xem tồn kho,Warehouse,SanPhamController,GET,/api/san-pham,✅ Done,High
+UC73,Nhập kho qua CSV/Excel,Warehouse,KhoController,POST,/api/kho/import-preview,✅ Done,Critical
+UC73.1,Upload & preview,Warehouse,KhoController,POST,/api/kho/import-preview,✅ Done,Critical
+UC73.2,Sửa dòng preview,Warehouse,KhoController,PUT,/api/kho/import-preview/row/{rowId},✅ Done,High
+UC73.3,Xóa dòng preview,Warehouse,KhoController,DELETE,/api/kho/import-preview/row/{rowId},✅ Done,Medium
+UC73.4,Thêm dòng thủ công,Warehouse,KhoController,POST,/api/kho/import-preview/{sessionId}/row,✅ Done,Medium
+UC73.5,Xác nhận nhập kho,Warehouse,KhoController,POST,/api/kho/import-confirm,✅ Done,Critical
+UC74,Xem biến động kho,Warehouse,KhoController,GET,/api/kho/bien-dong,✅ Done,High
+UC75,Xem cảnh báo HSD,Warehouse,KhoController,GET,/api/kho/cang-het-han,✅ Done,High
+UC76,Validate HSD,Warehouse,KhoController,POST,/api/kho/validate-hsd,✅ Done,Medium
+UC77,Xem lô hàng (batch),Warehouse,KhoController,GET,/api/kho/lo-hang,✅ Done,High
+UC78,Xem SP bán chậm,Warehouse,KhoController,GET,/api/kho/ban-cham,✅ Done,Medium
+UC79,Xem lịch sử phiếu nhập,Warehouse,KhoController,GET,/api/kho/phieu-nhap,✅ Done,Medium
+UC80,Xem chi tiết phiếu nhập,Warehouse,KhoController,GET,/api/kho/phieu-nhap/{id},✅ Done,Medium
+UC81,Xem hàng lỗi,Warehouse,SanPhamController,GET,/api/san-pham/hang-loi,✅ Done,High
+UC82,Xuất hàng lỗi trả NCC,Warehouse,SanPhamController,POST,/api/san-pham/{id}/xuat-hang-loi,✅ Done,High
+UC83,Xem PO chờ kho kiểm tra,Warehouse,KhoController,GET,/api/kho/po-cho-kiem-tra,✅ Done,Critical
+UC84,Kho xác nhận PO,Warehouse,KhoController,POST,/api/kho/po/{id}/kho-xac-nhan,✅ Done,Critical
+UC85,Xem PO chờ Admin duyệt,Admin,KhoController,GET,/api/kho/po-cho-admin-duyet,✅ Done,Critical
+UC86,Admin duyệt PO cuối,Admin,KhoController,POST,/api/kho/po/{id}/admin-duyet-cuoi,✅ Done,Critical
+UC87,Admin từ chối PO,Admin,KhoController,POST,/api/kho/po/{id}/admin-tu-choi,✅ Done,High
+UC88,Xem phiếu gợi thầu,Supplier,ProcurementController,GET,/api/procurement/batch,✅ Done,High
+UC89,Xem chi tiết phiếu đấu thầu,Supplier,ProcurementController,GET,/api/procurement/batch/{id},✅ Done,High
+UC90,Gửi báo giá,Supplier,ProcurementController,POST,/api/procurement/submit,✅ Done,High
+UC91,Xem lịch sử báo giá,Supplier,ProcurementController,GET,/api/procurement/my-quotes,❌ Missing,High
+UC92,Xem trạng thái đề xuất,Supplier,ProcurementController,GET,/api/procurement,✅ Done,Medium
+UC93,Đề xuất SP đơn lẻ,Supplier,ProcurementController,POST,/api/procurement/submit,✅ Done,High
+UC94,Tải template CSV,Supplier,ProcurementController,GET,/api/procurement/csv/download-template,✅ Done,High
+UC95,Đề xuất SP qua CSV,Supplier,ProcurementController,POST,/api/procurement/csv/upload,✅ Done,High
+UC95.1,Upload file CSV,Supplier,ProcurementController,POST,/api/procurement/csv/upload,✅ Done,High
+UC95.2,Xem preview,Supplier,ProcurementController,POST,/api/procurement/bulk-preview,✅ Done,High
+UC95.3,Xác nhận,Supplier,ProcurementController,POST,/api/procurement/bulk-confirm,✅ Done,High
+UC96,Xem tất cả đề xuất,Admin,ProcurementController,GET,/api/procurement,✅ Done,High
+UC97,Duyệt đề xuất,Admin,ProcurementController,PUT,/api/procurement/{id}/approve,✅ Done,High
+UC98,Từ chối đề xuất,Admin,ProcurementController,PUT,/api/procurement/{id}/reject,✅ Done,Medium
+UC99,Xem dashboard tổng quan,Director,DashboardController,GET,/api/admin/dashboard/stats,✅ Done,High
+UC100,Xem đơn gần nhất,Director,DashboardController,GET,/api/admin/dashboard/recent-orders,✅ Done,Medium
+UC101,Xem cảnh báo,Director,DashboardController,GET,/api/admin/dashboard/alerts,✅ Done,High
+UC102,Báo cáo tổng hợp,Director,ReportController,GET,/api/admin/reports/summary,✅ Done,High
+UC103,Báo cáo SP bán chạy,Director,ReportController,GET,/api/admin/reports/top-products,✅ Done,High
+UC104,Báo cáo DT theo trạng thái,Director,ReportController,GET,/api/admin/reports/revenue-by-status,✅ Done,Medium
+UC105,Xuất CSV,Director,ReportController,GET,/api/admin/reports/export,✅ Done,Medium
+UC106,Xem log đăng nhập,Director,LoginLogController,GET,/api/admin/login-logs,✅ Done,High
+UC107,Báo cáo biến động kho,Director,KhoController,GET,/api/kho/bien-dong,✅ Done,High
+UC108,Tạo phiếu gợi thầu,Admin,ProcurementController,POST,/api/procurement/create-batch,✅ Done,High
+UC109,Xem DS đấu thầu,Admin,ProcurementController,GET,/api/procurement/batch,✅ Done,High
+UC110,So sánh báo giá,Admin,ProcurementController,GET,/api/procurement/batch/{id}/quotes,✅ Done,High
+UC111,Chốt thầu,Admin,ProcurementController,PUT,/api/procurement/{id}/approve,✅ Done,Critical
+UC111.1,UPDATE gia_ban,System,ProcurementService,(internal - UPDATE san_pham),(internal),✅ Done,Critical
+UC111.2,Tính DSV,System,ProcurementService,(internal - tinhBienDoBan),(internal),✅ Done,Critical
+UC112,Hủy phiếu đấu thầu,Admin,ProcurementController,DELETE,/api/procurement/batch/{id},❌ Missing,Medium

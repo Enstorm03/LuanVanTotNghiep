@@ -101,10 +101,7 @@ public class ProcurementService {
             double tocDoBan = (double) tongBanRa / soNgayBienDo;
             result.put("tocDoBan", Math.round(tocDoBan * 100.0) / 100.0);
             
-            // Q: Số lượng gợi ý nhập = (V × T) + SS - I
-            // T = 30 ngày (chu kỳ nhập mặc định)
-            // SS = V × 5 (tồn kho an toàn 5 ngày)
-            // I = tồn kho hiện tại
+           
             int T = 30;
             double SS = tocDoBan * 5;
             SanPham sp = sanPhamRepository.findById(idSanPham).orElse(null);

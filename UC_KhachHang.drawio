@@ -1,0 +1,252 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="UC - Khách hàng" id="use-case-customer">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Actor: Khách hàng -->
+        <mxCell id="actor-customer" value="Khách hàng" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="400" width="40" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Actor: Hệ thống PayOS -->
+        <mxCell id="actor-payos" value="PayOS" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="500" width="40" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- System Boundary -->
+        <mxCell id="system-boundary" value="Hệ thống Perfume Shop" style="swimlane;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="200" y="50" width="750" height="750" as="geometry" />
+        </mxCell>
+        
+        <!-- A. XÁC THỰC & TÀI KHOẢN -->
+        <mxCell id="uc1" value="UC1: Đăng ký tài khoản" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="50" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc1-include1" value="UC1.1: Gửi email xác thực" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="50" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc2" value="UC2: Xác thực email" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="110" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc3" value="UC3: Gửi lại email xác thực" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="170" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc4" value="UC4: Kiểm tra trạng thái xác thực" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="110" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc5" value="UC5: Đăng nhập" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="230" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc6" value="UC6: Quản lý tài khoản cá nhân" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="290" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc6-include1" value="UC6.1: Xem thông tin" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc6-include2" value="UC6.2: Cập nhật thông tin" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="290" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc6-include3" value="UC6.3: Đổi mật khẩu" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- B. DUYỆT SẢN PHẨM -->
+        <mxCell id="uc9" value="UC9: Tìm kiếm sản phẩm" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="400" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc9-extend1" value="Lọc danh mục" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF9C4;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="390" width="100" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc9-extend2" value="Lọc thương hiệu" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF9C4;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="430" width="100" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc9-extend3" value="Lọc nồng độ" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF9C4;" vertex="1" parent="system-boundary">
+          <mxGeometry x="360" y="390" width="100" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc9-extend4" value="Lọc giá" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF9C4;" vertex="1" parent="system-boundary">
+          <mxGeometry x="360" y="430" width="100" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc9-extend5" value="Sắp xếp" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFF9C4;" vertex="1" parent="system-boundary">
+          <mxGeometry x="470" y="410" width="80" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc12" value="UC12: Xem chi tiết sản phẩm" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="470" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc13" value="UC13: Xem sản phẩm liên quan" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="470" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc14" value="UC14: Xem đánh giá SP" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="530" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- C. GIỎ HÀNG -->
+        <mxCell id="uc15" value="UC15: Quản lý giỏ hàng" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="540" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc15-include1" value="Thêm SP" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="580" width="80" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc15-include2" value="Cập nhật SL" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="340" y="580" width="80" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc15-include3" value="Xóa SP" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="430" y="580" width="70" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- D. ĐẶT HÀNG -->
+        <mxCell id="uc20" value="UC20: Đặt hàng (Checkout)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="610" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc20-include" value="Chọn phương thức TT" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E1F5FF;" vertex="1" parent="system-boundary">
+          <mxGeometry x="250" y="620" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc21" value="UC21: Thanh toán PayOS" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="420" y="610" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc21-webhook" value="Webhook xác nhận" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;" vertex="1" parent="system-boundary">
+          <mxGeometry x="580" y="590" width="100" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc21-polling" value="Polling kiểm tra" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;" vertex="1" parent="system-boundary">
+          <mxGeometry x="580" y="635" width="100" height="35" as="geometry" />
+        </mxCell>
+        
+        <!-- E. QUẢN LÝ ĐƠN HÀNG -->
+        <mxCell id="uc23" value="UC23: Xem lịch sử đơn hàng" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="50" y="680" width="140" height="50" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc24" value="UC24: Xem chi tiết đơn" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="210" y="680" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc25" value="UC25: Hủy đơn hàng" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="350" y="680" width="100" height="40" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="uc26" value="UC26: Tra cứu mã vận đơn" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="470" y="680" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- F. ĐỔI TRẢ -->
+        <mxCell id="uc28" value="UC28: Tạo yêu cầu đổi trả" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="600" y="50" width="130" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- G. ĐÁNH GIÁ -->
+        <mxCell id="uc30" value="UC30: Viết đánh giá SP" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="600" y="110" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- H. KHUYẾN MÃI -->
+        <mxCell id="uc32" value="UC32: Xem chiến dịch KM" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="system-boundary">
+          <mxGeometry x="600" y="170" width="120" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- Associations -->
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell edge="1" parent="1" source="actor-customer" target="uc32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Include relationships -->
+        <mxCell edge="1" parent="1" source="uc1" target="uc1-include1" style="dashed=1;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" x="10" y="-10" />
+            <mxLabel value="«include»" style="edgeLabel;html=1;align=center;verticalAlign=middle;" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell edge="1" parent="1" source="uc6" target="uc6-include1" style="dashed=1;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxLabel value="«include»" style="edgeLabel;html=1;align=center;verticalAlign=middle;" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell edge="1" parent="1" source="uc6" target="uc6-include2" style="dashed=1;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxLabel value="«include»" style="edgeLabel;html=1;align=center;verticalAlign=middle;" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell edge="1" parent="1" source="uc6" target="uc6-include3" style="dashed=1;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxLabel value="«include»" style="edgeLabel;html=1;align=center;verticalAlign=middle;" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Extend relationships -->
+        <mxCell edge="1" parent="1" source="uc9-extend1" target="uc9" style="dashed=1;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxLabel value="«extend»" style="edgeLabel;html=1;align=center;verticalAlign=middle;" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell edge="1" parent="1" source="uc21" target="actor-payos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

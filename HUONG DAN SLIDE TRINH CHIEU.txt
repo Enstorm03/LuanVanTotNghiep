@@ -1,0 +1,27 @@
+Slide 1: 
+	- Trinh bày tên trường, tên khoa
+	- Tên đề tài
+	- Tên sinh viên, mã số, lớp
+Slide 2: Mục tiêu đề tài: gạch đầu dòng, ngắn gọn 
+Slide 3: Nội dung thực hiện
+Slide 4: Thách thức
+Silde 5: Nghiệp vụ + Thiết kế dữ liệu ==> CSDL quan hệ
+Silde 6: Giao diện (chụp hình)
+Slide 7: Các chức năng đã xây dựng: chỉ gạch đầu dòng và liệt kê các chức năng (không chụp)
+Slide 8: Kết quả thực hiện
+Slide 9: Kết luận
+	. Bảng đối sánh mục tiêu và kết quả
+	. Những hạn chế/chưa làm được
+	. Hướng phát triển (mở rộng)
+Trên đây là gợi ý thứ tự, các em có thể trình bày nhiều slide hơn.
+Tuy nhiên: cần thật tóm gọn silde vì:
+	. Thời lượng để trình bày cho 1 SV (đối với slide 5-7 phút)
+	. Thời lượng demo và hội đồng đặt câu hỏi- SV trả lời (15-20 phút)
+
+IN SLIDE: 
+	. In khổ ngang và đóng cuốn
+	. 4 bản (1 bản cho SV và 3 bản cho 3 thầy/ cô hội đồng)
+	. In trắng đen, không cần đóng bìa kiếng (cho đỡ tốn tiền- còn ai muốn in màu cũng được)
+
+
+	

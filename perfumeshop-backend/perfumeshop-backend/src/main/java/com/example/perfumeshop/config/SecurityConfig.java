@@ -64,7 +64,22 @@ public class SecurityConfig {
                 // Đánh giá sản phẩm hiển thị công khai trên trang chi tiết
                 .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll()
                 // Xác nhận đơn hàng qua QR (khách không cần login)
+                .requestMatchers(HttpMethod.GET, "/api/don-hang/*").permitAll()
                 .requestMatchers("/api/don-hang/*/xac-nhan").permitAll()
+                .requestMatchers("/api/don-hang/*/hoan-thanh").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/doi-tra").permitAll()
+                
+                // ======== QUẢN LÝ ĐỚN HÀNG — Nhân viên nội bộ ========
+                // Danh sách đơn hàng, lịch sử, pick-list, các hành động quản lý
+                .requestMatchers(HttpMethod.GET, "/api/don-hang").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers(HttpMethod.GET, "/api/don-hang/lich-su").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/don-hang/lich-su-dto").authenticated()
+                .requestMatchers("/api/don-hang/*/giao-hang").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers("/api/don-hang/*/cap-nhat-van-don").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers("/api/don-hang/*/huy").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers("/api/don-hang/*/hoan-tien").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
+                .requestMatchers("/api/don-hang/*/pick-list").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER", "WAREHOUSE_STAFF")
+                .requestMatchers(HttpMethod.DELETE, "/api/don-hang/**").hasAnyRole("ADMIN", "DIRECTOR", "STORE_MANAGER")
                 // Thanh toán callback (PayOS webhook)
                 .requestMatchers("/api/payment/callback/**").permitAll()
                 .requestMatchers("/api/payment/webhook/**").permitAll()
@@ -136,10 +151,8 @@ public class SecurityConfig {
                 // Giỏ hàng, đặt hàng, lịch sử, hồ sơ, thanh toán, đổi trả — cần login
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/dat-hang").authenticated()
-                .requestMatchers("/api/don-hang/**").authenticated()
                 .requestMatchers("/api/users/**").authenticated()
                 .requestMatchers("/api/reviews/**").authenticated()
-                .requestMatchers("/api/doi-tra/**").authenticated()
                 .requestMatchers("/api/payment/**").authenticated()
 
                 // Tất cả còn lại — từ chối mặc định

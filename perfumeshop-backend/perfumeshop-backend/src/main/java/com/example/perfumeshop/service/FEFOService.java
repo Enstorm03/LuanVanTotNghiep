@@ -38,6 +38,7 @@ public class FEFOService {
 
     public void allocateOrderItemFromBatch(ChiTietDonHang chiTietDonHang,
                                            Integer idSanPham, Integer soLuongCan) {
+                                            
         try {
             List<Integer> batches = phieuNhapKhoRepository.findActiveBatchesByProductFEFO(idSanPham);
             if (batches == null || batches.isEmpty()) return;
@@ -55,9 +56,12 @@ public class FEFOService {
 
     public void deductFEFOOnConfirm(Integer idSanPham, Integer soLuongCan) {
         // Lấy từng dòng lô của ĐÚNG sản phẩm này, sắp theo HSD sớm nhất (FEFO)
-        String selectSql = "SELECT ct.id, ct.so_luong_con_lai " +
+        // ✅ CHỈ LẤY LÔ CHƯA HẾT HẠN (han_su_dung > CURDATE())
+        String selectSql = "SELECT ct.id, ct.so_luong_con_lai, ct.han_su_dung " +
                            "FROM Chi_Tiet_Phieu_Nhap ct " +
-                           "WHERE ct.id_san_pham = :idSanPham AND ct.so_luong_con_lai > 0 " +
+                           "WHERE ct.id_san_pham = :idSanPham " +
+                           "  AND ct.so_luong_con_lai > 0 " +
+                           "  AND (ct.han_su_dung IS NULL OR ct.han_su_dung > CURDATE()) " +  // ✅ Không bán hàng hết hạn
                            "ORDER BY ct.han_su_dung ASC, ct.id ASC";
         Query sq = entityManager.createNativeQuery(selectSql);
         sq.setParameter("idSanPham", idSanPham);
@@ -73,7 +77,15 @@ public class FEFOService {
 
             Number rowId = (Number) r[0];
             int available = r[1] != null ? ((Number) r[1]).intValue() : 0;
+            java.sql.Date hsdSql = (java.sql.Date) r[2];
+            LocalDate hanSuDung = hsdSql != null ? hsdSql.toLocalDate() : null;
+            
             if (available <= 0) continue;
+            
+            // ✅ Double-check: Không bán lô đã hết hạn
+            if (hanSuDung != null && hanSuDung.isBefore(LocalDate.now())) {
+                continue; // Skip lô hết hạn
+            }
 
             // Lấy tối đa từ dòng lô này, không vượt quá remaining
             int deduct = Math.min(available, remaining);
@@ -131,6 +143,7 @@ public class FEFOService {
 
     public List<PickListDTO> generatePickList(Integer idDonHang) {
         // Query lấy thông tin chi tiết từng sản phẩm trong đơn và lô hàng FEFO
+        // ✅ CHỈ LẤY LÔ CHƯA HẾT HẠN
         String sql = 
             "SELECT " +
             "  sp.ten_san_pham, " +
@@ -144,7 +157,8 @@ public class FEFOService {
             "JOIN San_Pham sp ON ctdh.id_san_pham = sp.id_san_pham " +
             "LEFT JOIN Chi_Tiet_Phieu_Nhap ct ON ct.id_san_pham = sp.id_san_pham " +
             "WHERE ctdh.id_don_hang = :idDonHang " +
-            "  AND ct.so_luong_con_lai >= 0 " +  // Chỉ lấy lô còn hàng hoặc đã trừ
+            "  AND ct.so_luong_con_lai >= 0 " +
+            "  AND (ct.han_su_dung IS NULL OR ct.han_su_dung > CURDATE()) " +  // ✅ Không lấy lô hết hạn
             "ORDER BY sp.id_san_pham, ct.han_su_dung ASC, ct.id ASC";
         
         Query query = entityManager.createNativeQuery(sql);

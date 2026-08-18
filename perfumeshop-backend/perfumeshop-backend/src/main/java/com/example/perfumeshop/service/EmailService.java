@@ -18,6 +18,43 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
+    @Autowired
+    private com.example.perfumeshop.repository.NguoiDungRepository nguoiDungRepository;
+
+
+//      Gửi email xác nhận đơn hàng (cho COD)
+
+    public void sendOrderConfirmationEmail(com.example.perfumeshop.entity.DonHang donHang) {
+        if (donHang.getIdNguoiDung() == null) return;
+        
+        com.example.perfumeshop.entity.NguoiDung user = nguoiDungRepository.findById(donHang.getIdNguoiDung()).orElse(null);
+        if (user == null || user.getEmail() == null) return;
+        
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(user.getEmail());
+            helper.setSubject("Xác nhận đơn hàng #" + donHang.getIdDonHang() + " - Perfume Shop");
+            helper.setFrom("perfumeshop@example.com");
+
+            String htmlContent = buildOrderConfirmationTemplate(
+                user.getHoTen(),
+                donHang.getIdDonHang(),
+                donHang.getTongTien(),
+                donHang.getDiaChiGiaoHang(),
+                donHang.getTenNguoiNhan(),
+                donHang.getSoDienThoai(),
+                donHang.getPhuongThucThanhToan()
+            );
+            helper.setText(htmlContent, true);
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Không thể gửi email xác nhận đơn hàng: " + e.getMessage(), e);
+        }
+    }
+
 
 //      Gửi email chào mừng người dùng mới
 
@@ -103,6 +140,72 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("Không thể gửi email hủy đơn: " + e.getMessage(), e);
         }
+    }
+
+
+//      Template HTML cho email xác nhận đơn hàng COD
+
+    private String buildOrderConfirmationTemplate(String hoTen, Integer orderId, BigDecimal totalAmount,
+                                                 String deliveryAddress, String recipientName, String phoneNumber,
+                                                 String paymentMethod) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String orderDate = LocalDateTime.now().format(formatter);
+
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "    <meta charset='UTF-8'>\n" +
+                "    <style>\n" +
+                "        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }\n" +
+                "        .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; border-radius: 8px; }\n" +
+                "        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; border-radius: 8px 8px 0 0; text-align: center; }\n" +
+                "        .header h1 { margin: 0; font-size: 28px; }\n" +
+                "        .content { background: white; padding: 30px 20px; }\n" +
+                "        .success-badge { display: inline-block; background: #4caf50; color: white; padding: 8px 15px; border-radius: 20px; font-size: 12px; margin-bottom: 15px; }\n" +
+                "        .order-info { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0; }\n" +
+                "        .order-info p { margin: 8px 0; }\n" +
+                "        .info-label { font-weight: bold; color: #667eea; width: 150px; display: inline-block; }\n" +
+                "        .delivery-box { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3; }\n" +
+                "        .total-amount { font-size: 20px; color: #d32f2f; font-weight: bold; }\n" +
+                "        .footer { background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }\n" +
+                "        .cod-note { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107; }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div class='container'>\n" +
+                "        <div class='header'>\n" +
+                "            <h1>✓ Đơn Hàng Đã Được Đặt!</h1>\n" +
+                "        </div>\n" +
+                "        <div class='content'>\n" +
+                "            <p><span class='success-badge'>Đơn hàng đã được xác nhận</span></p>\n" +
+                "            <p>Xin chào <strong>" + hoTen + "</strong>,</p>\n" +
+                "            <p>Cảm ơn bạn đã đặt hàng tại Perfume Shop! Đơn hàng của bạn đã được tiếp nhận và đang chờ xử lý.</p>\n" +
+                "            <div class='order-info'>\n" +
+                "                <p><span class='info-label'>Mã Đơn Hàng:</span> <strong>#" + orderId + "</strong></p>\n" +
+                "                <p><span class='info-label'>Ngày Đặt Hàng:</span> " + orderDate + "</p>\n" +
+                "                <p><span class='info-label'>Phương Thức:</span> " + (paymentMethod != null ? paymentMethod : "COD") + "</p>\n" +
+                "                <p><span class='info-label'>Tổng Tiền:</span> <span class='total-amount'>" + formatCurrency(totalAmount) + "</span></p>\n" +
+                "            </div>\n" +
+                (("COD".equalsIgnoreCase(paymentMethod)) ? 
+                "            <div class='cod-note'>\n" +
+                "                <p><strong>💵 Thanh Toán Khi Nhận Hàng (COD)</strong></p>\n" +
+                "                <p>Bạn sẽ thanh toán bằng tiền mặt khi nhận hàng từ nhân viên giao hàng.</p>\n" +
+                "            </div>\n" : "") +
+                "            <h3 style='color: #333; margin-top: 20px;'>Thông Tin Giao Hàng</h3>\n" +
+                "            <div class='delivery-box'>\n" +
+                "                <p><span class='info-label'>Người Nhận:</span> " + (recipientName != null ? recipientName : "") + "</p>\n" +
+                "                <p><span class='info-label'>Số Điện Thoại:</span> " + (phoneNumber != null ? phoneNumber : "") + "</p>\n" +
+                "                <p><span class='info-label'>Địa Chỉ:</span> " + (deliveryAddress != null ? deliveryAddress : "") + "</p>\n" +
+                "            </div>\n" +
+                "            <p style='margin-top: 20px; color: #666;'>Đơn hàng của bạn sẽ được xác nhận và chuẩn bị giao hàng sớm nhất. Bạn sẽ nhận được email cập nhật trạng thái đơn hàng.</p>\n" +
+                "        </div>\n" +
+                "        <div class='footer'>\n" +
+                "            <p>&copy; 2026 Perfume Shop. All rights reserved.</p>\n" +
+                "            <p>Đây là email tự động, vui lòng không trả lời email này.</p>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "</html>";
     }
 
 

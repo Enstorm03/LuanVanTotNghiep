@@ -72,14 +72,19 @@ const AdminSidebar = () => {
                 Danh mục
               </NavLink>
             )}
-
+   {isWarehouseStaff() && (
+              <NavLink to="/admin/orders" className={navLinkClasses}>
+                <span className="material-symbols-outlined">receipt_long</span>
+                 Đơn hàng
+              </NavLink>
+            )}
             {/* Đơn hàng, đổi trả, hàng lỗi — STORE_MANAGER trở lên */}
-            {isStoreManager() && (
+            {/* {isStoreManager() && (
               <NavLink to="/admin/orders" className={navLinkClasses}>
                 <span className="material-symbols-outlined">receipt_long</span>
                 Đơn hàng
               </NavLink>
-            )}
+            )} */}
             {isStoreManager() && (
               <NavLink to="/admin/returns" className={navLinkClasses}>
                 <span className="material-symbols-outlined">assignment_return</span>
@@ -100,12 +105,7 @@ const AdminSidebar = () => {
                 Quản lý kho
               </NavLink>
             )}
-            {isWarehouseStaff() && (
-              <NavLink to="/admin/orders" className={navLinkClasses}>
-                <span className="material-symbols-outlined">receipt_long</span>
-                 Đơn hàng
-              </NavLink>
-            )}
+         
 
             {/* Đấu thầu & NCC — STORE_MANAGER trở lên */}
             {isStoreManager() && (

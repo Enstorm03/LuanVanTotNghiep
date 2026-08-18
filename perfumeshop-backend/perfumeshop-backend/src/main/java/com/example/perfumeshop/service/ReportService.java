@@ -103,7 +103,7 @@ public class ReportService {
                 .limit(limit)
                 .collect(Collectors.toList());
     }
-
+ // lấy doanh thu theo trạng thái đơn hàng trong khoảng thời gian
     public Map<String, Object> getRevenueByStatus(LocalDate startDate, LocalDate endDate) {
         LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
         LocalDateTime end   = endDate   != null ? endDate.atTime(LocalTime.MAX) : LocalDateTime.now();

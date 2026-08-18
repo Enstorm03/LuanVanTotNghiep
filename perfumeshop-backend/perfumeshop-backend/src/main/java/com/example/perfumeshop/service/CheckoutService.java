@@ -33,6 +33,9 @@ public class CheckoutService {
     @Autowired
     private FEFOService fefoService;
 
+    @Autowired
+    private EmailService emailService;
+
     // Đặt hàng: tạo đơn và lưu vào DB — KHÔNG trừ kho tại bước này.
     // Kho sẽ được trừ khi admin bấm "Xác nhận đơn hàng", áp dụng cho cả COD lẫn online (PayOS).
     @Transactional
@@ -115,6 +118,16 @@ public class CheckoutService {
         }
 
         DonHang saved = donHangRepository.save(dh);
+
+        // Gửi email xác nhận đơn hàng cho COD
+        if ("COD".equalsIgnoreCase(req.getPhuongThucThanhToan())) {
+            try {
+                emailService.sendOrderConfirmationEmail(saved);
+            } catch (Exception e) {
+                log.error("Lỗi gửi email xác nhận đơn hàng COD: {}", e.getMessage());
+                // Không throw exception, vẫn cho phép đặt hàng thành công
+            }
+        }
 
         // Xóa giỏ hàng sau khi đặt hàng thành công
         // Dùng CartService để xóa giỏ hàng hiện tại
